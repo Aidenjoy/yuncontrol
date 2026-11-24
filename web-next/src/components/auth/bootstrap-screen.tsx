@@ -33,7 +33,7 @@ export function BootstrapScreen() {
       <div className="flex flex-col items-center gap-2 text-center mb-8">
         <h1 className="text-2xl font-bold tracking-tight">
           {t("bootstrap.titlePrefix")}{" "}
-          <span className="aa-wordmark">Agents Anywhere</span>
+          <span className="aa-wordmark">云大师</span>
         </h1>
         <p className="text-sm text-muted-foreground leading-relaxed">
           {t("bootstrap.description")}

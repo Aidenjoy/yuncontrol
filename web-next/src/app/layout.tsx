@@ -36,9 +36,9 @@ const brand = Caveat({
 });
 
 export const metadata: Metadata = {
-  title: "Agents Anywhere",
+  title: "云大师",
   description: "Remote control plane for coding agents",
-  applicationName: "Agents Anywhere",
+  applicationName: "云大师",
   manifest: "/site.webmanifest",
   icons: {
     icon: [
@@ -71,7 +71,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    title: "Agents Anywhere",
+    title: "云大师",
     statusBarStyle: "black-translucent"
   }
 };

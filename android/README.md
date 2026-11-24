@@ -35,6 +35,10 @@ successful refresh keeps the request's results and clears its loading state.
 Terminal connections and reconnects validate the session before opening their
 WebSocket and use the current access token while preserving the replay cursor.
 
+## 启动与登录
+
+已有登录凭证时沿用原有恢复与校验流程进入会话界面；未登录或登录失效时直接加载账号密码页，不再先选择扫码或账号登录。登录服务器优先使用上次保存的地址，否则使用安装包的默认服务器；连接失败时可在地址设置页修正。Debug 包的默认地址可通过 `android/local.properties` 的 `agentsAnywhere.serverUrl` 配置。修改启动流程后需要重新打包并安装 APK，已有安装包不会随源码更新。
+
 ## Build from the command line
 
 Use JDK 17 and the Android SDK matching `compileSdk` in `app/build.gradle.kts`

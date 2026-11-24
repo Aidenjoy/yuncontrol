@@ -66,7 +66,6 @@ import com.agentsanywhere.app.navigation.AppDestination
 import com.agentsanywhere.app.ui.designsystem.AAToastHost
 import com.agentsanywhere.app.ui.designsystem.AAToastVisuals
 import com.agentsanywhere.app.ui.designsystem.LocalAAColors
-import com.agentsanywhere.app.ui.screens.auth.LoginMethodsScreen
 import com.agentsanywhere.app.ui.screens.auth.QrLoginScreen
 import com.agentsanywhere.app.ui.screens.auth.QrWaitingScreen
 import com.agentsanywhere.app.ui.screens.auth.WebLoginHostScreen
@@ -287,7 +286,7 @@ internal fun AgentsAnywhereNavHost(
                     label = "App destination transition",
                 ) { destination ->
                     when (destination) {
-                        AppDestination.LoginMethods -> LoginMethodsScreen(navigate)
+                        AppDestination.LoginMethods -> WebLoginHostScreen(webLoginViewModel, navigate)
                         AppDestination.ServerSetup -> WebLoginHostScreen(webLoginViewModel, navigate)
                         AppDestination.QrLogin -> QrLoginScreen(
                             navigate = navigate,

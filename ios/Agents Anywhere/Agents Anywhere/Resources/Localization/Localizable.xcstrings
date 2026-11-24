@@ -1862,53 +1862,53 @@
         }
       }
     },
-    "Agents Anywhere": {
+    "云大师": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Agents Anywhere"
+            "value": "云大师"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Agents Anywhere"
+            "value": "云大师"
           }
         }
       }
     },
-    "Agents Anywhere Desktop": {
+    "云大师 Desktop": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Agents Anywhere Desktop"
+            "value": "云大师 Desktop"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Agents Anywhere 桌面应用"
+            "value": "云大师 桌面应用"
           }
         }
       }
     },
-    "Agents Anywhere · %@": {
+    "云大师 · %@": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Agents Anywhere · %@"
+            "value": "云大师 · %@"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Agents Anywhere · %@"
+            "value": "云大师 · %@"
           }
         }
       }
@@ -3665,19 +3665,19 @@
         }
       }
     },
-    "DSH 现可实时同步（Beta）Agents Anywhere。启用接管即可发送消息。": {
+    "DSH 现可实时同步（Beta）云大师。启用接管即可发送消息。": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "DSH now syncs in real time (Beta) with Agents Anywhere. Turn on takeover to send messages."
+            "value": "DSH now syncs in real time (Beta) with 云大师. Turn on takeover to send messages."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "DSH 现可实时同步（Beta）Agents Anywhere。启用接管即可发送消息。"
+            "value": "DSH 现可实时同步（Beta）云大师。启用接管即可发送消息。"
           }
         }
       }
@@ -5085,19 +5085,19 @@
         }
       }
     },
-    "Local Network access is disabled. Enable it for Agents Anywhere in Settings, then try again.": {
+    "Local Network access is disabled. Enable it for 云大师 in Settings, then try again.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Local Network access is disabled. Enable it for Agents Anywhere in Settings, then try again."
+            "value": "Local Network access is disabled. Enable it for 云大师 in Settings, then try again."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "局域网访问权限已关闭。请在系统设置中为 Agents Anywhere 开启权限后重试。"
+            "value": "局域网访问权限已关闭。请在系统设置中为 云大师 开启权限后重试。"
           }
         }
       }
@@ -7586,19 +7586,19 @@
         }
       }
     },
-    "Scan Agents Anywhere QR": {
+    "Scan 云大师 QR": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Scan Agents Anywhere QR"
+            "value": "Scan 云大师 QR"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "扫描 Agents Anywhere 二维码"
+            "value": "扫描 云大师 二维码"
           }
         }
       }
@@ -9435,19 +9435,19 @@
         }
       }
     },
-    "This QR code is not a valid Agents Anywhere login code.": {
+    "This QR code is not a valid 云大师 login code.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "This QR code is not a valid Agents Anywhere login code."
+            "value": "This QR code is not a valid 云大师 login code."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "这不是有效的 Agents Anywhere 登录二维码。"
+            "value": "这不是有效的 云大师 登录二维码。"
           }
         }
       }
@@ -9557,19 +9557,19 @@
         }
       }
     },
-    "This is not an Agents Anywhere mobile login QR code.": {
+    "This is not an 云大师 mobile login QR code.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "This is not an Agents Anywhere mobile login QR code."
+            "value": "This is not an 云大师 mobile login QR code."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "这不是 Agents Anywhere 移动端登录二维码。"
+            "value": "这不是 云大师 移动端登录二维码。"
           }
         }
       }
@@ -10034,20 +10034,20 @@
         }
       }
     },
-    "Turning models off or renaming them only affects Agents Anywhere, and applies to every runtime using Tokens Anywhere.": {
+    "Turning models off or renaming them only affects 云大师, and applies to every runtime using Tokens Anywhere.": {
       "comment": "Shared with Web: pages.settings.modelConfigs.account.modelsHint. Sync with ios/scripts/web_copy.py.",
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Turning models off or renaming them only affects Agents Anywhere, and applies to every runtime using Tokens Anywhere."
+            "value": "Turning models off or renaming them only affects 云大师, and applies to every runtime using Tokens Anywhere."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "关闭或改名只影响 Agents Anywhere，会应用到所有使用 Tokens Anywhere 的 Runtime。"
+            "value": "关闭或改名只影响 云大师，会应用到所有使用 Tokens Anywhere 的 Runtime。"
           }
         }
       }
@@ -10473,13 +10473,13 @@
         }
       }
     },
-    "When on, Agents Anywhere asks before quitting when the computer shuts down or restarts. When off, it quits right away and never blocks shutdown.": {
+    "When on, 云大师 asks before quitting when the computer shuts down or restarts. When off, it quits right away and never blocks shutdown.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "When on, Agents Anywhere asks before quitting when the computer shuts down or restarts. When off, it quits right away and never blocks shutdown."
+            "value": "When on, 云大师 asks before quitting when the computer shuts down or restarts. When off, it quits right away and never blocks shutdown."
           }
         },
         "zh-Hans": {
@@ -12740,13 +12740,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "This policy explains how the Agents Anywhere app for iPhone, iPad and Mac handles information. The server you connect to, connected devices and model services may be operated by different parties and have their own privacy policies."
+            "value": "This policy explains how the 云大师 app for iPhone, iPad and Mac handles information. The server you connect to, connected devices and model services may be operated by different parties and have their own privacy policies."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "本政策说明 Agents Anywhere 的 iPhone、iPad 和 Mac 客户端如何处理信息。你连接的服务器、设备和模型服务可能由不同主体运营，并有各自的隐私政策。"
+            "value": "本政策说明 云大师 的 iPhone、iPad 和 Mac 客户端如何处理信息。你连接的服务器、设备和模型服务可能由不同主体运营，并有各自的隐私政策。"
           }
         }
       }
@@ -13140,7 +13140,7 @@
       }
     },
     "下载桌面应用": {
-      "comment": "Opens the official website to download Agents Anywhere Desktop.",
+      "comment": "Opens the official website to download 云大师 Desktop.",
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -13746,7 +13746,7 @@
         }
       }
     },
-    "例如 Agents Anywhere": {
+    "例如 云大师": {
       "comment": "Shared with Web: dashboard.projects.namePlaceholder. Sync with ios/scripts/web_copy.py.",
       "extractionState": "manual",
       "localizations": {
@@ -16501,19 +16501,19 @@
         }
       }
     },
-    "已开启，可从 Agents Anywhere 继续操作。": {
+    "已开启，可从 云大师 继续操作。": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Enabled. Continue working from Agents Anywhere."
+            "value": "Enabled. Continue working from 云大师."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "已开启，可从 Agents Anywhere 继续操作。"
+            "value": "已开启，可从 云大师 继续操作。"
           }
         }
       }
@@ -16756,19 +16756,19 @@
         }
       }
     },
-    "开启后可在 Agents Anywhere 中操作。记录可能需要重启 Agent 客户端才能同步；请避免同时在两个客户端操作此会话。": {
+    "开启后可在 云大师 中操作。记录可能需要重启 Agent 客户端才能同步；请避免同时在两个客户端操作此会话。": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "You can continue working in Agents Anywhere. Restarting the Agent client may be needed to sync messages. Avoid operating on the session from both clients at once."
+            "value": "You can continue working in 云大师. Restarting the Agent client may be needed to sync messages. Avoid operating on the session from both clients at once."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "开启后可在 Agents Anywhere 中操作。记录可能需要重启 Agent 客户端才能同步；请避免同时在两个客户端操作此会话。"
+            "value": "开启后可在 云大师 中操作。记录可能需要重启 Agent 客户端才能同步；请避免同时在两个客户端操作此会话。"
           }
         }
       }

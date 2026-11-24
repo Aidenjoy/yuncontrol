@@ -6,6 +6,10 @@
 
 ### 升级须知
 
+- 配置改密通知后，认证服务修改密码会使该用户此前的云大师登录和移动刷新凭证失效；已有实时连接不主动断开。
+
+- 配置 `AGENT_SERVER_UTOKEN_URL` 后，普通用户使用 utoken 账号密码直接登录并自动关联账号，独立注册与本地密码登录关闭，本地管理员登录保留。
+
 - 运行中排队消息需要 Server 执行 `v2_56` 数据库迁移（只新增两张表，不改写已有数据）；排队在 Web、Desktop、Android 和 iOS 上可用，旧版客户端的行为不变。（[#658](https://github.com/anywhere-labs/Agents-Anywhere/pull/658)、[#659](https://github.com/anywhere-labs/Agents-Anywhere/pull/659)）
 
 ### 会话创建与消息交付
@@ -22,6 +26,8 @@
 
 ### Desktop
 
+- Web、Desktop、Android 和 iOS 的品牌展示名称统一改为「云大师」。
+
 - Desktop 安装包自带 Pi 运行环境，第一次启动只需在本地复制，不再下载 Node 和 npm 依赖；准备失败时也不再停在启动页、点「重试」也进不去，Pi 会在第一次使用时再次准备并在会话里提示错误。（[#657](https://github.com/anywhere-labs/Agents-Anywhere/pull/657)）
 
 ### 本机连接
@@ -30,6 +36,8 @@
 - 准备 Pi 时会复用本机 Node 22.19 及以上版本（包括 Node 24），不再强制下载；需要下载时，官方源连不上会自动改用 npmmirror，Python 安装源选了镜像的设备会优先使用 npmmirror；Windows 上多个进程同时准备不再报 `Resource deadlock avoided`，而是排队等待；数据目录通过 Junction 挂到其他盘时，不再误报「Node 安装包路径无效」；Node 下载失败时会提示检查网络。（[#657](https://github.com/anywhere-labs/Agents-Anywhere/pull/657)）
 
 ### Android
+
+- 未登录启动时直接打开账号密码登录页，已登录时进入会话界面，登录失效后直接回到账号密码登录。
 
 - 没发出去的消息下方显示「发送失败」，点开可以查看原因并删除这条消息，不会再一直留在对话里。（[#660](https://github.com/anywhere-labs/Agents-Anywhere/pull/660)）
 - 打开过文件后再进入会话，会直接显示对话，不再先停在「文件」页。（[#661](https://github.com/anywhere-labs/Agents-Anywhere/pull/661)）

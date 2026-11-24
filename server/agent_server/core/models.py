@@ -1467,3 +1467,10 @@ class RpcResponsePayload(BaseModel):
     ok: bool
     result: Any = None
     error: RpcError | None = None
+
+
+class RevokeLoginRequest(BaseModel):
+    """认证服务在密码提交成功后通知的用户 ID 和稳定事件时间（Unix 毫秒）。"""
+
+    userId: int = Field(gt=0)
+    changedAt: int = Field(gt=0)

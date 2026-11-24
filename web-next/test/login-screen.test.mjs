@@ -3,6 +3,7 @@ import test from 'node:test'
 import { readFileSync } from 'node:fs'
 import { setTimeout as delay } from 'node:timers/promises'
 import { JSDOM } from 'jsdom'
+import { registerHooks } from 'node:module'
 import { registerSource } from './helpers/onboarding-source.mjs'
 
 const dom = new JSDOM('<!doctype html><html><body></body></html>', { url: 'https://app.example.test/', pretendToBeVisual: true })
@@ -16,8 +17,13 @@ const { createRoot } = await import('react-dom/client')
 const { NextIntlClientProvider } = await import('next-intl')
 const hooks = registerSource()
 const { AuthProvider } = await import('../src/components/auth/auth-context.tsx')
+const shell = registerHooks({ load(url, context, next) {
+  if (url.endsWith('/auth/auth-shell.tsx')) return { format: 'module', shortCircuit: true, source: 'export const AuthShell = ({children}) => children' }
+  return next(url, context)
+} })
 const { LoginScreen } = await import('../src/components/auth/login-screen.tsx')
 const { authApi } = await import('../src/features/auth/api.ts')
+shell.deregister()
 hooks.deregister()
 
 const messages = JSON.parse(readFileSync(new URL('../messages/zh-CN.json', import.meta.url), 'utf8'))
@@ -38,7 +44,7 @@ async function type(input, value) {
   })
 }
 
-test('login asks for an email and blocks submission until the address is valid', async (t) => {
+test('local administrator login asks for an email and blocks submission until the address is valid', async (t) => {
   t.mock.method(authApi, 'config', async () => ({ needsBootstrap: false, registrationOpen: true }))
   t.mock.method(authApi, 'me', async () => null)
   const container = document.createElement('div')
@@ -48,6 +54,7 @@ test('login asks for an email and blocks submission until the address is valid',
   t.after(async () => { await act(async () => root.unmount()); container.remove() })
 
   await until(() => container.querySelector('#login-email'))
+  await act(async () => [...container.querySelectorAll('button')].find(button => button.textContent === messages.auth.login.useLocal).click())
   const email = container.querySelector('#login-email')
   const submit = [...container.querySelectorAll('button')].find(button => button.textContent === messages.auth.login.submitWithEnter)
   const hint = messages.auth.login.invalidEmail

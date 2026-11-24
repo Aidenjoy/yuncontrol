@@ -22,7 +22,7 @@ struct PrivacyPolicyContent: View {
             Section {
                 paragraph("privacyPolicy.introduction")
             } header: {
-                Text(verbatim: "Agents Anywhere")
+                Text(verbatim: "云大师")
             } footer: {
                 Text(String(localized: "privacyPolicy.updated"))
             }

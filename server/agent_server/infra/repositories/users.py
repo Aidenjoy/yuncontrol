@@ -537,3 +537,60 @@ class UserRepositoryMixin(EmailAccountRepositoryMixin):
         return int(row[0]) if row else 0
 
     # --- instance_settings ----------------------------------------------------
+
+
+    async def resolve_utoken_user(self, *, origin: str, subject: str, display_name: str) -> UserView:
+        """按实例和用户 ID 原子创建或读取普通账号，拒绝停用账号和身份冲突。"""
+        provider = "utoken:" + hashlib.sha256(origin.encode()).hexdigest()
+        user_id = "ut-" + hashlib.sha256(f"{origin}:{subject}".encode()).hexdigest()[:28]
+        now = utc_now()
+        # 本地密码使用随机值；绝不保存 utoken 密码，也不按同名账号自动合并。
+        try:
+            async with self._engine.begin() as conn:
+                row = (await conn.execute(select(users_t).join(oauth_accounts_t, oauth_accounts_t.c.user_id == users_t.c.id).where(
+                    oauth_accounts_t.c.provider == provider, oauth_accounts_t.c.subject == subject,
+                ))).mappings().first()
+                if row is None:
+                    stored_password = hash_password(secrets.token_urlsafe(32))
+                    await conn.execute(insert(users_t).values(id=user_id, password_hash=stored_password, role=MEMBER_ROLE,
+                        disabled=0, display_name=display_name, created_at=now, updated_at=now))
+                    await conn.execute(insert(oauth_accounts_t).values(provider=provider, subject=subject, user_id=user_id,
+                        display_name=display_name, created_at=now, updated_at=now))
+                else:
+                    user_id = row["id"]
+        except IntegrityError:
+            # 并发首次登录只有一个事务创建成功；仅接受已绑定的同一身份。
+            user = await self.oauth_user_for_subject(provider=provider, subject=subject)
+            if user is None:
+                raise ValueError("utoken account is disabled or conflicts with an existing account") from None
+            return user
+        user = await self.get_user(user_id)
+        if user.disabled:
+            raise ValueError("utoken account is disabled")
+        return user
+
+
+    async def revoke_utoken_login(self, *, origin: str, subject: str, changed_at: int) -> bool:
+        """找到外部身份并原子推进撤销时间；重复或乱序通知不能覆盖较新时间。"""
+        from sqlalchemy import BigInteger, Text, cast
+        from sqlalchemy.dialects.postgresql import insert as pg_insert
+        from agent_server.infra.db import instance_settings as settings
+
+        provider = "utoken:" + hashlib.sha256(origin.rstrip("/").encode()).hexdigest()
+        async with self._engine.begin() as conn:
+            user_id = (await conn.execute(select(oauth_accounts_t.c.user_id).where(
+                oauth_accounts_t.c.provider == provider, oauth_accounts_t.c.subject == subject,
+            ))).scalar_one_or_none()
+            if user_id is None:
+                return False
+            from datetime import UTC, datetime
+            cutoff = datetime.fromtimestamp(changed_at / 1000, UTC).isoformat().replace("+00:00", "Z")
+            # 旧二维码和未兑换授权码也不能换取新令牌；重试不删除事件之后的新授权。
+            for table in (mobile_login_tokens_t, oauth_authorization_codes_t):
+                await conn.execute(delete(table).where(table.c.user_id == user_id, table.c.created_at <= cutoff))
+            statement = pg_insert(settings).values(key="auth-revoked:" + user_id, value=str(changed_at), updated_at=utc_now())
+            await conn.execute(statement.on_conflict_do_update(index_elements=[settings.c.key], set_={
+                "value": cast(func.greatest(cast(settings.c.value, BigInteger), changed_at), Text),
+                "updated_at": utc_now(),
+            }))
+        return True

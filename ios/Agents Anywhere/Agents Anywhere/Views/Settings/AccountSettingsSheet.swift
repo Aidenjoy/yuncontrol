@@ -93,7 +93,7 @@ struct AccountSettingsSheet: View {
                             .foregroundStyle(.red)
                     }.disabled(appState.isAccountWorking)
                 } footer: {
-                    Text("Agents Anywhere · \(SettingsAboutView.version)")
+                    Text("云大师 · \(SettingsAboutView.version)")
                         .font(.footnote).frame(maxWidth: .infinity).padding(.top, 16)
                 }
             }

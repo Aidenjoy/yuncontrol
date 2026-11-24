@@ -13,7 +13,7 @@ export function CompleteSlide({ onExperience, showDownload = true }: {
       id="complete"
       title={"You are\nall set."} englishTitle
       titleSuffix={<CheckIcon className="completion-check" strokeWidth={2.1} />}
-      description={"点击「立刻体验」，\n开始使用 Agents Anywhere。"}
+      description={"点击「立刻体验」，\n开始使用 云大师。"}
       actions={<>
         <Button size="lg" onClick={(event) => onExperience(event.currentTarget)}>立刻体验<ArrowRightIcon data-icon="inline-end" /></Button>
         {showDownload

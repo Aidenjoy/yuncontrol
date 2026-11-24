@@ -128,13 +128,13 @@ private struct QRScanStepView: View {
             let data = Data(value.utf8)
             let decoded = try JSONDecoder().decode(MobileLoginPayload.self, from: data)
             guard decoded.type == "agents-anywhere.mobile-login", decoded.version == 1 else {
-                parseError = String(localized: "This is not an Agents Anywhere mobile login QR code.")
+                parseError = String(localized: "This is not an 云大师 mobile login QR code.")
                 return
             }
             didReadPayload = true
             onPayload(decoded)
         } catch {
-            parseError = String(localized: "This QR code is not a valid Agents Anywhere login code.")
+            parseError = String(localized: "This QR code is not a valid 云大师 login code.")
         }
     }
 }

@@ -107,7 +107,7 @@ def hash_password_verifier(verifier: str, *, salt: str) -> str:
 
 def create_user_access_token(user_id: str, expires_in: int = DEFAULT_USER_EXPIRES_IN) -> str:
     header = {"alg": "HS256", "typ": "JWT"}
-    payload = {"sub": user_id, "exp": int(time.time()) + expires_in}
+    payload = {"sub": user_id, "exp": int(time.time()) + expires_in, "iat": int(time.time()), "iatMs": time.time_ns() // 1_000_000}
     signing_input = f"{_b64_json(header)}.{_b64_json(payload)}"
     signature = _b64_bytes(hmac.new(_secret(), signing_input.encode("utf-8"), hashlib.sha256).digest())
     return f"{signing_input}.{signature}"
@@ -162,3 +162,14 @@ def _b64_bytes(value: bytes) -> str:
 def _b64_decode(value: str) -> bytes:
     padding = "=" * (-len(value) % 4)
     return base64.urlsafe_b64decode(value + padding)
+
+
+def user_token_issued_at(token: str) -> int:
+    """读取已验证用户凭证的毫秒签发时间；兼容旧凭证（返回零）。"""
+    if verify_user_access_token(token) is None:
+        return 0
+    try:
+        value = json.loads(_b64_decode(token.split(".")[1]).decode()).get("iatMs", 0)
+        return value if type(value) is int and value >= 0 else 0
+    except (ValueError, IndexError):
+        return 0

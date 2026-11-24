@@ -68,12 +68,27 @@ import com.composables.icons.lucide.Info
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.Server
 
+/**
+ * 未登录时直接加载默认服务器的账号密码页，连接失败后允许修正服务器地址。
+ */
 @Composable
 fun WebLoginHostScreen(
     viewModel: WebLoginViewModel,
     navigate: (AppDestination) -> Unit,
 ) {
+    var startingDefaultLogin by remember { mutableStateOf(true) }
+    LaunchedEffect(viewModel) {
+        viewModel.startDefaultLogin()
+        startingDefaultLogin = false
+    }
     val state = viewModel.state
+    // 自动连接期间只显示加载状态，避免闪现登录方式或服务选择页。
+    if (startingDefaultLogin || (state is WebLoginState.HostChoice && state.isBusy)) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
     val embeddedSession = when (state) {
         is WebLoginState.WebLogin -> state.session
         is WebLoginState.Exchanging -> state.session

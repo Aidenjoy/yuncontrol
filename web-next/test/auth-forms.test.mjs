@@ -57,22 +57,22 @@ async function fill(container, selector, value) {
   })
 }
 
-test('login identifies the saved credential pair and submits once via the form or button', async t => {
+test('utoken login identifies the saved credential pair and submits once via the form or button', async t => {
   const { container, calls, update } = await render(t, LoginScreen)
   const form = container.querySelector('form')
   const email = form.elements.namedItem('email')
   const password = form.elements.namedItem('password')
   assert.equal(email.autocomplete, 'username')
-  assert.equal(email.type, 'email')
-  assert.equal(email.inputMode, 'email')
+  assert.equal(email.type, 'text')
+  assert.equal(email.inputMode, 'text')
   assert.equal(email.getAttribute('autocapitalize'), 'none')
   assert.equal(email.getAttribute('autocorrect'), 'off')
   assert.equal(password.autocomplete, 'current-password')
   assert.equal(form.querySelector('button[type="submit"]').disabled, true)
-  await fill(container, '#login-email', 'member@example.test')
+  await fill(container, '#login-email', 'utoken-user')
   await fill(container, '#login-password', 'synthetic password')
   await act(async () => form.requestSubmit())
-  assert.deepEqual(calls, [{ email: 'member@example.test', password: 'synthetic password' }])
+  assert.deepEqual(calls, [{ email: 'utoken-user', password: 'synthetic password', utoken: true }])
   await act(async () => form.querySelector('button[type="submit"]').click())
   assert.equal(calls.length, 2)
   await act(async () => form.querySelector('button[aria-label]').click())
@@ -86,8 +86,9 @@ test('login identifies the saved credential pair and submits once via the form o
   assert.equal(calls.length, 2)
 })
 
-test('login rejects invalid email and empty password on direct form submission', async t => {
+test('local administrator login still rejects invalid email and empty password', async t => {
   const { container, calls } = await render(t, LoginScreen)
+  await act(async () => [...container.querySelectorAll('button')].find(button => button.textContent === messages.auth.login.useLocal).click())
   await fill(container, '#login-email', 'not-an-email')
   await fill(container, '#login-password', 'synthetic password')
   await act(async () => container.querySelector('form').requestSubmit())

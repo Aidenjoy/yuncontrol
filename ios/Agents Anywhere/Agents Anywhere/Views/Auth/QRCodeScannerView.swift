@@ -113,7 +113,7 @@ final class ScannerViewController: UIViewController, AVCaptureMetadataOutputObje
 
     private func addOverlay() {
         let label = UILabel()
-        label.text = String(localized: "Scan Agents Anywhere QR")
+        label.text = String(localized: "Scan 云大师 QR")
         label.textColor = .white
         label.font = .systemFont(ofSize: 17, weight: .semibold)
         label.textAlignment = .center

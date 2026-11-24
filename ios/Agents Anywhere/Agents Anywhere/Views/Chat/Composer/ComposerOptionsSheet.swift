@@ -67,7 +67,7 @@ struct ComposerOptionsSheet: View {
                             }
                             .toggleStyle(.switch).tint(nil).accentColor(nil)
                             .disabled(!chat.canChangeTakeover)
-                            Text(meta.takeover ? String(localized: "已开启，可从 Agents Anywhere 继续操作。") : String(localized: "只读模式，开启接管后可以继续发送消息。"))
+                            Text(meta.takeover ? String(localized: "已开启，可从 云大师 继续操作。") : String(localized: "只读模式，开启接管后可以继续发送消息。"))
                                 .font(.footnote).foregroundStyle(.secondary)
                             if let error = chat.takeoverError {
                                 Text(error).font(.footnote).foregroundStyle(.secondary)

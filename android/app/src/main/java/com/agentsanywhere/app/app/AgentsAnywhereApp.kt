@@ -109,7 +109,7 @@ fun AgentsAnywhereApp(
             if (sessionStore.hasAuthSession()) {
                 AppDestination.Sessions.name
             } else {
-                AppDestination.LoginMethods.name
+                AppDestination.ServerSetup.name
             },
         )
     }
@@ -289,7 +289,7 @@ fun AgentsAnywhereApp(
         selectedDeviceId = null
         pendingMobileLoginQr = null
         webLoginViewModel.resetForSignedOutEntry()
-        destinationName = AppDestination.LoginMethods.name
+        destinationName = AppDestination.ServerSetup.name
     }
 
     LaunchedEffect(unauthorizedTokens) {

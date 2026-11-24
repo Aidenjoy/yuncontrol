@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import hmac
 import re
 import secrets
 import time
@@ -8,6 +9,7 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
+from loguru import logger
 
 from agent_server.core.api_namespace import api_v2_path
 from agent_server.core.auth import (
@@ -22,6 +24,7 @@ from agent_server.core.models import (
     AuthPasswordSaltRequest,
     AuthPasswordSaltResponse,
     AuthRequest,
+    RevokeLoginRequest,
     AuthResponse,
     BindEmailRequest,
     ChangePasswordRequest,
@@ -65,6 +68,7 @@ from agent_server.services.oauth import (
     verify_pending_token,
 )
 from agent_server.services.setup_tokens import SetupTokenService
+from agent_server.services.utoken_login import UtokenLoginError, authenticate_utoken
 
 
 def _setup_token(request: Request) -> SetupTokenService:
@@ -97,13 +101,14 @@ async def auth_config(
         # the server log by the time they hit refresh.
         expires_at = await _setup_token(request).current_expires_at_iso()
     oauth_config = await db.get_oauth_provider_config()
+    utoken_enabled = bool(os.environ.get("AGENT_SERVER_UTOKEN_URL", "").strip())
     email_enabled = bool((await get_email_settings(db)).get("enabled"))
     return AuthConfigResponse(
         emailVerificationRequired=email_enabled,
         needsBootstrap=needs_bootstrap,
-        registrationOpen=await db.is_registration_open(),
-        oauthRegistrationOpen=await db.is_oauth_registration_open(),
-        oauthEnabled=oauth_enabled(oauth_config),
+        registrationOpen=not utoken_enabled and await db.is_registration_open(),
+        oauthRegistrationOpen=not utoken_enabled and await db.is_oauth_registration_open(),
+        oauthEnabled=not utoken_enabled and oauth_enabled(oauth_config),
         oauthProviderLabel=str(oauth_config.get("label") or "OAuth") if oauth_enabled(oauth_config) else None,
         passwordResetEnabled=email_enabled and await db.is_password_reset_enabled(),
         setupTokenExpiresAt=expires_at,
@@ -134,6 +139,9 @@ async def auth_register(
     - If users exist and registration_open is true: new user is a member.
     - Otherwise: 403.
     """
+    if os.environ.get("AGENT_SERVER_UTOKEN_URL", "").strip() and await db.count_users() > 0:
+        raise HTTPException(status_code=403, detail="普通用户请使用账号登录，不支持独立注册")
+
     # Pre-check rather than relying on bootstrap_first_admin's None return —
     # we want to reject before touching the DB when the setup token is wrong.
     if await db.count_users() == 0:
@@ -181,12 +189,26 @@ async def auth_register(
 
 @router.post("/auth/login", response_model=AuthResponse)
 async def auth_login(payload: AuthRequest, db: Store = Depends(get_store)) -> AuthResponse:
+    """保持原登录协议；utoken 模式下仅本地管理员可用本地凭证认证。"""
+    utoken_origin = os.environ.get("AGENT_SERVER_UTOKEN_URL", "").strip()
     try:
         user = await db.verify_email_user(
             email=payload.email, password=payload.password, verifier=payload.passwordVerifier,
         )
     except ValueError as exc:
-        raise _value_error_to_http(exc) from exc
+        if not utoken_origin:
+            raise _value_error_to_http(exc) from exc
+        user = None
+    if utoken_origin:
+        # 步骤1：保留本地管理员，普通账号必须在 utoken 重新验证密码。
+        if user is not None and user.role == "admin":
+            return _auth_response(user)
+        if not payload.password:
+            raise HTTPException(status_code=401, detail="请使用账号密码登录")
+        if await db.count_users() == 0:
+            raise HTTPException(status_code=403, detail="请先初始化本地管理员账号")
+        # 步骤2：上游验证后关联本地账号，复用既有凭证和权限体系。
+        return await _login_with_utoken(utoken_origin, payload.email, payload.password, db)
     if user is None:
         raise HTTPException(status_code=401, detail="invalid credentials")
     return _auth_response(user)
@@ -268,6 +290,8 @@ async def oauth_start(
     returnTo: str | None = None,
     db: Store = Depends(get_store),
 ) -> OAuthStartResponse:
+    if os.environ.get("AGENT_SERVER_UTOKEN_URL", "").strip():
+        raise HTTPException(status_code=403, detail="请使用账号密码登录")
     config = await db.get_oauth_provider_config()
     try:
         authorize_url = build_authorize_url(
@@ -344,6 +368,8 @@ async def oauth_finalize(
     payload: OAuthFinalizeRequest,
     db: Store = Depends(get_store),
 ) -> OAuthFinalizeResponse:
+    if os.environ.get("AGENT_SERVER_UTOKEN_URL", "").strip():
+        raise HTTPException(status_code=403, detail="请使用账号密码登录")
     identity = verify_pending_token(payload.pendingToken)
     if identity is None:
         raise HTTPException(status_code=401, detail="oauth session expired")
@@ -500,6 +526,7 @@ async def exchange_mobile_login(
             "sub": user.userId,
             "aud": "agents-anywhere-mobile",
             "nonce": secrets.token_urlsafe(16),
+            "iatMs": time.time_ns() // 1_000_000,
         },
         MOBILE_REFRESH_EXPIRES_IN,
     )
@@ -522,6 +549,10 @@ async def refresh_mobile_login(
     subject = token_payload.get("sub")
     if not isinstance(subject, str) or not subject:
         raise HTTPException(status_code=401, detail="invalid or expired mobile refresh token")
+    cutoff = await db.get_setting("auth-revoked:" + subject)
+    issued_at = token_payload.get("iatMs", 0)
+    if cutoff is not None and (type(issued_at) is not int or issued_at <= int(cutoff)):
+        raise HTTPException(status_code=401, detail="mobile login expired, sign in again")
     try:
         user = await db.get_user(subject)
     except KeyError:
@@ -721,3 +752,36 @@ def _oauth_frontend_redirect(
     except ValueError:
         target = f"{_public_origin(request)}/?{urlencode(params)}"
     return RedirectResponse(target)
+
+
+async def _login_with_utoken(origin: str, username: str, password: str, db: Store) -> AuthResponse:
+    """验证 utoken 密码并原子关联普通账号，返回既有云大师凭证，不持久化上游密码。"""
+    try:
+        identity = await authenticate_utoken(origin, username, password)
+    except UtokenLoginError as exc:
+        logger.warning("utoken login rejected status={}", exc.status_code)
+        raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
+    try:
+        user = await db.resolve_utoken_user(origin=identity.origin, subject=identity.subject, display_name=identity.display_name)
+    except ValueError as exc:
+        logger.warning("utoken local account unavailable")
+        raise HTTPException(status_code=403, detail="云大师账号已停用或身份绑定冲突") from exc
+    logger.info("utoken login succeeded user_id={}", user.userId)
+    return _auth_response(user)
+
+
+@router.post("/auth/revoke")
+async def revoke_login(payload: RevokeLoginRequest, request: Request, db: Store = Depends(get_store)) -> dict[str, bool]:
+    """校验后台共享密钥并撤销指定身份的旧令牌，不修改账号或业务数据。"""
+    secret = os.environ.get("AGENT_SERVER_AUTH_REVOKE_SECRET", "")
+    supplied = request.headers.get("X-Auth-Secret", "")
+    if len(secret) < 32 or not hmac.compare_digest(secret.encode(), supplied.encode()):
+        raise HTTPException(status_code=401, detail="invalid notification credential")
+    origin = os.environ.get("AGENT_SERVER_UTOKEN_URL", "").strip().rstrip("/")
+    if not origin:
+        raise HTTPException(status_code=503, detail="authentication service is not configured")
+    if payload.changedAt > time.time_ns() // 1_000_000 + 60_000:
+        raise HTTPException(status_code=422, detail="notification timestamp is in the future")
+    matched = await db.revoke_utoken_login(origin=origin, subject=str(payload.userId), changed_at=payload.changedAt)
+    logger.info("login revocation processed external_user_id={} matched={}", payload.userId, matched)
+    return {"ok": True, "matched": matched}

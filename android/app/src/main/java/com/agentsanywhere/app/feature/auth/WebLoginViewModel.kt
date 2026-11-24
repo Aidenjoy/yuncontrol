@@ -29,6 +29,9 @@ sealed interface WebLoginState {
     data object Success : WebLoginState
 }
 
+/**
+ * 管理账号网页登录、服务器选择和回调兑换，不改变原有凭证保存机制。
+ */
 class WebLoginViewModel(application: Application) : AndroidViewModel(application) {
     private val controller = AuthController(
         api = AuthApi(),
@@ -40,6 +43,20 @@ class WebLoginViewModel(application: Application) : AndroidViewModel(application
 
     var state: WebLoginState by mutableStateOf(hostChoice)
         private set
+
+    /**
+     * 未登录启动时优先使用上次服务器，否则使用安装包配置的服务器。
+     * 直接复用网页登录及凭证兑换流程，失败时保留地址设置供用户修正。
+     */
+    fun startDefaultLogin() {
+        val current = state as? WebLoginState.HostChoice ?: return
+        if (current.isBusy || current.errorMessage != null) return
+        val savedServer = controller.savedServerUrl().trim()
+        val serverUrl = savedServer.ifBlank { AppConfig.OFFICIAL_SERVER_URL.trim() }
+        if (serverUrl.isNotBlank()) {
+            start(serverUrl, official = savedServer.isBlank())
+        }
+    }
 
     fun selectSelfHost() {
         val current = state as? WebLoginState.HostChoice ?: return

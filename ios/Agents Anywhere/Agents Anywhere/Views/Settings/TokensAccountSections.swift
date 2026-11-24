@@ -211,7 +211,7 @@ private struct TokensModelsTab: View {
             } header: {
                 Text(String(localized: "pages.settings.modelConfigs.account.tabModels"))
             } footer: {
-                Text(String(localized: "Turning models off or renaming them only affects Agents Anywhere, and applies to every runtime using Tokens Anywhere."))
+                Text(String(localized: "Turning models off or renaming them only affects 云大师, and applies to every runtime using Tokens Anywhere."))
             }
             Section {
                 ForEach(account.groups) { group in

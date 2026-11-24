@@ -160,7 +160,7 @@ struct PairDeviceSheet: View {
 
     private var desktopInstructions: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Label(String(localized: "Agents Anywhere Desktop"), appSymbol: "desktopcomputer").font(.title2.bold())
+            Label(String(localized: "云大师 Desktop"), appSymbol: "desktopcomputer").font(.title2.bold())
             Text(String(localized: "在电脑上安装桌面应用，使用以下服务器地址登录当前账号。连接后，可以在设备管理中添加 Agent。"))
             Text(appState.serverURL?.absoluteString ?? "").font(.callout.monospaced()).textSelection(.enabled)
             AppGlassButton(String(localized: "下载桌面应用"), style: .prominent) {

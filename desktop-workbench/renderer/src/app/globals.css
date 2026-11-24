@@ -179,7 +179,7 @@ body {
 }
 
 .aa-wordmark {
-  font-family: "AA Caveat", "Snell Roundhand", cursive;
+  font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
   font-weight: 500;
   letter-spacing: 0;
   line-height: 1;

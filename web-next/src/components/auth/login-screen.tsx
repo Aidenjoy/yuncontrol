@@ -14,14 +14,15 @@ import { useTranslations } from "next-intl"
 export function LoginScreen() {
   const { navigate, login, loading, error, oauthEnabled, oauthProviderLabel, registrationOpen, passwordResetEnabled, startOAuth } = useAuth()
   const t = useTranslations("auth")
+  const [localLogin, setLocalLogin] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const emailInvalid = Boolean(email && !isValidEmail(email))
+  const emailInvalid = Boolean(localLogin && email && !isValidEmail(email))
 
   const submit = async () => {
-    if (loading || !isValidEmail(email) || !password) return
-    await login({ email, password }).catch(() => undefined)
+    if (loading || !(localLogin ? isValidEmail(email) : email.trim()) || !password) return
+    await login({ email, password, utoken: !localLogin }).catch(() => undefined)
   }
 
   return (
@@ -29,27 +30,27 @@ export function LoginScreen() {
       <div className="flex flex-col items-center gap-2 text-center mb-8">
         <h1 className="text-2xl font-bold tracking-tight">
           {t("login.titlePrefix")}{" "}
-          <span className="aa-wordmark">Agents Anywhere</span>
+          <span className="aa-wordmark">云大师</span>
         </h1>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          {t("login.description")}
+          {localLogin ? t("login.description") : t("login.utokenDescription")}
         </p>
       </div>
 
       <form noValidate onSubmit={(event) => { event.preventDefault(); void submit() }}>
         <FieldGroup>
           <Field data-invalid={emailInvalid}>
-            <Label htmlFor="login-email">{t("fields.email")}</Label>
+            <Label htmlFor="login-email">{localLogin ? t("fields.email") : t("login.utokenAccount")}</Label>
             <InputGroup className="h-11 rounded-lg">
               <InputGroupAddon><User className="size-4" /></InputGroupAddon>
               <InputGroupInput
                 id="login-email"
                 value={email}
                 onChange={(event) => setEmail(event.currentTarget.value)}
-                placeholder={t("login.userPlaceholder")}
-                type="email"
+                placeholder={localLogin ? t("login.userPlaceholder") : t("login.utokenPlaceholder")}
+                type={localLogin ? "email" : "text"}
                 name="email"
-                inputMode="email"
+                inputMode={localLogin ? "email" : "text"}
                 autoCapitalize="none"
                 autoCorrect="off"
                 autoComplete="username"
@@ -87,7 +88,7 @@ export function LoginScreen() {
 
           <Button
             className="h-11 w-full font-medium"
-            disabled={loading || !isValidEmail(email) || !password}
+            disabled={loading || !(localLogin ? isValidEmail(email) : email.trim()) || !password}
             type="submit"
           >
             {loading ? t("login.signingIn") : t("login.submitWithEnter")}
@@ -95,7 +96,11 @@ export function LoginScreen() {
 
           {error ? <p className="text-center text-sm text-destructive">{error}</p> : null}
 
-          {oauthEnabled && oauthProviderLabel ? (
+          <Button type="button" variant="ghost" disabled={loading} onClick={() => { setLocalLogin(!localLogin); setEmail(""); setPassword("") }}>
+            {t(localLogin ? "login.useUtoken" : "login.useLocal")}
+          </Button>
+
+          {localLogin && oauthEnabled && oauthProviderLabel ? (
             <Button
               type="button"
               variant="outline"
@@ -108,7 +113,7 @@ export function LoginScreen() {
             </Button>
           ) : null}
 
-          {registrationOpen || passwordResetEnabled ? (
+          {localLogin && (registrationOpen || passwordResetEnabled) ? (
             <div className="flex flex-col items-center gap-1 text-sm text-muted-foreground">
               {registrationOpen ? (
                 <p>

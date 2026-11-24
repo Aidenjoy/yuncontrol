@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from loguru import logger
+from agent_server.infra.login_revocation import LoginRevocationMiddleware
 from redis.exceptions import RedisError
 
 from agent_server.api import (
@@ -249,6 +250,7 @@ def create_app(
         error_handlers.workspace_service_error_handler,
     )
     cors_origins = os.environ.get("AGENT_SERVER_CORS_ORIGINS")
+    app.add_middleware(LoginRevocationMiddleware)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=cors_origins.split(",") if cors_origins else [],

@@ -57,3 +57,40 @@ _reference/*
 
 # Package dependencies are local, including linked worktree dependencies.
 **/node_modules
+
+# Local IDE settings and workspace metadata.
+.idea/
+.vscode/
+*.iml
+*.code-workspace
+
+# Environment secrets; keep shareable configuration templates.
+.env
+.env.*
+!.env.example
+!.env.*.example
+!.env.sample
+!.env.*.sample
+!.env.template
+!.env.*.template
+
+# Logs, coverage reports, and editor recovery files.
+*.log
+.coverage
+.coverage.*
+htmlcov/
+coverage/
+*.swp
+*.swo
+*~
+*.orig
+*.rej
+
+# Generated package metadata and signing credentials.
+*.egg-info/
+*.tsbuildinfo
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.mobileprovision

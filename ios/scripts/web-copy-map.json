@@ -403,7 +403,7 @@
         "vendor": "@"
       }
     },
-    "Turning models off or renaming them only affects Agents Anywhere, and applies to every runtime using Tokens Anywhere.": "pages.settings.modelConfigs.account.modelsHint",
+    "Turning models off or renaming them only affects 云大师, and applies to every runtime using Tokens Anywhere.": "pages.settings.modelConfigs.account.modelsHint",
     "Unable to Load Files": "dashboard.workspacePicker.loadFailed",
     "Unknown model": "pages.settings.modelConfigs.account.unknownModel",
     "Unlinked": "pages.settings.modelConfigs.unlinked",
@@ -567,7 +567,7 @@
     "使用此目录": "dashboard.workspacePicker.usePath",
     "使用此项目并保存名称": "dashboard.projects.workspaceConflictConfirm",
     "使用配对码": "dashboard.pairDevice.pairCodeTitle",
-    "例如 Agents Anywhere": "dashboard.projects.namePlaceholder",
+    "例如 云大师": "dashboard.projects.namePlaceholder",
     "侧边栏显示会话": "pages.settings.desktopSidebarShowSessions",
     "保存": "common.save",
     "停止生成": "dashboard.session.interrupt",

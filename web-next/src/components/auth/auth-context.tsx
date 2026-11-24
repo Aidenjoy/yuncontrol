@@ -51,7 +51,7 @@ type AuthState = {
   refreshConfig: () => Promise<void>
   registrationOpen: boolean
   navigate: (screen: AuthScreen) => void
-  login: (input: { email: string; password: string }) => Promise<void>
+  login: (input: { email: string; password: string; utoken?: boolean }) => Promise<void>
   register: (input: { email: string; displayName: string; password: string; code?: string; setupToken?: string }) => Promise<void>
   startOAuth: () => Promise<void>
   finalizeOAuth: (input: { email?: string; displayName?: string; code?: string; password?: string; setPassword?: boolean }) => Promise<void>
@@ -312,11 +312,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [finishAuth, oauthPending, t])
 
   const login = React.useCallback(
-    async (input: { email: string; password: string }) => {
+    async (input: { email: string; password: string; utoken?: boolean }) => {
       setLoading(true)
       setError(null)
       try {
-        await finishAuth(await authApi.login(input))
+        await finishAuth(input.utoken ? await authApi.utokenLogin(input.email, input.password) : await authApi.login(input))
       } catch (err) {
         setError(err instanceof Error ? err.message : t("errors.loginFailed"))
         throw err

@@ -4,16 +4,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
-import com.agentsanywhere.app.R
-
-private val AAWordmarkFontFamily = FontFamily(
-    Font(R.font.caveat_wght, weight = FontWeight.Medium),
-)
 
 @Composable
 fun AAWordmark(
@@ -24,11 +18,11 @@ fun AAWordmark(
     textAlign: TextAlign? = null,
 ) {
     Text(
-        text = "Agents Anywhere",
+        text = "云大师",
         modifier = modifier,
         color = color,
         fontSize = fontSize,
-        fontFamily = AAWordmarkFontFamily,
+        fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Medium,
         lineHeight = lineHeight,
         letterSpacing = TextUnit.Unspecified,

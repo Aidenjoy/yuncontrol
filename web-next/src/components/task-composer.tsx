@@ -1038,7 +1038,7 @@ export function TaskComposer() {
             onClick={goHome}
             className="aa-wordmark text-xl leading-none text-foreground transition-colors hover:text-primary"
           >
-            Agents Anywhere
+            云大师
           </button>
         </div>
       ) : null}

@@ -280,9 +280,10 @@
 				"ENABLE_RESOURCE_ACCESS_CAMERA[sdk=macosx*]" = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "云大师";
 				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Scan login QR codes and attach camera photos to sessions.";
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Connect to your self-hosted Agents Anywhere server on the local network.";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Connect to your self-hosted 云大师 server on the local network.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
@@ -337,9 +338,10 @@
 				"ENABLE_RESOURCE_ACCESS_CAMERA[sdk=macosx*]" = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "云大师";
 				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Scan login QR codes and attach camera photos to sessions.";
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Connect to your self-hosted Agents Anywhere server on the local network.";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Connect to your self-hosted 云大师 server on the local network.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;

@@ -3,9 +3,9 @@ import type { Metadata } from "next"
 import { PrivacyPolicyScreen } from "@/components/pages/privacy-policy-screen"
 
 export const metadata: Metadata = {
-  title: "Privacy policy · Agents Anywhere",
+  title: "Privacy policy · 云大师",
   description:
-    "How the Agents Anywhere web and desktop clients handle information.",
+    "How the 云大师 web and desktop clients handle information.",
 }
 
 export default function PrivacyPage() {

@@ -60,6 +60,11 @@ export class AuthApi {
     );
   }
 
+  utokenLogin(username: string, password: string): Promise<AuthResponse> {
+    // utoken 必须接收原密码，不能复用本地账号的密码摘要协议。
+    return this.client.post<AuthResponse>("/auth/login", { email: username.trim(), password }, { auth: false });
+  }
+
   async register(credentials: AuthCredentials): Promise<AuthResponse> {
     const email = normalizeEmail(credentials.email);
     const verifier =

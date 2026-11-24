@@ -348,7 +348,7 @@ export function AppSidebar({ contained = false }: { contained?: boolean }) {
       <SidebarHeader className="gap-0 px-4 pb-2 pt-4">
         <div className="flex min-h-7 items-center justify-between">
           <button type="button" onClick={goHome} className="aa-wordmark min-w-0 text-left text-xl">
-            Agents Anywhere
+            云大师
           </button>
         </div>
 
