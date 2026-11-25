@@ -51,7 +51,7 @@
 .dialog.wordmarkDialog, .dialog.accountDialog { max-height: calc(100dvh - 48px); }
 
 .tabs { display: flex; gap: 8px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--dsw-alias-border-l2); }
-.tabs > button { flex: 1; border-radius: 8px; }
+.tabs > button { flex: 1; border-radius: 8px; white-space: nowrap; }
 .loginDescription { margin: 0 0 24px; color: var(--dsw-alias-label-secondary); font: var(--dsw-font-s-14); }
 
 .placeholder {

@@ -59,7 +59,11 @@ class DshRuntime(AgentRuntime):
         self.config = config
         self.host = host
         self.client_version = client_version
-        self._identity = RuntimeIdentity("dsh", "unknown", "DeepSeek Harness")
+        self._identity = RuntimeIdentity(
+            provider_config.runtime_type(),
+            "unknown",
+            provider_config.runtime_display_name(),
+        )
         self._client: BridgeClient | None = None
         self._connect_lock = asyncio.Lock()
         # Each connection owns one inventory and one history capture.
@@ -316,7 +320,7 @@ class DshRuntime(AgentRuntime):
                     return RuntimeTimelineSnapshot(
                         session_id=session_id,
                         external_session_id=native_id,
-                        runtime="dsh",
+                        runtime=provider_config.runtime_type(),
                         items=tuple(items),
                         complete=complete,
                         metadata=metadata,
@@ -340,7 +344,7 @@ class DshRuntime(AgentRuntime):
                 raise RuntimeUpstreamError("DSH source observation returned a different session")
             # Wait for ingestion before returning session.state. The server's
             # detail snapshot then reads the fresh source fact from its database.
-            await self.host.publish_runtime_notifications("dsh", [{
+            await self.host.publish_runtime_notifications(provider_config.runtime_type(), [{
                 "method": "session.source.updated", "params": {
                     "sessionId": session_id, "externalSessionId": payload.get("externalSessionId"),
                     **source, "observationOrigin": "operation",
@@ -478,9 +482,9 @@ class DshRuntime(AgentRuntime):
         try:
             identity = result["identity"]
             self._identity = RuntimeIdentity(
-                runtime="dsh",
+                runtime=provider_config.runtime_type(),
                 runtime_version=identity.get("runtimeVersion", "unknown"),
-                display_name="DeepSeek Harness",
+                display_name=provider_config.runtime_display_name(),
                 protocol_version=identity["protocolVersion"],
             )
             # Bootstrap only declared capabilities; read-only startup needs no model catalog.
@@ -498,7 +502,7 @@ class DshRuntime(AgentRuntime):
                 from dataclasses import replace
                 from connector.runtime_protocol.models import RuntimeCapability
                 items = tuple(item for item in capabilities.capabilities if item.capability_id != "session.planning")
-                capabilities = replace(capabilities, capabilities=(*items, RuntimeCapability(capability_id="session.planning", runtime="dsh", scope="runtime", supported=False, available=False, metadata={"nativePlanningAvailable": native_planning})))
+                capabilities = replace(capabilities, capabilities=(*items, RuntimeCapability(capability_id="session.planning", runtime=provider_config.runtime_type(), scope="runtime", supported=False, available=False, metadata={"nativePlanningAvailable": native_planning})))
             await self.host.runtime_capabilities_update(capabilities)
             supported = {item.capability_id for item in capabilities.capabilities if item.available and item.supported}
             for capability, method, decode, publish in (

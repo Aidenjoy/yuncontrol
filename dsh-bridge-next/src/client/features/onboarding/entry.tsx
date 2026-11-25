@@ -52,6 +52,8 @@ export function ConnectionEntry({ wide, host, t, renderTrigger }: ConnectionEntr
   const tabId = useId()
   const state = useOnboardingState(host, open)
   const snapshot = state.snapshot
+  const branded = Boolean(snapshot?.brand)
+  const brandName = snapshot?.brand?.shortName || snapshot?.brand?.productName || '云大师'
   const standalone = snapshot?.desktop.status === 'absent'
   const ownershipError = standalone && snapshot?.ownership && snapshot.ownership.status !== 'owned' ? snapshot.ownership.message || t('暂时无法检查本机 Connector 状态，请稍后重试。') : null
   const showLogin = standalone && !snapshot.account && tab === 'connection'
@@ -144,9 +146,9 @@ export function ConnectionEntry({ wide, host, t, renderTrigger }: ConnectionEntr
     <Modal
       open={open}
       onClose={close}
-      title={standalone ? 'Agents Anywhere' : t('远程控制')}
+      title={branded ? t('{brand}远程控制', { brand: brandName }) : (standalone ? 'Agents Anywhere' : t('远程控制'))}
       closeLabel={t('关闭远程控制')}
-      className={clsx(css.dialog, standalone ? css.wordmarkDialog : css.accountDialog, tab === 'logs' && css.logsDialog)}
+      className={clsx(css.dialog, branded ? css.accountDialog : (standalone ? css.wordmarkDialog : css.accountDialog), tab === 'logs' && css.logsDialog)}
       contentClassName={clsx(css.dialogContent)}
     >
       <div ref={content}>
@@ -179,7 +181,7 @@ export function ConnectionEntry({ wide, host, t, renderTrigger }: ConnectionEntr
                   <OnboardingSection t={t} host={host} state={state} />
                 </>}
         </>}
-            {tab === 'connection' ? <nav className={css.homeLinks} aria-label={t('Agents Anywhere 相关链接')}>
+            {!branded && tab === 'connection' ? <nav className={css.homeLinks} aria-label={t('Agents Anywhere 相关链接')}>
               {homeLinks.map(({ label, url, icon: Icon }) => <Button key={url} variant="outline"
                 icon={<Icon size={16} strokeWidth={1.5} />} onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}>
                 {t(label)}

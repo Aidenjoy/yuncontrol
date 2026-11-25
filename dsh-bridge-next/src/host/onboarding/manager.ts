@@ -310,7 +310,7 @@ export class OnboardingManager {
     await this.initialize()
     if (this.disposed) throw new Error('插件已关闭。')
     if (input && input.target !== 'cloud' && input.target !== 'server') throw new Error('请选择云端或自建服务器。')
-    const next = this.validateSettings({ apiBaseUrl: input?.target === 'cloud' ? CLOUD_API_BASE_URL
+    const next = this.validateSettings({ apiBaseUrl: input?.target === 'cloud' ? this.config.apiBaseUrl
       : input?.target === 'server' ? input.serverUrl : this.settings.apiBaseUrl })
     await this.requireStandalone()
     await (this.dependencies.checkServer ?? checkServer)(next.apiBaseUrl)
@@ -352,7 +352,7 @@ export class OnboardingManager {
         await this.markAccountExpired(this.account)
       }
     }
-    return { url: flow.authorizationUrl(resolveOAuthWebOrigin(this.settings.apiBaseUrl)) }
+    return { url: flow.authorizationUrl(resolveOAuthWebOrigin(this.settings.apiBaseUrl, this.config.anywhereWebUrl)) }
   }
 
   private launch(flow: LoopbackFlow, controller: AbortController, code?: string): void {
@@ -393,7 +393,7 @@ export class OnboardingManager {
     await this.connector.start(this.binding, this.settings.apiBaseUrl, signal)
     await this.waitOnline(api, account, this.binding.connectorId, signal)
     signal.throwIfAborted()
-    const redirectUrl = resolveOnboardingUrl(this.settings.apiBaseUrl, this.binding.connectorId, flow.id)
+    const redirectUrl = resolveOnboardingUrl(this.settings.apiBaseUrl, this.binding.connectorId, flow.id, this.config.anywhereWebUrl)
     this.stage = 'ready'
     this.message = '设备已上线，正在继续 Web 引导…'
     flow.update({ stage: 'ready', message: this.message, redirectUrl })
@@ -846,11 +846,18 @@ export class OnboardingManager {
   }
 
   private snapshot(): OnboardingSnapshot {
+    const hasBrand = Boolean(this.config.productName || this.config.shortName || this.config.anywhereWebUrl)
     return {
+      ...(hasBrand ? {
+        brand: {
+          ...(this.config.productName ? { productName: this.config.productName } : {}),
+          ...(this.config.shortName ? { shortName: this.config.shortName } : {}),
+        },
+      } : {}),
       desktop: this.desktop, settings: { ...this.settings }, stage: this.stage, message: this.message,
       account: this.account ? publicProfile(this.account) : null,
       accountExpired: Boolean(this.account && this.accountExpired(this.account)),
-      webAppUrl: resolveWebAppUrl(this.settings.apiBaseUrl),
+      webAppUrl: resolveWebAppUrl(this.settings.apiBaseUrl, this.config.anywhereWebUrl),
       connectorId: this.binding?.connectorId ?? null, connectorRunning: this.connector.running, flowId: this.flow?.id ?? null,
       deviceRecovery: this.recovery ? { ...this.recovery } : null,
       connector: {

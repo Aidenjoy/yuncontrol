@@ -436,10 +436,12 @@ def command_result(value: Any, command: str) -> RuntimeCommandResult:
 
 
 def _runtime(data: Mapping[str, Any]) -> str:
+    from connector.runtimes.dsh import provider_config
+    expected = provider_config.runtime_type()
     runtime = data.get("runtime", "dsh")
-    if runtime != "dsh":
-        raise ValueError("bridge payload runtime must be dsh")
-    return "dsh"
+    if runtime not in ("dsh", expected):
+        raise ValueError(f"bridge payload runtime must be dsh or {expected}")
+    return expected
 
 
 def _mapping(value: Any, label: str) -> dict[str, Any]:

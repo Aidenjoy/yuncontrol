@@ -14,6 +14,20 @@ DEFAULT_MAX_RESTART_ATTEMPTS = 3
 DEFAULT_RESTART_BACKOFF_MS = 1_000
 
 
+def runtime_type() -> str:
+    return os.environ.get("YUNWORK_ANYWHERE_RUNTIME_TYPE", "").strip() or "dsh"
+
+
+def runtime_display_name() -> str:
+    if runtime_type() != "dsh":
+        return (
+            os.environ.get("YUNWORK_SHORT_NAME", "").strip()
+            or os.environ.get("YUNWORK_PRODUCT_NAME", "").strip()
+            or "云大师"
+        )
+    return "DeepSeek Harness"
+
+
 def dsh_config_schema() -> dict[str, Any]:
     positive_timeout = {"type": "integer", "minimum": 100, "maximum": 600_000}
     return {
@@ -112,7 +126,10 @@ def dsh_home(values: dict[str, Any]) -> Path:
 
 
 def bridge_directory() -> Path:
-    """Fixed per-user rendezvous shared with the plugin; DSH_HOME does not move it."""
+    """Per-user rendezvous shared with the plugin; isolated under DSH_HOME when set."""
+    dsh_home_env = os.environ.get("DSH_HOME", "").strip()
+    if dsh_home_env and Path(dsh_home_env).is_absolute():
+        return Path(canonical_path(Path(dsh_home_env) / "anywhere" / "dsh-bridge"))
     return Path(canonical_path(runtime_owner.system_home() / ".agents-anywhere" / "dsh-bridge"))
 
 

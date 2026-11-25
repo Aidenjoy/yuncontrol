@@ -42,8 +42,14 @@ export interface AccountProfile {
   avatar?: string | null
 }
 
+export interface BrandProfile {
+  productName?: string
+  shortName?: string
+}
+
 /** Public snapshots never contain account or Connector credentials. */
 export interface OnboardingSnapshot {
+  brand?: BrandProfile
   bridge?: BridgeStatus
   ownership?: { status: 'owned' | 'conflict' | 'error'; message?: string | undefined } | null
   desktop: DesktopDetection

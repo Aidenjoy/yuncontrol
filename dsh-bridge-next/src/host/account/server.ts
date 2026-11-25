@@ -29,7 +29,7 @@ export async function checkServer(apiBaseUrl: string, fetcher: typeof fetch = fe
     if (!response.ok) throw new Error('无法连接服务器，请检查地址和网络后重试。')
     const payload: unknown = await response.json().catch(() => null)
     if (!payload || typeof payload !== 'object' || !('status' in payload) || payload.status !== 'ok') {
-      throw new Error('该地址未返回正常的 Agents Anywhere 服务，请检查后端地址。')
+      throw new Error('该地址未返回正常的远程控制服务，请检查后端地址。')
     }
   } catch (error) {
     if (controller.signal.aborted) throw new Error('连接服务器超时，请检查地址和网络后重试。')

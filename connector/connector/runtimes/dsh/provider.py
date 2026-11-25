@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from collections.abc import Awaitable, Callable, Mapping
 from typing import Any
 
@@ -58,11 +59,11 @@ class DshProvider(RuntimeProvider):
 
     @property
     def runtime(self) -> str:
-        return "dsh"
+        return os.environ.get("YUNWORK_ANYWHERE_RUNTIME_TYPE", "").strip() or "dsh"
 
     @property
     def runtime_type(self) -> str:
-        return "dsh"
+        return self.runtime
 
     @property
     def implementation_type(self) -> str:
@@ -70,10 +71,18 @@ class DshProvider(RuntimeProvider):
 
     @property
     def display_name(self) -> str:
+        if self.runtime_type != "dsh":
+            return (
+                os.environ.get("YUNWORK_SHORT_NAME", "").strip()
+                or os.environ.get("YUNWORK_PRODUCT_NAME", "").strip()
+                or "云大师"
+            )
         return "DeepSeek Harness"
 
     @property
     def description(self) -> str:
+        if self.runtime_type != "dsh":
+            return f"{self.display_name} 本地服务运行时"
         return "DeepSeek Harness local service runtime"
 
     async def discover(self) -> RuntimeTypeDescriptor:

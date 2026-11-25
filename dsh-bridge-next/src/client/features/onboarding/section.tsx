@@ -9,6 +9,8 @@ import css from './section.module.css'
 
 export function OnboardingSection({ t, host, state: panel }: { t: Translate; host: OnboardingHostApi; state: OnboardingState }) {
   const { snapshot, busy, run, refresh, clearError } = panel
+  const branded = Boolean(snapshot?.brand)
+  const brandName = snapshot?.brand?.shortName || snapshot?.brand?.productName || '云大师'
   const error = panel.error ?? panel.readError
   const [link, setLink] = useState<string | null>(null)
   const [serverUrl, setServerUrl] = useState('')
@@ -51,9 +53,9 @@ export function OnboardingSection({ t, host, state: panel }: { t: Translate; hos
       disabled={unavailable}
       onClick={() => begin('cloud')}
     >
-      {primaryBusy ? t('正在连接…') : t('登录 Agents Anywhere Cloud')}
+      {primaryBusy ? t('正在连接…') : (branded ? t('登录{brand}远程控制', { brand: brandName }) : t('登录 Agents Anywhere Cloud'))}
     </Button>
-    {showServer ? <form id={serverFormId} className={css.form} onSubmit={(event) => {
+    {branded ? null : showServer ? <form id={serverFormId} className={css.form} onSubmit={(event) => {
       event.preventDefault()
       if (serverUrl.trim() && !unavailable) begin('server')
     }}>

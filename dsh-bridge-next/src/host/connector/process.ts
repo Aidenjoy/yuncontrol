@@ -263,6 +263,13 @@ export class SourceConnector implements ConnectorProcess {
     // 不依赖 prepare() 的调用顺序：start() 自己也要保证项目副本就位。
     const projectDir = this.projectDir ??= await materializeConnectorProject(this.config)
     signal.throwIfAborted()
+    const venvDir = join(this.config.stateRoot, 'connector-venv')
+    const venvPython = process.platform === 'win32'
+      ? join(venvDir, 'Scripts', 'python.exe')
+      : join(venvDir, 'bin', 'python')
+    if (existsSync(venvDir) && !existsSync(venvPython)) {
+      rmSync(venvDir, { recursive: true, force: true })
+    }
     const child = this.launch(command, [
       'run', '--directory', projectDir,
       'anywhere-cli', 'rpc', '--config', configPath,
@@ -278,6 +285,9 @@ export class SourceConnector implements ConnectorProcess {
         // Undefined removes an inherited value: the setting decides.
         AA_CONNECTOR_PROXY: settings.connectorProxy || undefined,
         ...(this.config.dshHome ? { DSH_HOME: this.config.dshHome } : {}),
+        ...(this.config.runtimeType ? { YUNWORK_ANYWHERE_RUNTIME_TYPE: this.config.runtimeType } : {}),
+        ...(this.config.productName ? { YUNWORK_PRODUCT_NAME: this.config.productName } : {}),
+        ...(this.config.shortName ? { YUNWORK_SHORT_NAME: this.config.shortName } : {}),
         AGENT_CONNECTOR_DATA_DIR: dataDir,
         UV_PROJECT_ENVIRONMENT: join(this.config.stateRoot, 'connector-venv'),
         PYTHONDONTWRITEBYTECODE: '1',

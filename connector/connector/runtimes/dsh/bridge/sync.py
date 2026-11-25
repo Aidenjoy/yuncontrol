@@ -20,6 +20,7 @@ from connector.runtime_protocol.models import (
     SessionSourceObservation,
     SessionSourceState,
 )
+from connector.runtimes.dsh import provider_config
 from connector.runtimes.dsh.bridge.client import BridgeClient
 from connector.runtimes.dsh.bridge.host import (
     SUBSCRIPTION_UNKNOWN,
@@ -294,7 +295,7 @@ class SyncRelay:
             # landed before its capture, so the upload need not queue behind, or
             # hold back, the other notifications of the Connector.
             await self.host.publish_runtime_snapshot(
-                "dsh", session_id, meta, items, ordered=not self.durable_checkpoints,
+                provider_config.runtime_type(), session_id, meta, items, ordered=not self.durable_checkpoints,
             )
         except (ConnectorIngestRejectedError, httpx.HTTPStatusError) as error:
             if isinstance(error, httpx.HTTPStatusError) and not 400 <= error.response.status_code < 500:
@@ -323,7 +324,7 @@ class SyncRelay:
             "DSH session history refused by the backend; session quarantined session_id={} reason={} attempts={} error={}",
             session_id, record.reason, record.attempts, error,
         )
-        await self.host.publish_runtime_notifications("dsh", [{
+        await self.host.publish_runtime_notifications(provider_config.runtime_type(), [{
             "method": "session.source.updated",
             "params": {"sessionId": session_id, "externalSessionId": external_id, **record.source_state()},
         }])
@@ -371,7 +372,7 @@ class SyncRelay:
             source = {"availability": "available"}
         # The capture's own source fact may predate the "unavailable" observation
         # published while it was refused; restate it as of now.
-        await self.host.publish_runtime_notifications("dsh", [{
+        await self.host.publish_runtime_notifications(provider_config.runtime_type(), [{
             "method": "session.source.updated",
             "params": {"sessionId": session_id, "externalSessionId": meta.get("externalSessionId"),
                        **source, "observedAt": _observed_now(), "observationOrigin": "event"},
@@ -414,7 +415,7 @@ class SyncRelay:
         loop = asyncio.get_running_loop()
         drafts = all(_streaming_draft(notice) for notice in notifications)
         started = loop.time()
-        await self.host.publish_runtime_notifications("dsh", notifications)
+        await self.host.publish_runtime_notifications(provider_config.runtime_type(), notifications)
         streaming = drafts and self.last_draft_post > float("-inf")
         self.last_draft_post = started if drafts else float("-inf")
         if streaming and (hold := started + self.streaming_post_interval - loop.time()) > 0:
@@ -473,25 +474,25 @@ class SyncRelay:
         elif method == "session.meta.upsert":
             meta = session_meta(params)
             await self.host.session_meta_upsert(
-                session_id=meta.session_id, runtime="dsh", external_session_id=meta.external_session_id,
+                session_id=meta.session_id, runtime=provider_config.runtime_type(), external_session_id=meta.external_session_id,
                 title=meta.title, cwd=meta.cwd, ordering_time=meta.ordering_time, metadata=meta.metadata,
             )
         elif method == "session.state.updated":
             state = session_state(params)
             await self.host.session_state_update(
-                session_id=state.session_id, runtime="dsh", external_session_id=state.external_session_id,
+                session_id=state.session_id, runtime=provider_config.runtime_type(), external_session_id=state.external_session_id,
                 status=state.status, selections=state.selections, status_reason=state.status_reason,
                 error=state.error, metadata=state.metadata,
             )
         elif method == "session.source.updated":
             await self.host.session_source_update(SessionSourceObservation(
-                session_id=params["sessionId"], external_session_id=params.get("externalSessionId"), runtime="dsh",
+                session_id=params["sessionId"], external_session_id=params.get("externalSessionId"), runtime=provider_config.runtime_type(),
                 state=SessionSourceState(availability=params["availability"], reason=params.get("reason"),
                     observed_at=params.get("observedAt"), observation_origin=params.get("observationOrigin", "event")),
             ))
         elif method == "session.turnEnded":
             await self.host.session_turn_ended(
-                session_id=params["sessionId"], runtime="dsh", external_session_id=params.get("externalSessionId"),
+                session_id=params["sessionId"], runtime=provider_config.runtime_type(), external_session_id=params.get("externalSessionId"),
                 turn_id=params.get("turnId"), outcome=params.get("outcome", "completed"), metadata=params.get("metadata"),
             )
         elif method == "notice.upsert":
@@ -507,7 +508,7 @@ class SyncRelay:
         elif method == "catalog.permission.update":
             await self.host.permission_catalog_update(permission_catalog(params))
         elif method in {"session.inventory.begin", "session.inventory.complete"}:
-            await self.host.publish_runtime_notifications("dsh", [notice])
+            await self.host.publish_runtime_notifications(provider_config.runtime_type(), [notice])
             if method == "session.inventory.complete" and params.get("complete") is True:
                 await self._baseline_completed()
         else:
