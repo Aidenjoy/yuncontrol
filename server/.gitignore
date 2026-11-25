@@ -21,3 +21,4 @@ file-upload-review.html
 
 # Runtime-created local file storage (uploaded attachment blobs)
 *.files/
+.data/
