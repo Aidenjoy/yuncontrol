@@ -5,7 +5,7 @@ import hashlib
 import json
 import os
 from ipaddress import ip_address
-from typing import Annotated
+from typing import Annotated, Literal
 from urllib.parse import urlsplit
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Response
@@ -13,6 +13,9 @@ from fastapi import Path as ApiPath
 
 from agent_server.core.models import UserView
 from agent_server.core.plugin_catalog import (
+    PluginBulkPublication,
+    PluginBulkResult,
+    PluginCatalogSummary,
     PluginImport,
     PluginList,
     PluginPublication,
@@ -150,12 +153,39 @@ async def list_plugins(
     q: str = Query("", max_length=200),
     category: str = Query("", max_length=160),
     limit: int = Query(50, ge=1, le=100),
+    status: Literal["draft", "published"] | None = Query(None),
+    source: str = Query("", max_length=160),
     offset: int = Query(0, ge=0, le=1000000),
     repo: Annotated[PluginCatalogRepository, Depends(repository)] = None,
 ):
     """List drafts and published entries for authenticated administrators only."""
     response.headers["Cache-Control"] = "no-store"
-    return await repo.list(q, category, limit, offset)
+    return await repo.list(q, category, limit, offset, status=status, source=source)
+
+
+@admin_router.get("/summary", response_model=PluginCatalogSummary)
+async def catalog_summary(
+    response: Response, repo: Annotated[PluginCatalogRepository, Depends(repository)]
+):
+    """Return global live statistics; administrator authentication is inherited."""
+    response.headers["Cache-Control"] = "no-store"
+    return await repo.summary()
+
+
+@admin_router.post("/bulk", response_model=PluginBulkResult)
+async def bulk_publish(
+    payload: PluginBulkPublication,
+    admin: Annotated[UserView, Depends(require_admin)],
+    repo: Annotated[PluginCatalogRepository, Depends(repository)],
+):
+    """Publish/unpublish selected records atomically with the existing audit and clock logic."""
+    try:
+        result = await repo.mutate(
+            admin.userId, identifiers=payload.ids, status=payload.status
+        )
+    except KeyError:
+        raise HTTPException(404, "plugin not found") from None
+    return PluginBulkResult(updated=len(result))
 
 
 @admin_router.get("/sync", response_model=PluginSyncState)
@@ -176,10 +206,10 @@ async def sync_catalog(
 ):
     """Admin-triggered metadata-only synchronization; one job across all HTTP workers."""
     try:
-        state = await repo.claim_sync(payload.sources)
+        state = await repo.claim_sync(["custom"] if payload.url else payload.sources)
     except ValueError as exc:
         raise HTTPException(409, str(exc)) from exc
-    tasks.add_task(PluginCatalogSync(repo).run, state, admin.userId)
+    tasks.add_task(PluginCatalogSync(repo).run, state, admin.userId, payload.url)
     return state
 
 

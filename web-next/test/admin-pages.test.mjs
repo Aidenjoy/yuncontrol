@@ -186,13 +186,18 @@ test('the settings sidebar drives the settings tab and the page shows the active
 test('plugin management reads the protected catalog and toggles publication separately', async (t) => {
   const item = { id: 'fixture', name: 'fixture', displayName: '测试插件', summary: '目录说明', latestVersion: '1.0.0', package: { registry: 'npm', name: 'fixture' } }
   let status = 'draft'
-  const get = t.mock.method(apiClient, 'get', async () => ({ items: [{ id: '123', item, status }], total: 1 }))
+  const get = t.mock.method(apiClient, 'get', async (path) => {
+    if (path === '/admin/plugins/summary') return { total: 1, published: status === 'published' ? 1 : 0, draft: status === 'draft' ? 1 : 0, sourceCount: 0, categories: [], sources: {} }
+    if (path === '/admin/plugins/sync') return { jobId: null, status: 'idle', source: null, total: 0, processed: 0, created: 0, updated: 0, unchanged: 0, skipped: 0, failed: 0, errors: [] }
+    return { items: [{ id: '123', item, status }], total: 1 }
+  })
   const patch = t.mock.method(apiClient, 'patch', async (_path, payload) => { status = payload.status; return { id: '123', item, status } })
   const container = await render(t, h(AdminPage), { section: 'plugins' })
   assert.match(container.textContent, /插件管理/)
   assert.match(container.textContent, /测试插件/)
-  assert.match(get.mock.calls[0].arguments[0], /^\/admin\/plugins\?/)
-  assert.equal(get.mock.calls[0].arguments[1].token, 'fixture-token')
+  const listCall = get.mock.calls.find(call => call.arguments[0].startsWith('/admin/plugins?'))
+  assert.ok(listCall)
+  assert.equal(listCall.arguments[1].token, 'fixture-token')
   await act(async () => container.querySelector('[role="switch"]').click())
   assert.deepEqual(patch.mock.calls[0].arguments, ['/admin/plugins/123', { status: 'published' }, { token: 'fixture-token' }])
   assert.match(container.textContent, /已上架/)

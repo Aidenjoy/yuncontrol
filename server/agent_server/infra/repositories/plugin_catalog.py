@@ -2,16 +2,19 @@
 
 from __future__ import annotations
 
+import hashlib
 import time
 from datetime import UTC, datetime
 from uuid import uuid4
 
 from loguru import logger
-from sqlalchemy import Text, bindparam, cast, func, insert, or_, select, update
+from sqlalchemy import Text, bindparam, cast, func, insert, or_, select, true, update
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from agent_server.core.plugin_catalog import (
+    PluginCatalogSummary,
     PluginList,
     PluginSyncEntry,
     PluginSyncState,
@@ -37,11 +40,22 @@ class PluginCatalogRepository:
         limit: int = 50,
         offset: int = 0,
         public: bool = False,
+        status: str | None = None,
+        source: str = "",
     ) -> PluginList:
         """Filter publication before counting/paging; category and search are literal input."""
         conditions = [info.c.deleted == 0]
         if public:
             conditions.append(info.c.status == "published")
+        if not public and status:
+            conditions.append(info.c.status == status)
+        if not public and source:
+            origins = func.coalesce(info.c.item["_origins"], cast({}, JSONB))
+            conditions.append(
+                origins == cast({}, JSONB)
+                if source == "manual"
+                else origins.op("?")(source)
+            )
         if q:
             needle = (
                 "%"
@@ -107,6 +121,7 @@ class PluginCatalogRepository:
         identifier: int | None = None,
         status: str | None = None,
         delete: bool = False,
+        identifiers: list[int] | None = None,
     ) -> list[PluginView]:
         """Serialize upserts, allocate Snowflake IDs, and write history in the same transaction."""
         now = datetime.now(UTC)
@@ -140,17 +155,43 @@ class PluginCatalogRepository:
                 last = (timestamp << 22) | sequence
                 return last
 
-            entries = items if items is not None else [None]
-            for entry in entries:
+            bulk_rows = {}
+            if identifiers:
+                bulk_rows = {
+                    r["id"]: r
+                    for r in (
+                        await conn.execute(
+                            select(info).where(
+                                info.c.id.in_(identifiers), info.c.deleted == 0
+                            )
+                        )
+                    )
+                    .mappings()
+                    .all()
+                }
+                if len(bulk_rows) != len(identifiers):
+                    raise KeyError("plugin not found")
+            entries = (
+                items
+                if items is not None
+                else [None] * (len(identifiers) if identifiers else 1)
+            )
+            for index, entry in enumerate(entries):
+                if identifiers:
+                    identifier = identifiers[index]
                 condition = (
                     info.c.id == identifier
                     if identifier is not None
                     else info.c.plugin_key == entry.item["id"]
                 )
                 old = (
-                    (await conn.execute(select(info).where(condition)))
-                    .mappings()
-                    .first()
+                    bulk_rows[identifier]
+                    if identifiers
+                    else (
+                        (await conn.execute(select(info).where(condition)))
+                        .mappings()
+                        .first()
+                    )
                 )
                 if identifier is not None and (not old or old["deleted"]):
                     raise KeyError("plugin not found")
@@ -368,19 +409,27 @@ class PluginCatalogRepository:
             state.processed += len(entries) + failed + skipped
             for entry in entries:
                 key = entry.item["id"]
+                # 自定义目录按地址保留独立来源，避免多个目录互相覆盖溯源记录。
+                origin_key = (
+                    "custom:" + hashlib.sha256(entry.origin.url.encode()).hexdigest()
+                    if entry.origin.source == "custom"
+                    else entry.origin.source
+                )
                 old = existing.get(key)
                 if old and old["deleted"]:
                     state.skipped += 1
                     continue
                 # 同一来源内容未变时不重复覆盖另一来源或管理员补充的资料。
-                if old and old["item"].get("_origins", {}).get(
-                    entry.origin.source
-                ) == entry.origin.model_dump():
+                if (
+                    old
+                    and old["item"].get("_origins", {}).get(origin_key)
+                    == entry.origin.model_dump()
+                ):
                     state.unchanged += 1
                     continue
                 origins = {
                     **(old["item"].get("_origins", {}) if old else {}),
-                    entry.origin.source: entry.origin.model_dump(),
+                    origin_key: entry.origin.model_dump(),
                 }
                 # 步骤2：补充实际存在的元数据；新源未提供的可选安装身份不被清空。
                 item = {
@@ -460,3 +509,75 @@ class PluginCatalogRepository:
                 )
             await self._save_sync(conn, state)
             return state
+
+    async def summary(self) -> PluginCatalogSummary:
+        """Aggregate live counts and filter options in SQL without loading plugin documents."""
+        live = info.c.deleted == 0
+        origins = (
+            func.jsonb_each(func.coalesce(info.c.item["_origins"], cast({}, JSONB)))
+            .table_valued("key", "value")
+            .lateral()
+        )
+        async with self._engine.connect() as conn:
+            await conn.execution_options(isolation_level="REPEATABLE READ")
+            async with conn.begin():
+                counts = (
+                    (
+                        await conn.execute(
+                            select(
+                                func.count().label("total"),
+                                func.count()
+                                .filter(info.c.status == "published")
+                                .label("published"),
+                                func.count()
+                                .filter(info.c.status == "draft")
+                                .label("draft"),
+                            )
+                            .select_from(info)
+                            .where(live)
+                        )
+                    )
+                    .mappings()
+                    .one()
+                )
+                categories = (
+                    (
+                        await conn.execute(
+                            select(
+                                func.jsonb_array_elements_text(
+                                    func.coalesce(
+                                        info.c.item["categories"], cast([], JSONB)
+                                    )
+                                ).label("category")
+                            )
+                            .where(live)
+                            .distinct()
+                            .order_by("category")
+                        )
+                    )
+                    .scalars()
+                    .all()
+                )
+                sources = (
+                    (
+                        await conn.execute(
+                            select(
+                                origins.c.key,
+                                func.min(
+                                    cast(origins.c.value, JSONB)["url"].astext
+                                ).label("url"),
+                            )
+                            .select_from(info.join(origins, true()))
+                            .where(live)
+                            .group_by(origins.c.key)
+                        )
+                    )
+                    .mappings()
+                    .all()
+                )
+        return PluginCatalogSummary(
+            **counts,
+            categories=list(categories),
+            sourceCount=len(sources),
+            sources={r["key"]: r["url"] or r["key"] for r in sources},
+        )

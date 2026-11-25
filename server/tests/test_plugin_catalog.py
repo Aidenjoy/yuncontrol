@@ -239,3 +239,130 @@ def test_protocol_validation_and_disabled_identity_reimport(tmp_path, monkeypatc
     )
     monkeypatch.setenv("AGENT_SERVER_PLUGIN_ORIGIN", "https://host:invalid")
     assert client.get("/api/v2/plugins/config").status_code == 503
+
+
+def test_admin_summary_filters_and_atomic_bulk_publication(tmp_path):
+    """Real SQL pagination/aggregates and atomic publication retain the public boundary."""
+    from sqlalchemy import update
+
+    client = make_client(tmp_path)
+    admin = auth_headers(client)
+    member = auth_headers(client, user_id="catalog-member")
+    records = []
+    for index, categories in enumerate(
+        (["tools"], ["tools", "development"], ["development"])
+    ):
+        item = {**ITEM, "id": f"catalog-{index}", "categories": categories}
+        response = client.post("/admin/plugins", headers=admin, json={"item": item})
+        assert response.status_code == 201, response.text
+        records.append(response.json())
+
+    async def add_origin():
+        """Seed provenance only in the disposable test database."""
+        origins = {
+            "dshfind": {
+                "source": "dshfind",
+                "url": "https://api.dshfind.com/v1/catalog",
+            }
+        }
+        async with client.app.state.store._engine.begin() as conn:
+            await conn.execute(
+                update(plugin_catalog_info)
+                .where(plugin_catalog_info.c.id == int(records[0]["id"]))
+                .values(item={**records[0]["item"], "_origins": origins})
+            )
+
+    asyncio.run(add_origin())
+    for headers in ({}, member):
+        assert client.get("/admin/plugins/summary", headers=headers).status_code in (
+            401,
+            403,
+        )
+        assert client.post(
+            "/admin/plugins/bulk",
+            headers=headers,
+            json={"ids": [records[0]["id"]], "status": "published"},
+        ).status_code in (401, 403)
+    stats = client.get("/admin/plugins/summary", headers=admin)
+    assert stats.status_code == 200, stats.text
+    assert stats.json() == {
+        "total": 3,
+        "published": 0,
+        "draft": 3,
+        "sourceCount": 1,
+        "categories": ["development", "tools"],
+        "sources": {"dshfind": "https://api.dshfind.com/v1/catalog"},
+    }
+    page = client.get(
+        "/admin/plugins",
+        headers=admin,
+        params={"category": "tools", "limit": 1, "offset": 1},
+    ).json()
+    assert page["total"] == 2 and len(page["items"]) == 1
+    assert page["items"][0]["item"]["id"] == "catalog-1"
+    assert (
+        client.get(
+            "/admin/plugins", headers=admin, params={"source": "dshfind"}
+        ).json()["total"]
+        == 1
+    )
+    assert (
+        client.get("/admin/plugins", headers=admin, params={"source": "manual"}).json()[
+            "total"
+        ]
+        == 2
+    )
+    assert client.get("/api/v2/plugins/search").json()["items"] == []
+    ids = [record["id"] for record in records[:2]]
+    assert (
+        client.post(
+            "/admin/plugins/bulk",
+            headers=admin,
+            json={"ids": ids + ["1"], "status": "published"},
+        ).status_code
+        == 404
+    )
+    assert client.get("/admin/plugins/summary", headers=admin).json()["published"] == 0
+    assert (
+        client.post(
+            "/admin/plugins/bulk",
+            headers=admin,
+            json={"ids": [ids[0], ids[0]], "status": "published"},
+        ).status_code
+        == 422
+    )
+    published = client.post(
+        "/admin/plugins/bulk", headers=admin, json={"ids": ids, "status": "published"}
+    )
+    assert published.status_code == 200, published.text
+    assert published.json() == {"updated": 2}
+    assert (
+        client.get(
+            "/admin/plugins", headers=admin, params={"status": "published"}
+        ).json()["total"]
+        == 2
+    )
+    assert (
+        client.get("/admin/plugins", headers=admin, params={"status": "draft"}).json()[
+            "total"
+        ]
+        == 1
+    )
+    assert len(client.get("/api/v2/plugins/search").json()["items"]) == 2
+    updated = client.put(
+        "/admin/plugins/" + ids[0],
+        headers=admin,
+        json={"item": {**records[0]["item"], "summary": "Updated"}},
+    )
+    assert updated.json()["status"] == "published"
+    assert client.get("/admin/plugins/summary", headers=admin).json()["published"] == 2
+    assert (
+        client.post(
+            "/admin/plugins/bulk", headers=admin, json={"ids": ids, "status": "draft"}
+        ).status_code
+        == 200
+    )
+    assert client.get("/api/v2/plugins/search").json()["items"] == []
+    client.delete("/admin/plugins/" + ids[0], headers=admin)
+    final = client.get("/admin/plugins/summary", headers=admin).json()
+    assert (final["total"], final["draft"], final["sourceCount"]) == (2, 2, 0)

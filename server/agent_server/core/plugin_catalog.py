@@ -120,7 +120,7 @@ class PluginList(BaseModel):
 class PluginOrigin(BaseModel):
     """Original catalog metadata retained for inspection, never an executable install plan."""
 
-    source: Literal["1024store", "dshfind"]
+    source: Literal["1024store", "dshfind", "custom"]
     url: str
     itemId: str
     metadata: dict[str, Any]
@@ -133,7 +133,29 @@ class PluginSyncEntry(PluginWrite):
 
 
 class PluginSyncRequest(BaseModel):
-    """Choose existing YunWork providers; arbitrary remote URLs are not accepted."""
+    """Choose built-in catalogs or an explicit public HTTPS metadata endpoint."""
+
+    url: str | None = Field(default=None, max_length=2048)
+
+    @field_validator("url")
+    @classmethod
+    def catalog_url(cls, value: str | None) -> str | None:
+        """Reject ambiguous URLs before the background worker resolves the public host."""
+        if value is None:
+            return None
+        value = value.strip()
+        parsed = urlsplit(value)
+        if (
+            parsed.scheme != "https"
+            or not parsed.hostname
+            or parsed.port not in (None, 443)
+            or parsed.username
+            or parsed.password
+            or parsed.fragment
+            or any(c.isspace() for c in value)
+        ):
+            raise ValueError("目录地址必须是无账号凭据的 HTTPS 443 地址")
+        return value
 
     sources: list[Literal["1024store", "dshfind"]] = Field(
         default_factory=lambda: ["1024store", "dshfind"], min_length=1, max_length=2
@@ -153,7 +175,9 @@ class PluginSyncState(BaseModel):
 
     jobId: str | None = None
     status: Literal["idle", "running", "completed", "failed"] = "idle"
-    sources: list[Literal["1024store", "dshfind"]] = Field(default_factory=list)
+    sources: list[Literal["1024store", "dshfind", "custom"]] = Field(
+        default_factory=list
+    )
     source: str | None = None
     total: int = 0
     processed: int = 0
@@ -166,3 +190,36 @@ class PluginSyncState(BaseModel):
     startedAt: str | None = None
     updatedAt: str | None = None
     leaseUntil: float = 0
+
+
+class PluginCatalogSummary(BaseModel):
+    """Global live catalog counts and distinct server-side filter options."""
+
+    total: int
+    published: int
+    draft: int
+    sourceCount: int
+    categories: list[str]
+    sources: dict[str, str]
+
+
+class PluginBulkPublication(PluginPublication):
+    """Explicit publication decision for up to one hundred existing catalog records."""
+
+    ids: list[int] = Field(min_length=1, max_length=100)
+
+    @field_validator("ids")
+    @classmethod
+    def valid_ids(cls, value: list[int]) -> list[int]:
+        """Reject duplicates and IDs outside PostgreSQL bigint before any writes."""
+        if len(set(value)) != len(value) or any(
+            v < 1 or v > 9223372036854775807 for v in value
+        ):
+            raise ValueError("invalid or duplicate plugin IDs")
+        return value
+
+
+class PluginBulkResult(BaseModel):
+    """Number of records whose explicit bulk publication request completed."""
+
+    updated: int

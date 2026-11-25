@@ -37,7 +37,9 @@ https://你的云大师域名/api/v2/plugins/config
 | GET | `/plugins/config` | 标准源 manifest |
 | GET | `/plugins/v1/plugins` | 标准公共目录页，`q/category/cursor/limit`（可重复 category，多个分类同时匹配），limit 1–100，默认50 |
 | GET | `/plugins/search` | 上述目录查询别名 |
-| GET | `/admin/plugins` | 管理列表，`q/category/offset/limit` |
+| GET | `/admin/plugins` | 管理列表，`q/category/offset/limit`；可选 `status=draft/published`、`source=来源键/manual`，limit 1–100 |
+| GET | `/admin/plugins/summary` | 全局未删除插件的总数、已上架/未上架数、来源数及分类/来源筛选项，数据库聚合，不返回全部插件 |
+| POST | `/admin/plugins/bulk` | `{"ids":["记录ID"],"status":"published/draft"}`，1–100 个不重复 ID；整批事务、审计与目录版本同步更新，任一记录不存在时整批回滚 |
 | GET | `/admin/plugins/sync` | 查询最近一次同步进度，不请求上游 |
 | POST | `/admin/plugins/sync` | 手动启动后台元数据同步，返回 202；运行中重复请求返回 409 |
 | POST | `/admin/plugins` | 创建/按目录条目 ID幂等更新：`{"item":标准条目}`，新条目草稿 |
@@ -106,12 +108,20 @@ JSON Schema 来自 YunWork，保留原许可证，位于 `server/agent_server/co
 
 ## 管理员手动同步目录
 
-Web 管理员「插件管理」中的「同步插件目录」读取 YunWork `dsh-community-market` 已有来源：
+Web 管理员「插件管理」点击「同步插件目录」后弹出地址输入框，默认填入 1024Store 地址，可快捷切换 dshfind，或输入其他公网 HTTPS 目录地址。支持以下来源格式：
 
 - 1024Store：`https://deepseek1024.com/api/v2/plugins`，每页 200 条，按总页数遍历。
 - dshfind：`https://api.dshfind.com/v1/catalog`，读取完整元数据快照，复用其插件识别与风险过滤条件。
 
-POST 请求体为 `{}`（两个来源），或 `{"sources":["1024store"]}` / `{"sources":["dshfind"]}`。不接受自定义 URL，不在服务启动、打开页面或轮询时自动触发同步。每次请求限定响应大小与超时，对临时网络错误最多请求三次。
+POST `/admin/plugins/sync` 新增可选字段 `url`：
+
+```json
+{"url":"https://deepseek1024.com/api/v2/plugins"}
+```
+
+传入 `url` 时只同步该地址，自动识别 1024Store、dshfind 或 YunWork 标准目录页（`schemaVersion/items/page`）。也支持标准源配置地址：`transport.endpoint` 必须与配置同源，使用 HTTPS GET。标准目录按 `page.nextCursor` 继续读取，校验版本、总条数并防止循环分页。自定义任务的 `sources` 为 `["custom"]`，插件来源包含实际目录地址；不同地址独立保留来源记录。
+
+旧请求 `{}`（两个内置来源）及 `{"sources":["1024store"]}` / `{"sources":["dshfind"]}` 仍兼容。自定义地址仅接受公网 HTTPS 443、无账号凭据或片段；DNS 解析后固定连接到检查过的公网 IP，保留 TLS 主机名验证，不跟随重定向、不使用环境代理。普通网页或未知 JSON 格式不会导入。不在服务启动、打开页面或轮询时自动触发同步。每次请求限定响应大小与超时，对临时网络错误最多请求三次。
 
 复用现有插件资料表、流水表和实例设置，每批最多 200 条；以规范化 GitHub 仓库身份（包含已声明的子目录）去重，多个来源的原始字段保存在管理响应 `origins` 中，包含实际提供的安装命令、版本、下载地址和图标地址。公共目录沿用标准协议返回仓库身份，以及能够按来源规则确认的 npm 包与版本；原始命令不执行，也不作为安装授权。
 
@@ -126,3 +136,21 @@ POST 请求体为 `{}`（两个来源），或 `{"sources":["1024store"]}` / `{"
 - 前端 Mock：打开页面不启动同步、快速重复点击只发一次请求、运行时按钮禁用、统计和异常展示、完成后刷新列表均通过；Web 类型检查和同步模块 ruff 检查通过。
 - Apifox 使用仅监听本机的临时 Mock 服务：POST 同步返回 202，GET 进度返回 200、`completed`、总数/处理数/新增数均为 1；未连接真实来源或开发库，临时服务已停止。
 - 未执行真实目录同步、插件本体下载/安装、完整回归或桌面安装包验证。
+
+
+## 管理页面交互与资料录入
+
+- 页面采用全宽表格，状态 Tab、搜索、分类和来源筛选均由服务端执行；每页 20/50/100 条，多选仅针对当前页。四项统计为全局未删除记录的真实聚合，不随列表筛选改变。
+- 来源数统计实际目录来源，不将手工录入计为目录；不同自定义地址的来源独立保存。
+- 新增、编辑在右侧抽屉中完成，默认使用表单；字段和校验由当前 `catalog-provider-page.schema.json` 生成（`node web-next/scripts/sync-plugin-schema.mjs`），回归检查副本与 Server Schema 一致。分类支持下拉多选和合法自定义标识，高级字段默认折叠。
+- JSON 可解析回填表单，单条编辑及最多 200 条目录导入均保留未编辑的数据。未知扩展字段在模式切换时保留；因当前 Schema 禁止额外字段，保存时明确提示，不静默删除或绕过后端校验。
+- 编辑时插件 ID 不可修改；保存资料不提交上架状态，新记录为草稿，已有状态保持。列表可直接操作上架开关；批量上下架与删除必须确认，使用原有权限、事务与审计边界。
+- 页面文案支持中文和英文，深浅色均复用主题系统；紧凑同步模块在任务结束后收起明细，错误仍保持可见。
+- 部署时 Web 与 Server 应配套更新以提供统计和批量接口；不涉及数据库迁移、插件安装器或 DSH 运行时变更。
+
+### 表格与表单回归（2026-11-25）
+
+- Web：`node --test test/plugin-admin.test.mjs test/admin-pages.test.mjs test/admin-navigation.test.mjs`，21 项通过；覆盖表单、JSON 往返、未知字段保留、ID 锁定、分页/筛选、上下架与批量确认、删除确认、空态/错误态、同步模块及原后台导航。
+- Server：在本次新建的一次性 PostgreSQL 测试库运行 `tests/test_plugin_catalog.py`，6 项通过；覆盖真实统计、来源/状态筛选、批量原子性、权限、资料更新状态保留和公开市场只显示已上架记录。测试库已删除，未操作开发库。
+- Web 类型检查、协议生成一致性、Python ruff 和差异检查通过；本地 Web HTTP 入口返回 200。
+- 未执行真实插件下载/安装、付费接口调用或浏览器视觉验收。本次未重启开发服务；需要部署包含新增统计、筛选和批量接口的 Server。

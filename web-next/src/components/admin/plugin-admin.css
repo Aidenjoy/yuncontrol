@@ -1,0 +1,26 @@
+/* Plugin administration tokens stay scoped to this page and its overlays. */
+.plugin-admin {
+  --catalog-live: #327254;
+  --catalog-live-surface: #dcece3;
+}
+.dark .plugin-admin {
+  --background: #0c0d0f;
+  --card: #17181b;
+  --popover: #17181b;
+  --border: #292b30;
+  --catalog-live: #86b49a;
+  --catalog-live-surface: #355d47;
+}
+.plugin-admin .catalog-live {
+  color: var(--catalog-live);
+}
+.plugin-admin .catalog-switch[data-state="checked"] {
+  background: var(--catalog-live-surface);
+}
+.plugin-admin
+  button:not([role="switch"]):not([role="checkbox"]):not([role="tab"]):not(
+    [data-slot="sheet-close"]
+  ),
+.plugin-admin input:not([type="checkbox"]) {
+  min-height: 36px;
+}
