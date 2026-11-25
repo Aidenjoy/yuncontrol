@@ -191,6 +191,7 @@ grep -i token ~/yuncontrol/.local-dev/logs/server.log
 ```bash
 cd ~/yuncontrol
 pg_dump -U yuncontrol yuncontrol > ~/backup_$(date +%F).sql
+git pull                # 自己控制版本，auto.sh 不拉代码
 ./server/auto.sh
 ./web-next/auto.sh
 ```
@@ -226,16 +227,18 @@ EOF
 
 ```bash
 cd ~/yuncontrol
-./server/auto.sh      # git pull + 加载 .env.local + uv sync + 迁移 + 停旧 + 启动
+./server/auto.sh      # 加载 .env.local + uv sync + 迁移 + 停旧 + 启动
 ./server/start.sh     # 只启动
 ./server/stop.sh      # 只停止
 
-./web-next/auto.sh    # git pull + 加载 .env.local + yarn install + build + 停旧 + 启动
+./web-next/auto.sh    # 加载 .env.local + yarn install + build + 停旧 + 启动
 ./web-next/start.sh   # 只启动（需先 build）
 ./web-next/stop.sh    # 只停止
 ```
 
 PID：`.local-dev/server.pid`、`.local-dev/web.pid`
+
+两个 `auto.sh` 都不执行 `git pull`，代码版本自己在根目录控制。
 
 
 # 服务器环境
