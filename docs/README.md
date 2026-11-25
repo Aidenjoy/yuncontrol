@@ -27,3 +27,5 @@
 当前开发版本为 2.2，开发主线为 `main`。API 路径使用 `/api/v2`，数据库修订号独立管理，版本号含义见[版本号规则](versioning.md)。已发布安装包的功能范围见发布说明。
 
 `docs/migrations/main-to-v2/` 保留早期迁移设计与历史基线。其旧版本号、移动端完成度和 Redis 策略不能替代当前升级指南。带 proposal、plan、target、gap 的文档描述设计或特定时间点的差距，使用前应与源码和契约核对。
+
+- [云大师插件目录管理与 YunWork 接入](api/plugins.md)

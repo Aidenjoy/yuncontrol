@@ -283,6 +283,7 @@ def test_v2_0_database_upgrades_through_current_revision(fresh_database_url) -> 
         ("v2_53", "v2_54"),
         ("v2_54", "v2_55"),
         ("v2_55", "v2_56"),
+        ("v2_56", "v2_57"),
     ],
 )
 def test_every_adjacent_schema_upgrade(tmp_path,
@@ -1023,9 +1024,9 @@ def test_unversioned_runtime_schema_is_classified_by_actual_columns(tmp_path,
     )
 
 
-def test_current_schema_version_is_v2_56() -> None:
-    assert CURRENT_SCHEMA_REVISION == "v2_56"
-    assert CURRENT_SCHEMA_VERSION == "2.56"
+def test_current_schema_version_is_v2_57() -> None:
+    assert CURRENT_SCHEMA_REVISION == "v2_57"
+    assert CURRENT_SCHEMA_VERSION == "2.57"
 
 
 def test_v2_49_tracks_inventory_scans_without_rewriting_sessions(
@@ -2673,5 +2674,34 @@ def test_v2_56_adds_session_message_queue(fresh_database_url) -> None:
         inspector = inspect(engine)
         assert not inspector.has_table("session_queued_messages")
         assert not inspector.has_table("session_queue_state")
+    finally:
+        engine.dispose()
+
+
+def test_v2_57_catalog_uses_explicit_bigint_ids_and_safe_downgrade(fresh_database_url) -> None:
+    """Catalog tables are recognized without a version row and downgrade preserves users."""
+    url = fresh_database_url
+    upgrade_database(db_url=url, revision="v2_57")
+    engine = create_engine(_sync_url(url))
+    try:
+        inspector = inspect(engine)
+        for name in ("plugin_catalog_info", "plugin_catalog_flow"):
+            columns = {column["name"]: column for column in inspector.get_columns(name)}
+            assert isinstance(columns["id"]["type"], BigInteger)
+            assert columns["id"]["default"] is None
+            assert {"create_time", "update_time", "create_by", "update_by", "deleted", "status"}.issubset(columns)
+        with engine.begin() as connection:
+            connection.execute(text("DROP TABLE alembic_version"))
+    finally:
+        engine.dispose()
+    assert asyncio.run(classify_database(url)) == UnversionedDatabase("v2", "v2_57")
+    command.stamp(_alembic_config(url), "v2_57")
+    command.downgrade(_alembic_config(url), "v2_56")
+    engine = create_engine(_sync_url(url))
+    try:
+        inspector = inspect(engine)
+        assert not inspector.has_table("plugin_catalog_info")
+        assert not inspector.has_table("plugin_catalog_flow")
+        assert inspector.has_table("users")
     finally:
         engine.dispose()

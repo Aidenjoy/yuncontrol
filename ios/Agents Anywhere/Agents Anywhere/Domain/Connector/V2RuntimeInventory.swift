@@ -58,7 +58,7 @@ nonisolated struct V2RuntimeInventory: Hashable {
     let types: [V2RuntimeType]
     let instances: [V2DeviceRuntime]
 
-    var configuredInstances: [V2DeviceRuntime] { instances.filter(\.configured) }
+    var configuredInstances: [V2DeviceRuntime] { instances.filter { $0.configured && $0.runtimeType == "yunwork" } + instances.filter { $0.configured && $0.runtimeType != "yunwork" } }
 
     /// A cleared instance keeps its identity/history and can be configured again.
     func reconfigurableInstance(for type: V2RuntimeType) -> V2DeviceRuntime? {

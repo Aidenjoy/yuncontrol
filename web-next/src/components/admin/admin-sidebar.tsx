@@ -9,6 +9,7 @@ import {
   LineChart,
   Mail,
   Megaphone,
+  Package,
   SlidersHorizontal,
   UserCog,
   Users,
@@ -32,6 +33,7 @@ const ICONS = {
   quality: Activity,
   team: UserCog,
   announcements: Megaphone,
+  plugins: Package,
   "service-general": SlidersHorizontal,
   "service-auth": KeyRound,
   "service-email": Mail,
@@ -47,6 +49,7 @@ export function AdminSidebar({ contained = false }: { contained?: boolean }) {
   const { adminSection, navigate } = useWorkspace()
 
   const label = (section: AdminSection): string => {
+    if (section === "plugins") return "插件管理"
     if (section === "team") return tTeam("title")
     if (section === "announcements") return tAnnouncement("title")
     if (isAdminServiceSection(section)) return tService(`sections.${servicePageKey(section)}.title`)

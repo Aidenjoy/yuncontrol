@@ -545,7 +545,7 @@ wait_for_url server "${SERVER_URL}/api/v2/health" 60
 
 start_service web "${YELLOW}" "${WEB_DIR}" \
   env AGENTS_ANYWHERE_API="${SERVER_URL}" \
-  corepack yarn exec next dev --hostname 127.0.0.1 --port "${WEB_PORT}"
+  corepack yarn exec next dev --hostname 0.0.0.0 --port "${WEB_PORT}"
 wait_for_url web "${WEB_URL}/" 120
 
 start_service desktop "${GREEN}" "${DESKTOP_DIR}" \

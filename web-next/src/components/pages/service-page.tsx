@@ -4,8 +4,6 @@ import * as React from "react"
 import {
   Check,
   Copy,
-  ExternalLink,
-  Globe,
   KeyRound,
   RefreshCw,
   Server,
@@ -428,7 +426,6 @@ export function ServicePage({ section }: { section: AdminServiceSection }) {
               copied={copied}
               onCopy={copy}
             />
-            <AboutCard />
           </>
         )}
       </div>
@@ -920,31 +917,6 @@ function FirstPartyClientsCard({
             />
           </InfoGroup>
         ))}
-      </CardContent>
-    </Card>
-  )
-}
-
-function AboutCard() {
-  const t = useTranslations("pages.service")
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("about")}</CardTitle>
-        <CardDescription>{t("aboutDescription")}</CardDescription>
-        <CardAction>
-          <Globe />
-        </CardAction>
-      </CardHeader>
-      <CardContent className="flex flex-wrap gap-2">
-        <Button asChild variant="outline">
-          <a href="https://github.com/anywhere-labs/Agents-Anywhere" target="_blank" rel="noreferrer">
-            <Globe data-icon="inline-start" />
-            {t("viewOnGithub")}
-            <ExternalLink data-icon="inline-end" />
-          </a>
-        </Button>
       </CardContent>
     </Card>
   )

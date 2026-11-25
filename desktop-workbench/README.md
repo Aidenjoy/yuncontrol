@@ -81,10 +81,9 @@ The desktop shell uses the `/api/v2` API namespace by default.
 
 ## Login and server configuration
 
-The login page offers **Agents Anywhere Cloud** and an expandable self-hosted
-server form. Both check `GET /api/v2/health` and require `status: "ok"` before
-opening sign-in. HTTP errors, invalid responses, and a 10-second timeout stay on
-the login page so the address can be corrected and retried.
+桌面端默认直接显示与 Web 一致的账号密码登录表单，普通账号使用与 Web 相同的服务端身份认证，本地管理员可切换到「本地管理员登录」。登录成功后保存原有会话并直接进入工作台；再次打开时校验并恢复有效会话，凭证失效后返回登录页。普通登录不再跳转浏览器或先选择 Cloud / 自建实例；原有 OAuth 回调仍保留兼容。
+
+连接地址沿用 `WORKBENCH_API_ORIGIN` / `AGENTS_ANYWHERE_API` 或 `config.json` 中的 `cloud.serverUrl`；本地使用根目录 `./desktop-local-up.sh` 自动连接本机 Server。修改源码后需重启开发桌面端；已有安装包需要重新构建才包含本次修改。
 
 `config.json` is the shared source for the official Cloud backend/Web origins,
 API namespace, health timeout, and Desktop OAuth client settings. The build and

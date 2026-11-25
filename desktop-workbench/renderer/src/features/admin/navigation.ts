@@ -6,7 +6,7 @@
  * configuration into one page per concern.
  */
 export const adminDataSections = ["overview", "users", "usage", "devices", "quality"] as const
-export const adminManagementSections = ["team", "announcements"] as const
+export const adminManagementSections = ["team", "announcements", "plugins"] as const
 export const adminServiceSections = ["service-general", "service-auth", "service-email", "service-info"] as const
 export const adminSections = [...adminDataSections, ...adminManagementSections, ...adminServiceSections] as const
 

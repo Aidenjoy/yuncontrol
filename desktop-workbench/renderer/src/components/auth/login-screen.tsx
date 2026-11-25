@@ -1,107 +1,112 @@
 "use client"
 
 import { useState } from "react"
-import { LoaderCircle, Server } from "lucide-react"
-import { LoginAction } from "./login-action"
+import { User, Lock, Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Field, FieldError, FieldGroup, FieldLabel, FieldSeparator } from "@/components/ui/field"
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
+import { Field, FieldError, FieldGroup, FieldLabel as Label } from "@/components/ui/field"
+import { isValidEmail } from "@/features/auth/account-profile"
+import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupButton } from "@/components/ui/input-group"
 import { AuthShell } from "./auth-shell"
 import { useAuth } from "./auth-context"
 import { useTranslations } from "next-intl"
 
+/** Render the same direct account/password entry as Web inside the desktop window. */
 export function LoginScreen() {
-  const {
-    error,
-    desktopOAuthAvailable,
-    startDesktopOAuth,
-    oauthStatus,
-    clearError,
-  } = useAuth()
+  const { login, signingIn: loading, error, clearError } = useAuth()
   const t = useTranslations("auth")
-  const [showServer, setShowServer] = useState(false)
-  const [serverUrl, setServerUrl] = useState("")
-  const [loginTarget, setLoginTarget] = useState<"cloud" | "server">("cloud")
-  const busy = oauthStatus === "opening"
+  const [localLogin, setLocalLogin] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const emailInvalid = Boolean(localLogin && email && !isValidEmail(email))
 
-  const startLogin = async (target: "cloud" | "server") => {
-    setLoginTarget(target)
-    await startDesktopOAuth(target === "server" ? serverUrl : undefined)
+  /** Authenticate against the configured server; preserve the local administrator path. */
+  const submit = async () => {
+    if (loading || !(localLogin ? isValidEmail(email) : email.trim()) || !password) return
+    await login({ email, password, utoken: !localLogin }).catch(() => undefined)
   }
 
   return (
     <AuthShell>
-      <div className="mb-8 flex flex-col gap-4">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {t("login.titlePrefix")} <span className="aa-wordmark text-[1.25em]">云大师</span>
-        </h1>
-        <p className="text-sm leading-6 text-muted-foreground">{t("login.syncDescription")}</p>
-      </div>
+      <div className="mx-auto w-full max-w-sm">
+        <div className="flex flex-col items-center gap-2 text-center mb-8">
+          <h1 className="text-2xl font-bold tracking-tight">
+            {t("login.titlePrefix")}{" "}
+            <span className="aa-wordmark">云大师</span>
+          </h1>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            {localLogin ? t("login.description") : t("login.utokenDescription")}
+          </p>
+        </div>
 
-      <div className="flex flex-col gap-7">
-        <LoginAction
-          loading={busy && loginTarget === "cloud"}
-          disabled={busy || !desktopOAuthAvailable}
-          startLogin={() => startLogin("cloud")}
-        />
+        <form noValidate onSubmit={(event) => { event.preventDefault(); void submit() }}>
+          <FieldGroup>
+            <Field data-invalid={emailInvalid}>
+              <Label htmlFor="login-email">{localLogin ? t("fields.email") : t("login.utokenAccount")}</Label>
+              <InputGroup className="h-11 rounded-lg">
+                <InputGroupAddon><User className="size-4" /></InputGroupAddon>
+                <InputGroupInput
+                  autoFocus
+                  disabled={loading}
+                  id="login-email"
+                  value={email}
+                  onChange={(event) => { setEmail(event.currentTarget.value); clearError() }}
+                  placeholder={localLogin ? t("login.userPlaceholder") : t("login.utokenPlaceholder")}
+                  type={localLogin ? "email" : "text"}
+                  name="email"
+                  inputMode={localLogin ? "email" : "text"}
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  autoComplete="username"
+                  spellCheck={false}
+                  className="code-mono"
+                  aria-invalid={emailInvalid}
+                  aria-describedby={emailInvalid ? "login-email-error" : undefined}
+                />
+              </InputGroup>
+              {emailInvalid ? <FieldError id="login-email-error">{t("login.invalidEmail")}</FieldError> : null}
+            </Field>
 
-        {showServer ? (
-          <form
-            id="desktop-server-login"
-            className="flex flex-col gap-8 pt-3"
-            onSubmit={(event) => {
-              event.preventDefault()
-              if (serverUrl.trim() && !busy && desktopOAuthAvailable) void startLogin("server")
-            }}
-          >
-            <FieldSeparator>OR</FieldSeparator>
-            <FieldGroup className="gap-4">
-              <Field data-invalid={Boolean(error && loginTarget === "server")} data-disabled={busy}>
-                <FieldLabel htmlFor="desktop-server-url">{t("login.selfHosted")}</FieldLabel>
-                <InputGroup className="h-11 rounded-xl" data-disabled={busy}>
-                  <InputGroupAddon className="pl-3"><Server aria-hidden="true" /></InputGroupAddon>
-                  <InputGroupInput
-                    id="desktop-server-url"
-                    type="text"
-                    inputMode="url"
-                    autoComplete="url"
-                    autoCapitalize="none"
-                    autoCorrect="off"
-                    spellCheck={false}
-                    autoFocus
-                    value={serverUrl}
-                    onChange={(event) => { setServerUrl(event.target.value); clearError() }}
-                    placeholder={t("login.serverPlaceholder")}
-                    disabled={busy}
-                    aria-invalid={Boolean(error && loginTarget === "server")}
-                    aria-describedby={error ? "desktop-login-error" : undefined}
-                    className="h-full"
-                  />
-                </InputGroup>
-              </Field>
-              <Button type="submit" className="h-10 w-full rounded-lg" disabled={busy || !serverUrl.trim() || !desktopOAuthAvailable}>
-                {busy && loginTarget === "server" ? <LoaderCircle data-icon="inline-start" className="animate-spin" /> : null}
-                {t(busy && loginTarget === "server" ? "login.connecting" : "login.connectServer")}
-              </Button>
-            </FieldGroup>
-          </form>
-        ) : (
-          <div className="text-muted-foreground">
+            <Field>
+              <Label htmlFor="login-password">{t("fields.password")}</Label>
+              <InputGroup className="h-11 rounded-lg">
+                <InputGroupAddon><Lock className="size-4" /></InputGroupAddon>
+                <InputGroupInput
+                  disabled={loading}
+                  id="login-password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(event) => { setPassword(event.currentTarget.value); clearError() }}
+                  placeholder={t("login.passwordPlaceholder")}
+                  autoComplete="current-password"
+                  spellCheck={false}
+                  className="code-mono"
+                />
+                <InputGroupAddon align="inline-end">
+                  <InputGroupButton type="button" disabled={loading} onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? t("actions.hidePassword") : t("actions.showPassword")}>
+                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  </InputGroupButton>
+                </InputGroupAddon>
+              </InputGroup>
+            </Field>
+
             <Button
-              variant="ghost"
-              className="h-10 w-full rounded-lg"
-              disabled={busy}
-              aria-expanded={showServer}
-              aria-controls="desktop-server-login"
-              onClick={() => { setShowServer(true); clearError() }}
+              className="h-11 w-full font-medium"
+              disabled={loading || !(localLogin ? isValidEmail(email) : email.trim()) || !password}
+              type="submit"
             >
-              {t("login.selfHosted")}
+              {loading ? t("login.signingIn") : t("login.submitWithEnter")}
             </Button>
-          </div>
-        )}
 
-        {error ? <FieldError id="desktop-login-error">{error}</FieldError> : null}
-        {oauthStatus === "waiting" && !error ? <p role="status" className="text-center text-sm text-muted-foreground">{t("login.browserOpened")}</p> : null}
+            {error ? <FieldError role="alert">{error}</FieldError> : null}
+
+            <Button type="button" variant="ghost" disabled={loading} onClick={() => { setLocalLogin(!localLogin); setEmail(""); setPassword(""); clearError() }}>
+              {t(localLogin ? "login.useUtoken" : "login.useLocal")}
+            </Button>
+
+          </FieldGroup>
+        </form>
       </div>
     </AuthShell>
   )

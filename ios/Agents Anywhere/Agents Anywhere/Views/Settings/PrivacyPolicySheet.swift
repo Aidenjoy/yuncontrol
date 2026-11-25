@@ -50,9 +50,6 @@ struct PrivacyPolicyContent: View {
 
             Section(String(localized: "privacyPolicy.contact.title")) {
                 paragraph("privacyPolicy.contact.body")
-                Link(destination: URL(string: "https://github.com/anywhere-labs/Agents-Anywhere")!) {
-                    Label(String(localized: "privacyPolicy.projectSupport"), appSymbol: "arrow.up.right")
-                }
             }
         }
         .listStyle(.insetGrouped)

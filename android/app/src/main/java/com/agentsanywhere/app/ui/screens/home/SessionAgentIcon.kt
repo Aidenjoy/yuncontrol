@@ -8,9 +8,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.agentsanywhere.app.R
 import com.agentsanywhere.app.ui.designsystem.LocalAAColors
+import com.composables.icons.lucide.Cloud
 import com.composables.icons.lucide.Bot
 import com.composables.icons.lucide.Lucide
 
+/**
+ * 按 Runtime 类型显示会话标识，云大师使用独立云图标。
+ */
 @Composable
 internal fun SessionAgentIcon(
     runtime: String,
@@ -32,7 +36,7 @@ internal fun SessionAgentIcon(
         R.drawable.ic_session_agent_codex -> "Codex"
         R.drawable.ic_session_agent_claude -> "Claude Code"
         R.drawable.ic_session_agent_deepseek -> "DeepSeek Harness"
-        else -> runtime
+        else -> if (type == "yunwork") "云大师" else runtime
     }
     if (drawable != null) {
         Icon(
@@ -43,7 +47,7 @@ internal fun SessionAgentIcon(
         )
     } else {
         Icon(
-            imageVector = Lucide.Bot,
+            imageVector = if (type == "yunwork") Lucide.Cloud else Lucide.Bot,
             contentDescription = label,
             tint = LocalAAColors.current.faint,
             modifier = modifier.size(16.dp),

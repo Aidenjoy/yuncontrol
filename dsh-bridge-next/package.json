@@ -1,6 +1,10 @@
 {
   "name": "@agents-anywhere/dsh-bridge-next",
   "version": "2.2.0",
+  "agentsAnywhereRuntimeProfiles": [
+    "dsh",
+    "yunwork"
+  ],
   "description": "Agents Anywhere onboarding, Connector management and event-driven session runtime for DeepSeek Harness",
   "repository": {
     "type": "git",

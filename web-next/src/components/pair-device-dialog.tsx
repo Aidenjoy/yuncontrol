@@ -3,7 +3,6 @@
 import * as React from "react"
 import {
   ArrowLeft,
-  ExternalLink,
   Hash,
   KeyRound,
   MonitorUp,
@@ -57,7 +56,6 @@ const NOUNS = [
   "quartz", "raven", "ridge", "river", "rocket", "sequoia", "sparrow", "summit", "willow", "zephyr",
 ]
 
-const DESKTOP_DOWNLOAD_URL = "https://github.com/anywhere-labs/Agents-Anywhere/releases/latest"
 
 type CliMethod = "command" | "pair-code"
 type Step =
@@ -385,12 +383,6 @@ export function PairDeviceDialog({
                     {tCommon("back")}
                   </Button>
                   <div className="flex flex-col gap-2 sm:flex-row">
-                    <Button type="button" variant="outline" asChild>
-                      <a href={DESKTOP_DOWNLOAD_URL} target="_blank" rel="noopener noreferrer">
-                        {t("githubReleases")}
-                        <ExternalLink data-icon="inline-end" />
-                      </a>
-                    </Button>
                     <Button type="button" onClick={() => completePairing()}>{tCommon("done")}</Button>
                   </div>
                 </DialogFooter>

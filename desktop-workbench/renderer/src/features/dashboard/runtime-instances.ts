@@ -102,7 +102,8 @@ export function configuredRuntimeInstances(
 ): DeviceRuntimeView[] {
   return runtimes
     .filter((runtime) => runtime.configured)
-    .sort((left, right) => runtimeInstanceName(left).localeCompare(runtimeInstanceName(right)))
+    .sort((left, right) => Number(right.runtimeType === "yunwork") - Number(left.runtimeType === "yunwork")
+      || runtimeInstanceName(left).localeCompare(runtimeInstanceName(right)))
 }
 
 /**

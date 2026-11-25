@@ -26,6 +26,7 @@ export function isVisibleTimelineItem(item: TimelineItem): boolean {
 export function runtimeLabel(runtime: string): string {
   if (runtime === "codex") return "Codex"
   if (runtime === "claude") return "Claude Code"
+  if (runtime === "yunwork") return "云大师"
   if (runtime === "dsh") return "DeepSeek Harness"
   if (runtime === "opencode") return "OpenCode"
   return runtime.slice(0, 1).toUpperCase() + runtime.slice(1)

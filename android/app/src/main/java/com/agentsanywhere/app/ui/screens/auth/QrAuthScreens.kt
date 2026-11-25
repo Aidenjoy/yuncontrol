@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -76,6 +75,7 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+/** 展示手机连接扫码页，在剩余区域居中展示相机和操作说明。 */
 @Composable
 fun QrLoginScreen(
     navigate: (AppDestination) -> Unit,
@@ -127,13 +127,13 @@ fun QrLoginScreen(
                 .fillMaxSize()
                 .padding(horizontal = 32.dp)
                 .padding(top = 74.dp, bottom = 30.dp),
-            verticalArrangement = Arrangement.spacedBy(128.dp),
+            verticalArrangement = Arrangement.spacedBy(30.dp),
         ) {
             BackPill(label = stringResource(R.string.common_back), onClick = navigateBack)
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().weight(1f),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(34.dp),
+                verticalArrangement = Arrangement.spacedBy(30.dp, Alignment.CenterVertically),
             ) {
                 QrScannerFrame(
                     hasCameraPermission = hasCameraPermission,
@@ -189,6 +189,7 @@ fun QrLoginScreen(
     }
 }
 
+/** 展示扫码后的授权等待状态，沿用扫码页的居中布局和错误提示样式。 */
 @Composable
 fun QrWaitingScreen(
     navigate: (AppDestination) -> Unit,
@@ -253,13 +254,13 @@ fun QrWaitingScreen(
                 .fillMaxSize()
                 .padding(horizontal = 32.dp)
                 .padding(top = 74.dp, bottom = 30.dp),
-            verticalArrangement = Arrangement.spacedBy(42.dp),
+            verticalArrangement = Arrangement.spacedBy(30.dp),
         ) {
             BackPill(label = stringResource(R.string.common_back), onClick = navigateBack)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 168.dp),
+                    .weight(1f),
                 contentAlignment = Alignment.Center,
             ) {
                 Column(
@@ -277,13 +278,7 @@ fun QrWaitingScreen(
                         textAlign = TextAlign.Center,
                     )
                     state.errorMessage?.let { message ->
-                        Text(
-                            text = message,
-                            color = MaterialTheme.colorScheme.error,
-                            fontSize = 12.5.sp,
-                            lineHeight = 16.sp,
-                            textAlign = TextAlign.Center,
-                        )
+                        AuthErrorNotice(message = message)
                     }
                 }
             }

@@ -22,6 +22,8 @@ from sqlalchemy import (
     text,
 )
 
+from agent_server.infra.db.plugin_catalog import catalog_tables
+
 metadata = MetaData()
 
 
@@ -852,3 +854,6 @@ session_goals, session_goal_state, goal_operations, goal_event_outbox = (
 from agent_server.infra.db.message_queue_schema import define_message_queue_tables
 
 session_queued_messages, session_queue_state = define_message_queue_tables(metadata)
+
+
+plugin_catalog_info, plugin_catalog_flow = catalog_tables(metadata)

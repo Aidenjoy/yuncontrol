@@ -15,6 +15,7 @@ struct SessionAgentIcon: View {
         case "pi": return ("aa-AgentPi", "Pi")
         case "codex": return ("aa-AgentCodex", "Codex")
         case "claude", "claudecode": return ("aa-AgentClaudeCode", "Claude Code")
+        case "yunwork": return ("aa-Cloud", "云大师")
         case "dsh", "deepseek", "deepseekharness": return ("aa-AgentDeepSeek", "DeepSeek Harness")
         default: return nil
         }

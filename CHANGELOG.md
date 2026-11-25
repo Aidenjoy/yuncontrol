@@ -6,6 +6,8 @@
 
 ### 升级须知
 
+- 插件管理需要执行 `v2_57` 数据库迁移，并配置 `AGENT_SERVER_PLUGIN_ORIGIN` 或现有公网地址后接入桌面市场。
+
 - 配置改密通知后，认证服务修改密码会使该用户此前的云大师登录和移动刷新凭证失效；已有实时连接不主动断开。
 
 - 配置 `AGENT_SERVER_UTOKEN_URL` 后，普通用户使用 utoken 账号密码直接登录并自动关联账号，独立注册与本地密码登录关闭，本地管理员登录保留。
@@ -21,10 +23,14 @@
 
 ### DSH 同步
 
+- 管理员可维护插件目录并独立控制上架，自有云大师市场兼容 YunWork 标准目录协议，刷新后隐藏已下架插件。
+
 - DSH 0.2.3 在回复末尾附带的操作卡片（例如推荐启用某个插件）不再以一段 JSON 代码块出现在 Agents Anywhere 的会话里；卡片本身仍要在 DSH 中查看和操作。（[#829](https://github.com/anywhere-labs/Agents-Anywhere/pull/829)）
 - 修复 DSH 0.2.3 中「远程控制」弹窗被压窄的问题：标签、说明文字和底部按钮不再挤得换行，运行日志页恢复原来的宽度，自建服务的地址输入框恢复原来的高度；在 DSH 0.2.3 里更新 AA 插件后，面板不用刷新页面也会用上新版样式。（[#829](https://github.com/anywhere-labs/Agents-Anywhere/pull/829)、[#830](https://github.com/anywhere-labs/Agents-Anywhere/pull/830)）
 
 ### Desktop
+
+- 桌面端打开后直接显示与 Web 一致的账号密码登录页，保留本地管理员登录，有效登录状态自动恢复。
 
 - Web、Desktop、Android 和 iOS 的品牌展示名称统一改为「云大师」。
 
@@ -32,12 +38,18 @@
 
 ### 本机连接
 
+- 登录页、服务设置和设备连接说明不再显示 GitHub 仓库入口与下载跳转。
+
+- 设备支持独立的「云大师」Agent，并优先展示；与原 DSH 分开连接和保存本地连接数据。
+
 - AA 插件退出登录前会弹窗确认，并提示退出后本机连接将停止。（[#789](https://github.com/anywhere-labs/Agents-Anywhere/pull/789)）
 - 准备 Pi 时会复用本机 Node 22.19 及以上版本（包括 Node 24），不再强制下载；需要下载时，官方源连不上会自动改用 npmmirror，Python 安装源选了镜像的设备会优先使用 npmmirror；Windows 上多个进程同时准备不再报 `Resource deadlock avoided`，而是排队等待；数据目录通过 Junction 挂到其他盘时，不再误报「Node 安装包路径无效」；Node 下载失败时会提示检查网络。（[#657](https://github.com/anywhere-labs/Agents-Anywhere/pull/657)）
 
 ### Android
 
-- 未登录启动时直接打开账号密码登录页，已登录时进入会话界面，登录失效后直接回到账号密码登录。
+- 登录界面恢复「扫码登录」入口，可扫描桌面端或网页端「手机连接」中的二维码登录；底部背景及系统栏跟随登录网页颜色，扫码与等待确认页统一布局和提示样式。
+
+- 未登录启动时直接打开铺满内容区域的账号密码登录页，不再显示顶部原生返回栏；已登录时进入会话界面，登录失效后直接回到账号密码登录。
 
 - 没发出去的消息下方显示「发送失败」，点开可以查看原因并删除这条消息，不会再一直留在对话里。（[#660](https://github.com/anywhere-labs/Agents-Anywhere/pull/660)）
 - 打开过文件后再进入会话，会直接显示对话，不再先停在「文件」页。（[#661](https://github.com/anywhere-labs/Agents-Anywhere/pull/661)）

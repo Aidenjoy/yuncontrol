@@ -78,6 +78,7 @@ class BridgeClient:
         exit_handler: ExitHandler | None = None,
     ) -> None:
         self.host = host
+        self.runtime_type = getattr(host, "runtime_type", "dsh")
         self.connector_id = connector_id
         self.session_namespace = session_namespace or connector_id
         self.client_version = client_version
@@ -130,7 +131,7 @@ class BridgeClient:
                 await asyncio.sleep(min(DISCOVERY_RETRY_SECONDS, remaining))
                 timeout = max(0.1, deadline - loop.time())
         identity = result.get("identity") if isinstance(result, dict) else None
-        if not isinstance(identity, dict) or identity.get("runtime") != "dsh":
+        if not isinstance(identity, dict) or identity.get("runtime") != self.runtime_type:
             raise ValueError("DSH bridge returned an invalid identity")
         if not str(identity.get("protocolVersion", "")).startswith("2."):
             raise ValueError("DSH bridge protocol is incompatible")
@@ -149,7 +150,7 @@ class BridgeClient:
             if isinstance(mapped, BridgeUnavailableError):
                 self.lost(mapped)
             raise mapped from error
-        return result.model_dump()
+        return runtime_payload(result.model_dump(), self.runtime_type)
 
     async def stream(self, method: str, params: Mapping[str, Any] | None = None) -> AsyncIterator[dict[str, Any]]:
         """Items of a server stream; the stream has no deadline of its own."""
@@ -158,7 +159,7 @@ class BridgeClient:
                 DSH_BRIDGE_SERVICE, method, Payload(**dict(params or {})), Payload, metadata=self.metadata,
             ) as items:
                 async for item in items:
-                    yield item.model_dump()
+                    yield runtime_payload(item.model_dump(), self.runtime_type)
         except MeshCallError as error:
             mapped = bridge_error(error)
             if isinstance(mapped, BridgeUnavailableError):
@@ -175,3 +176,15 @@ class BridgeClient:
 
     async def close(self) -> None:
         self._closing = True
+
+
+def runtime_payload(value: Any, runtime_type: str) -> Any:
+    """仅转换协议中的 runtime 字段；不改正文、模型 ID 或 DSH 原生业务标识。"""
+    if runtime_type == "dsh":
+        return value
+    if isinstance(value, dict):
+        return {key: runtime_type if key == "runtime" and item == "dsh" else runtime_payload(item, runtime_type)
+                for key, item in value.items()}
+    if isinstance(value, list):
+        return [runtime_payload(item, runtime_type) for item in value]
+    return value

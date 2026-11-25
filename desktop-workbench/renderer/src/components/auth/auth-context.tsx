@@ -22,6 +22,8 @@ type AuthState = {
   loading: boolean
   error: string | null
   isAuthenticated: boolean
+  signingIn: boolean
+  login: (input: { email: string; password: string; utoken?: boolean }) => Promise<void>
   desktopOAuthAvailable: boolean
   emailVerificationRequired: boolean
   refreshConfig: () => Promise<void>
@@ -77,6 +79,7 @@ function screenToHash(screen: AuthScreen): string {
   return map[screen]
 }
 
+/** Restore desktop sessions and issue direct logins while preserving legacy OAuth callbacks. */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const t = useTranslations("auth")
   const [screen, setScreenState] = React.useState<AuthScreen>("login")
@@ -85,6 +88,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
   const [oauthStatus, setOAuthStatus] = React.useState<"idle" | "opening" | "waiting">("idle")
+  const [signingIn, setSigningIn] = React.useState(false)
+  const passwordLoginInFlight = React.useRef(false)
   const startingOAuth = React.useRef(false)
   const receivedOAuthResult = React.useRef(false)
   const [emailVerificationRequired, setEmailVerificationRequired] = React.useState(false)
@@ -159,7 +164,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setScreenState(nextScreen)
   }, [])
 
-  const finishDesktopOAuth = React.useCallback(async (accessToken: string) => {
+  // Both login paths keep the same account validation, server binding and session persistence.
+  const finishLogin = React.useCallback(async (accessToken: string) => {
     const currentUser = normalizeDesktopOAuthMe(await authApi.me(accessToken))
     const nextSession: StoredSession = {
       accessToken,
@@ -204,7 +210,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setDesktopServerConnection(result.server)
         setOAuthStatus("opening")
         setError(null)
-        await finishDesktopOAuth(result.accessToken)
+        await finishLogin(result.accessToken)
       } catch (err) {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : t("errors.oauth"))
@@ -222,7 +228,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       cancelled = true
       if (typeof unsubscribe === "function") unsubscribe()
     }
-  }, [desktopAuthBridge, finishDesktopOAuth, loading, screen, t])
+  }, [desktopAuthBridge, finishLogin, loading, screen, t])
 
   // A plugin deep link that arrives while the app is already running must start
   // a new flow instead of being ignored by the current screen.
@@ -258,6 +264,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [desktopAuthBridge, t])
 
+  /** Sign in directly using the Web contract, without launching an external browser. */
+  const login = React.useCallback(async (input: { email: string; password: string; utoken?: boolean }) => {
+    if (passwordLoginInFlight.current) return
+    passwordLoginInFlight.current = true
+    setSigningIn(true)
+    setError(null)
+    try {
+      const result = input.utoken
+        ? await authApi.utokenLogin(input.email, input.password)
+        : await authApi.login(input)
+      await finishLogin(result.accessToken)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("errors.loginFailed"))
+      throw err
+    } finally {
+      passwordLoginInFlight.current = false
+      setSigningIn(false)
+    }
+  }, [finishLogin, t])
+
   const refreshMe = React.useCallback(async () => {
     if (!session?.accessToken) {
       setMe(null)
@@ -285,6 +311,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         loading,
         error,
         isAuthenticated: Boolean(session),
+        signingIn,
+        login,
         desktopOAuthAvailable: Boolean(desktopAuthBridge),
         emailVerificationRequired,
         refreshConfig,

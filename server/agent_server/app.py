@@ -19,6 +19,7 @@ from redis.exceptions import RedisError
 from agent_server.api import (
     admin,
     admin_usage,
+    plugins,
     agents,
     announcements,
     auth,
@@ -433,6 +434,8 @@ def create_app(
 
     app.include_router(auth.router, prefix=API_V2_PREFIX)
     app.include_router(admin.router, prefix=API_V2_PREFIX)
+    app.include_router(plugins.router, prefix=API_V2_PREFIX)
+    app.include_router(plugins.admin_router, prefix=API_V2_PREFIX)
     app.include_router(announcements.router, prefix=API_V2_PREFIX)
     app.include_router(announcements.admin_router, prefix=API_V2_PREFIX)
     app.include_router(admin_usage.router, prefix=API_V2_PREFIX)

@@ -1,5 +1,6 @@
 "use client"
 
+import { PluginsPage } from "@/components/admin/plugins-page"
 import { AnnouncementsPage } from "@/components/admin/announcements-page"
 import { useAuth } from "@/components/auth/auth-context"
 import { OpsDashboardPage } from "@/components/ops-dashboard/ops-dashboard-page"
@@ -16,5 +17,6 @@ export function AdminPage() {
   if (isAdminDataSection(adminSection)) return <OpsDashboardPage tab={adminSection} />
   if (isAdminServiceSection(adminSection)) return <ServicePage section={adminSection} />
   if (adminSection === "team") return <TeamPage />
+  if (adminSection === "plugins") return <PluginsPage />
   return <AnnouncementsPage />
 }

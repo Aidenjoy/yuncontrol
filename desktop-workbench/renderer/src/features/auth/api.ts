@@ -27,6 +27,7 @@ import type {
   MobileLoginStatusResponse
 } from "@/features/auth/types";
 
+/** Server authentication and account operations; passwords are never persisted here. */
 export class AuthApi {
   constructor(private readonly client: ApiClient = apiClient) {}
 
@@ -58,6 +59,11 @@ export class AuthApi {
       },
       { auth: false },
     );
+  }
+
+  /** Forward the original account password to the server, matching Web's external identity login. */
+  utokenLogin(username: string, password: string): Promise<AuthResponse> {
+    return this.client.post<AuthResponse>("/auth/login", { email: username.trim(), password }, { auth: false });
   }
 
   async register(credentials: AuthCredentials): Promise<AuthResponse> {

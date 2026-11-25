@@ -9,7 +9,6 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
       <header className="flex shrink-0 items-center justify-between px-8 py-5">
         <span className="aa-wordmark hidden text-xl md:inline">云大师</span>
         <nav className="flex items-center gap-4 text-sm text-muted-foreground">
-          <a href="#" className="hidden transition-colors hover:text-foreground md:inline">GitHub</a>
           <LocaleSwitcher size="sm" variant="ghost" className="text-foreground" />
         </nav>
       </header>

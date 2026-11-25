@@ -15,10 +15,12 @@ export interface YunworkBridgeContract {
 }
 
 function probeYunworkContract(): YunworkBridgeContract | undefined {
+  // Electron exposes this optional property; the plugin also runs in plain Node.
+  const resourcesPath = (process as NodeJS.Process & { resourcesPath?: string }).resourcesPath
   const candidates = [
     process.env['YUNWORK_RUNTIME'],
-    typeof process.resourcesPath === 'string' ? join(process.resourcesPath, 'yunwork-runtime.json') : undefined,
-    typeof process.resourcesPath === 'string' ? join(process.resourcesPath, 'app.asar.unpacked', 'yunwork-runtime.json') : undefined,
+    typeof resourcesPath === 'string' ? join(resourcesPath, 'yunwork-runtime.json') : undefined,
+    typeof resourcesPath === 'string' ? join(resourcesPath, 'app.asar.unpacked', 'yunwork-runtime.json') : undefined,
     join(dirname(process.execPath), 'resources', 'yunwork-runtime.json'),
   ].filter((p): p is string => typeof p === 'string' && p.trim() !== '')
 
@@ -57,6 +59,7 @@ function probeYunworkContract(): YunworkBridgeContract | undefined {
 }
 
 export interface Config {
+  runtimeType?: 'dsh' | 'yunwork'
   dshHome?: string
   apiBaseUrl?: string
   stateRoot?: string
@@ -65,6 +68,7 @@ export interface Config {
 }
 
 export const Config: z<Config> = z.object({
+  runtimeType: z.union([z.const('dsh'), z.const('yunwork')]),
   dshHome: z.string(),
   apiBaseUrl: z.string(),
   stateRoot: z.string(),
@@ -84,22 +88,29 @@ export interface ResolvedConfig extends ConnectionSettings {
   shortName?: string
 }
 
-export function stateRoot(config: Config): string {
-  if (config.stateRoot !== undefined) return config.stateRoot
-  const dshHome = config.dshHome ?? process.env['DSH_HOME']
-  if (probeYunworkContract() !== undefined && typeof dshHome === 'string' && dshHome.trim() !== '' && isAbsolute(dshHome)) {
-    return join(dshHome, 'anywhere', 'dsh-bridge-next')
-  }
-  return join(userInfo().homedir, '.agents-anywhere', 'dsh-bridge-next')
+/** Explicit profile selection wins; packaged metadata supplies the default. */
+function runtimeType(config: Config): string {
+  return config.runtimeType ?? probeYunworkContract()?.runtimeType ?? 'dsh'
 }
 
-/** Fixed per-user rendezvous with the Connector; isolated under DSH_HOME when branded. */
-export function bridgeDirectory(dshHome?: string): string {
-  const home = dshHome ?? process.env['DSH_HOME']
-  if (probeYunworkContract() !== undefined && typeof home === 'string' && home.trim() !== '' && isAbsolute(home)) {
+export function stateRoot(config: Config): string {
+  if (config.stateRoot !== undefined) return config.stateRoot
+  const name = runtimeType(config) === 'yunwork' ? 'yunwork-bridge-next' : 'dsh-bridge-next'
+  const home = config.dshHome ?? process.env['DSH_HOME']
+  if (runtimeType(config) === 'yunwork' && typeof home === 'string' && home.trim() !== '' && isAbsolute(home)) {
+    return join(home, 'anywhere', 'dsh-bridge-next')
+  }
+  return join(userInfo().homedir, '.agents-anywhere', name)
+}
+
+/** Match Connector's DSH_HOME scope and keep DSH/YunWork rendezvous distinct. */
+export function bridgeDirectory(config: Config = {}): string {
+  const name = runtimeType(config) === 'yunwork' ? 'yunwork-bridge' : 'dsh-bridge'
+  const home = config.dshHome ?? process.env['DSH_HOME']
+  if (runtimeType(config) === 'yunwork' && typeof home === 'string' && home.trim() !== '' && isAbsolute(home)) {
     return join(home, 'anywhere', 'dsh-bridge')
   }
-  return join(userInfo().homedir, '.agents-anywhere', 'dsh-bridge')
+  return join(userInfo().homedir, '.agents-anywhere', name)
 }
 
 /**
@@ -107,6 +118,7 @@ export function bridgeDirectory(dshHome?: string): string {
  * the bridge mirrors its endpoint to this directory; it is resolved exactly as those plugins did.
  */
 export function legacyBridgeDirectory(config: Config): string | undefined {
+  if (runtimeType(config) === 'yunwork') return undefined
   const home = config.dshHome ?? process.env['DSH_HOME'] ?? join(homedir(), '.dsh')
   return isAbsolute(home) ? join(home, 'agents-anywhere', 'bridge') : undefined
 }
@@ -114,17 +126,18 @@ export function legacyBridgeDirectory(config: Config): string | undefined {
 export function resolveConfig(config: Config): ResolvedConfig {
   if (config.dshHome !== undefined && !isAbsolute(config.dshHome)) throw new Error('DSH_HOME 必须是绝对路径。')
   const contract = probeYunworkContract()
+  const selectedRuntimeType = config.runtimeType ?? contract?.runtimeType ?? 'dsh'
   const root = stateRoot(config)
   const connectorSourceDir = config.connectorSourceDir ?? fileURLToPath(new URL('./bundled-connector/', import.meta.url))
   if (!isAbsolute(root) || !isAbsolute(connectorSourceDir)) throw new Error('数据目录和 Connector 源码目录必须是绝对路径。')
   return {
     ...(config.dshHome !== undefined ? { dshHome: config.dshHome } : {}),
+    runtimeType: selectedRuntimeType,
     stateRoot: root,
-    ...(config.stateRoot === undefined ? { legacyStateRoot: join(userInfo().homedir, '.agentsanywhere', 'dsh-bridge-next') } : {}),
+    ...(config.stateRoot === undefined && selectedRuntimeType === 'dsh' && root === join(userInfo().homedir, '.agents-anywhere', 'dsh-bridge-next') ? { legacyStateRoot: join(userInfo().homedir, '.agentsanywhere', 'dsh-bridge-next') } : {}),
     connectorSourceDir,
     apiBaseUrl: normalizeServerOrigin(config.apiBaseUrl ?? contract?.serverUrl ?? CLOUD_API_BASE_URL),
     uvPath: config.uvPath ?? process.env['UV_PATH'] ?? 'uv',
-    runtimeType: contract?.runtimeType ?? 'dsh',
     ...(contract?.webUrl !== undefined ? { anywhereWebUrl: contract.webUrl } : {}),
     ...(contract?.productName !== undefined ? { productName: contract.productName } : {}),
     ...(contract?.shortName !== undefined ? { shortName: contract.shortName } : {}),

@@ -26,6 +26,7 @@ const { SettingsSidebar } = await import('../src/components/settings/settings-si
 const { SidebarProvider } = await import('../src/components/ui/sidebar.tsx')
 const { authApi } = await import('../src/features/auth/api.ts')
 const { announcementsApi } = await import('../src/features/announcements/api.ts')
+const { apiClient } = await import('../src/lib/api/index.ts')
 const { dashboardApi } = await import('../src/features/dashboard/api.ts')
 contextHooks.deregister(); hooks.deregister()
 const messages = JSON.parse(readFileSync(new URL('../messages/zh-CN.json', import.meta.url), 'utf8'))
@@ -159,7 +160,7 @@ test('the administration sidebar lists both groups and navigates by section', as
   assert.match(container.textContent, /团队与公告/)
   assert.match(container.textContent, /服务/)
   const items = [...container.querySelectorAll('[data-sidebar="menu-button"]')].map((button) => button.textContent.trim())
-  assert.deepEqual(items, ['返回主页', '概览', '用户', '使用量', '设备与 Runtime', '运行质量', '团队', '公告', '常规', '身份认证', '邮件', '服务信息'])
+  assert.deepEqual(items, ['返回主页', '概览', '用户', '使用量', '设备与 Runtime', '运行质量', '团队', '公告', '插件管理', '常规', '身份认证', '邮件', '服务信息'])
   assert.match(container.textContent, /服务/)
   assert.equal(container.querySelector('[aria-current="page"]').textContent.trim(), '概览')
   await act(async () => buttonNamed(container, '团队').click())
@@ -179,4 +180,20 @@ test('the settings sidebar drives the settings tab and the page shows the active
   assert.equal(page.querySelector('h1').textContent, '外观')
   assert.ok(page.querySelector('[role="radiogroup"]'))
   assert.equal(page.querySelector('nav'), null, 'the inner category navigation moved to the sidebar')
+})
+
+
+test('plugin management reads the protected catalog and toggles publication separately', async (t) => {
+  const item = { id: 'fixture', name: 'fixture', displayName: '测试插件', summary: '目录说明', latestVersion: '1.0.0', package: { registry: 'npm', name: 'fixture' } }
+  let status = 'draft'
+  const get = t.mock.method(apiClient, 'get', async () => ({ items: [{ id: '123', item, status }], total: 1 }))
+  const patch = t.mock.method(apiClient, 'patch', async (_path, payload) => { status = payload.status; return { id: '123', item, status } })
+  const container = await render(t, h(AdminPage), { section: 'plugins' })
+  assert.match(container.textContent, /插件管理/)
+  assert.match(container.textContent, /测试插件/)
+  assert.match(get.mock.calls[0].arguments[0], /^\/admin\/plugins\?/)
+  assert.equal(get.mock.calls[0].arguments[1].token, 'fixture-token')
+  await act(async () => container.querySelector('[role="switch"]').click())
+  assert.deepEqual(patch.mock.calls[0].arguments, ['/admin/plugins/123', { status: 'published' }, { token: 'fixture-token' }])
+  assert.match(container.textContent, /已上架/)
 })

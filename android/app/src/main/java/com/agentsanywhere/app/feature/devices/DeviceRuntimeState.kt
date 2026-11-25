@@ -256,6 +256,7 @@ internal fun RemoteDeviceRuntime.toDeviceRuntime(): DeviceRuntime {
 
 internal val deviceRuntimeComparator = compareBy<DeviceRuntime> {
     when (it.type) {
+        "yunwork" -> -1
         "codex" -> 0
         "claude" -> 1
         "dsh" -> 2

@@ -16,26 +16,29 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -45,6 +48,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -64,6 +69,7 @@ import com.agentsanywhere.app.ui.designsystem.AuthErrorNotice
 import com.agentsanywhere.app.ui.designsystem.BackPill
 import com.agentsanywhere.app.ui.designsystem.LocalAAColors
 import com.agentsanywhere.app.ui.designsystem.ScreenScaffold
+import com.agentsanywhere.app.ui.screens.sessiondetail.FullscreenSystemBars
 import com.composables.icons.lucide.Info
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.Server
@@ -101,6 +107,7 @@ fun WebLoginHostScreen(
             onCallback = viewModel::handleCallback,
             onWebError = viewModel::reportWebError,
             onBack = viewModel::returnFromWebLogin,
+            onQrLogin = { navigate(AppDestination.QrLogin) },
             takeSavedState = { viewModel.takeWebViewState(embeddedSession) },
             onSaveState = { viewModel.saveWebViewState(embeddedSession, it) },
         )
@@ -250,6 +257,9 @@ private fun SelfHostLoginForm(
     }
 }
 
+/**
+ * 展示账号密码登录网页，底部提供扫码入口；扫码复用现有手机连接流程。
+ */
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 private fun EmbeddedWebLogin(
@@ -258,23 +268,27 @@ private fun EmbeddedWebLogin(
     onCallback: (String) -> Unit,
     onWebError: (String) -> Unit,
     onBack: () -> Unit,
+    onQrLogin: () -> Unit,
     takeSavedState: () -> Bundle?,
     onSaveState: (Bundle) -> Unit,
 ) {
     var webView by remember(session) { mutableStateOf<WebView?>(null) }
     var loading by remember(session) { mutableStateOf(true) }
+    val colors = LocalAAColors.current
+    var pageBackground by remember(session) { mutableStateOf(colors.canvas) }
+    val pageForeground = if (pageBackground.luminance() < 0.5f) Color.White else Color.Black
 
     BackHandler(onBack = onBack)
+    FullscreenSystemBars(
+        backgroundColor = pageBackground,
+        useDarkIcons = pageBackground.luminance() >= 0.5f,
+    )
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
+        Modifier.fillMaxSize().background(pageBackground)
             .windowInsetsPadding(WindowInsets.statusBars),
     ) {
-        Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp)) {
-            BackPill(label = stringResource(R.string.common_back), onClick = onBack)
-        }
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
             AndroidView(
                 modifier = Modifier.fillMaxSize(),
                 factory = { context ->
@@ -307,6 +321,7 @@ private fun EmbeddedWebLogin(
                             onLoadingChanged = { loading = it },
                             onCallback = onCallback,
                             onError = onWebError,
+                            onPageBackground = { pageBackground = it },
                         )
                         val restored = takeSavedState()
                         if (restored == null || restoreState(restored) == null) {
@@ -319,6 +334,21 @@ private fun EmbeddedWebLogin(
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
+            }
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp)
+                .padding(top = 12.dp, bottom = 30.dp),
+        ) {
+            TextButton(
+                modifier = Modifier.align(Alignment.Center),
+                colors = ButtonDefaults.textButtonColors(contentColor = pageForeground),
+                enabled = !exchanging,
+                onClick = onQrLogin,
+            ) {
+                Text(stringResource(R.string.auth_continue_qr), fontSize = 14.sp)
             }
         }
     }
@@ -339,10 +369,12 @@ private fun EmbeddedWebLogin(
     }
 }
 
+/** 限制网页登录跳转，并将已加载网页的背景同步给原生登录区域。 */
 private class SecureLoginWebViewClient(
     private val onLoadingChanged: (Boolean) -> Unit,
     private val onCallback: (String) -> Unit,
     private val onError: (String) -> Unit,
+    private val onPageBackground: (Color) -> Unit,
 ) : WebViewClient() {
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         onLoadingChanged(true)
@@ -350,6 +382,26 @@ private class SecureLoginWebViewClient(
 
     override fun onPageFinished(view: WebView?, url: String?) {
         onLoadingChanged(false)
+        // 仅读取背景颜色，不向网页登录注入可访问原生功能的 JS 桥。
+        view?.evaluateJavascript(
+            """(() => {
+                for (const element of [document.body, document.documentElement]) {
+                    if (!element) continue;
+                    const color = getComputedStyle(element).backgroundColor;
+                    const parts = color.match(/[\d.]+/g);
+                    if (parts && (parts.length === 3 || Number(parts[3]) === 1)) {
+                        return parts.slice(0, 3).map(Number);
+                    }
+                }
+                return null;
+            })()""".trimIndent(),
+        ) { result ->
+            runCatching { org.json.JSONArray(result) }.getOrNull()?.let { rgb ->
+                if (rgb.length() == 3) {
+                    onPageBackground(Color(rgb.getInt(0), rgb.getInt(1), rgb.getInt(2)))
+                }
+            }
+        }
     }
 
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest): Boolean {
