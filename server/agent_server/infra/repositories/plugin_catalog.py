@@ -4,13 +4,20 @@ from __future__ import annotations
 
 import time
 from datetime import UTC, datetime
+from uuid import uuid4
 
 from loguru import logger
-from sqlalchemy import Text, cast, func, insert, or_, select, update
+from sqlalchemy import Text, bindparam, cast, func, insert, or_, select, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncEngine
 
-from agent_server.core.plugin_catalog import PluginList, PluginView, PluginWrite
+from agent_server.core.plugin_catalog import (
+    PluginList,
+    PluginSyncEntry,
+    PluginSyncState,
+    PluginView,
+    PluginWrite,
+)
 from agent_server.infra.db.schema import instance_settings
 from agent_server.infra.db.schema import plugin_catalog_flow as flow
 from agent_server.infra.db.schema import plugin_catalog_info as info
@@ -81,7 +88,12 @@ class PluginCatalogRepository:
                 )
         return PluginList(
             items=[
-                PluginView(id=str(r["id"]), item=r["item"], status=r["status"])
+                PluginView(
+                    id=str(r["id"]),
+                    item={k: v for k, v in r["item"].items() if k != "_origins"},
+                    status=r["status"],
+                    origins=r["item"].get("_origins", {}),
+                )
                 for r in rows
             ],
             total=total,
@@ -142,7 +154,9 @@ class PluginCatalogRepository:
                 )
                 if identifier is not None and (not old or old["deleted"]):
                     raise KeyError("plugin not found")
-                item = entry.item if entry else old["item"]
+                item = dict(entry.item) if entry else dict(old["item"])
+                if old and old["item"].get("_origins"):
+                    item["_origins"] = old["item"]["_origins"]
                 if identifier is not None and item["id"] != old["plugin_key"]:
                     raise ValueError("plugin ID cannot change")
                 # 步骤2：导入不授予上架权限；已删除记录复用ID并恢复为草稿。
@@ -195,7 +209,12 @@ class PluginCatalogRepository:
                     )
                 )
                 result.append(
-                    PluginView(id=str(row_id), item=item, status=current_status)
+                    PluginView(
+                        id=str(row_id),
+                        item={k: v for k, v in item.items() if k != "_origins"},
+                        status=current_status,
+                        origins=item.get("_origins", {}),
+                    )
                 )
             await conn.execute(
                 update(instance_settings)
@@ -209,3 +228,235 @@ class PluginCatalogRepository:
             len(result),
         )
         return result
+
+    async def _sync_state(self, conn):
+        """Lock shared progress so duplicate starts and stale workers cannot race."""
+        raw = await conn.scalar(
+            select(instance_settings.c.value)
+            .where(instance_settings.c.key == "plugin-catalog-sync")
+            .with_for_update()
+        )
+        return PluginSyncState.model_validate_json(raw) if raw else PluginSyncState()
+
+    async def _save_sync(self, conn, state):
+        """Persist a heartbeat and progress in the current catalog transaction."""
+        state.updatedAt = datetime.now(UTC).isoformat()
+        state.leaseUntil = time.time() + 600 if state.status == "running" else 0
+        await conn.execute(
+            update(instance_settings)
+            .where(instance_settings.c.key == "plugin-catalog-sync")
+            .values(value=state.model_dump_json(), updated_at=state.updatedAt)
+        )
+
+    async def sync_status(self) -> PluginSyncState:
+        """Read job progress; expired jobs become retryable rather than locking the UI forever."""
+        async with self._engine.begin() as conn:
+            state = await self._sync_state(conn)
+            if state.status == "running" and state.leaseUntil < time.time():
+                state.status = "failed"
+                state.errors = [
+                    *state.errors[-19:],
+                    "同步进程已中断，请重新同步；已提交批次会自动去重。",
+                ]
+                await self._save_sync(conn, state)
+            return state
+
+    async def claim_sync(self, sources: list[str]) -> PluginSyncState:
+        """Atomically start one metadata sync across all server processes."""
+        async with self._engine.begin() as conn:
+            await conn.execute(
+                pg_insert(instance_settings)
+                .values(
+                    key="plugin-catalog-sync",
+                    value="{}",
+                    updated_at=datetime.now(UTC).isoformat(),
+                )
+                .on_conflict_do_nothing()
+            )
+            current = await self._sync_state(conn)
+            if current.status == "running" and current.leaseUntil >= time.time():
+                raise ValueError("插件目录正在同步，请勿重复触发")
+            state = PluginSyncState(
+                jobId=str(uuid4()),
+                status="running",
+                sources=sources,
+                startedAt=datetime.now(UTC).isoformat(),
+            )
+            await self._save_sync(conn, state)
+            return state
+
+    async def sync_progress(
+        self,
+        job_id: str,
+        *,
+        source: str | None = None,
+        total_delta: int = 0,
+        finish: bool = False,
+        error: str | None = None,
+    ) -> PluginSyncState:
+        """Update the selected source/known total or finish without overwriting another job."""
+        async with self._engine.begin() as conn:
+            state = await self._sync_state(conn)
+            if state.jobId != job_id or state.status != "running":
+                raise RuntimeError("sync job no longer owns the lease")
+            if source is not None:
+                state.source = source
+            state.total += total_delta
+            if error:
+                state.errors = [*state.errors[-19:], error[:400]]
+            if finish:
+                state.status = "failed" if state.errors else "completed"
+            await self._save_sync(conn, state)
+            return state
+
+    async def sync_batch(
+        self,
+        job_id: str,
+        actor: str,
+        entries: list[PluginSyncEntry],
+        *,
+        failed: int = 0,
+        skipped: int = 0,
+    ) -> PluginSyncState:
+        """Bulk metadata upsert and audit/progress commit; preserve publication and deletions."""
+        if len(entries) > 200:
+            raise ValueError("catalog batch exceeds 200 entries")
+        now = datetime.now(UTC)
+        async with self._engine.begin() as conn:
+            # 步骤1：先校验任务归属，再与手工上下架共用目录锁，防止状态竞争。
+            state = await self._sync_state(conn)
+            if state.jobId != job_id or state.status != "running":
+                raise RuntimeError("sync job no longer owns the lease")
+            await conn.execute(
+                pg_insert(instance_settings)
+                .values(
+                    key="plugin-catalog-clock", value="0", updated_at=now.isoformat()
+                )
+                .on_conflict_do_nothing()
+            )
+            last = int(
+                await conn.scalar(
+                    select(instance_settings.c.value)
+                    .where(instance_settings.c.key == "plugin-catalog-clock")
+                    .with_for_update()
+                )
+            )
+
+            def next_id():
+                """Allocate IDs using the same Snowflake layout as manual edits."""
+                nonlocal last
+                timestamp = max(int(time.time() * 1000) - 1704067200000, last >> 22)
+                sequence = (last & 4095) + 1 if timestamp == last >> 22 else 0
+                if sequence > 4095:
+                    timestamp += 1
+                    sequence = 0
+                last = (timestamp << 22) | sequence
+                return last
+
+            keys = [entry.item["id"] for entry in entries]
+            rows = (
+                (await conn.execute(select(info).where(info.c.plugin_key.in_(keys))))
+                .mappings()
+                .all()
+                if keys
+                else []
+            )
+            existing = {row["plugin_key"]: dict(row) for row in rows}
+            creates, edits, history = [], [], []
+            state.failed += failed
+            state.skipped += skipped
+            state.processed += len(entries) + failed + skipped
+            for entry in entries:
+                key = entry.item["id"]
+                old = existing.get(key)
+                if old and old["deleted"]:
+                    state.skipped += 1
+                    continue
+                # 同一来源内容未变时不重复覆盖另一来源或管理员补充的资料。
+                if old and old["item"].get("_origins", {}).get(
+                    entry.origin.source
+                ) == entry.origin.model_dump():
+                    state.unchanged += 1
+                    continue
+                origins = {
+                    **(old["item"].get("_origins", {}) if old else {}),
+                    entry.origin.source: entry.origin.model_dump(),
+                }
+                # 步骤2：补充实际存在的元数据；新源未提供的可选安装身份不被清空。
+                item = {
+                    **(old["item"] if old else {}),
+                    **entry.item,
+                    "_origins": origins,
+                }
+                if old and old["item"] == item:
+                    state.unchanged += 1
+                    continue
+                row_id = old["id"] if old else next_id()
+                status = old["status"] if old else "draft"
+                if old:
+                    edits.append(
+                        {
+                            "pk_id": row_id,
+                            "p_item": item,
+                            "p_time": now,
+                            "p_actor": actor,
+                        }
+                    )
+                    state.updated += 1
+                else:
+                    creates.append(
+                        {
+                            "id": row_id,
+                            "plugin_key": key,
+                            "item": item,
+                            "status": "draft",
+                            "deleted": 0,
+                            "create_time": now,
+                            "update_time": now,
+                            "create_by": actor,
+                            "update_by": actor,
+                        }
+                    )
+                    state.created += 1
+                existing[key] = {
+                    "id": row_id,
+                    "item": item,
+                    "status": status,
+                    "deleted": 0,
+                }
+                history.append(
+                    {
+                        "id": next_id(),
+                        "plugin_catalog_info_id": row_id,
+                        "action": "sync",
+                        "status": status,
+                        "create_time": now,
+                        "update_time": now,
+                        "create_by": actor,
+                        "update_by": actor,
+                        "deleted": 0,
+                    }
+                )
+            # 步骤3：批量写入资料、流水和进度；整批失败时全部回滚。
+            if creates:
+                await conn.execute(insert(info), creates)
+            if edits:
+                await conn.execute(
+                    update(info)
+                    .where(info.c.id == bindparam("pk_id"))
+                    .values(
+                        item=bindparam("p_item"),
+                        update_time=bindparam("p_time"),
+                        update_by=bindparam("p_actor"),
+                    ),
+                    edits,
+                )
+            if history:
+                await conn.execute(insert(flow), history)
+                await conn.execute(
+                    update(instance_settings)
+                    .where(instance_settings.c.key == "plugin-catalog-clock")
+                    .values(value=str(last), updated_at=now.isoformat())
+                )
+            await self._save_sync(conn, state)
+            return state

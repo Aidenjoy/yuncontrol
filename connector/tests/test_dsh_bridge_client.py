@@ -352,3 +352,35 @@ def test_stream_maps_plugin_errors() -> None:
         assert str(raised.value) == "unknown subscription"
 
     asyncio.run(run())
+
+
+def test_yunwork_client_handshake_and_snapshot_keep_user_data_unchanged():
+    """Exercise the call boundary, including timeline source identity and content hashes."""
+    from connector.runtime_protocol import timeline_content_hash
+    from connector.runtimes.dsh.bridge import models
+    business = {"runtime": "dsh", "nested": [{"runtime": "dsh"}]}
+    content = {"toolName": "example", "arguments": business}
+    item = {"id": "item", "sessionId": "session", "type": "tool", "status": "done",
+            "orderSeq": 1, "revision": 1, "source": {"runtime": "dsh"}, "content": content,
+            "contentHash": timeline_content_hash("tool", "done", None, content)}
+    mesh = FakeMesh({
+        "initialize": lambda _: {"identity": {"runtime": "dsh", "protocolVersion": "2.0"}},
+        "getSessionSnapshot": lambda _: {"sessionId": "session", "items": [item]},
+    })
+    host = fake_host(mesh)
+    host.runtime_type = "yunwork"
+    client = BridgeClient(host, connector_id="yunwork-fixture")
+    async def scenario():
+        try:
+            identity = await client.start()
+            assert identity["identity"]["runtime"] == "yunwork"
+            assert mesh.calls[0]["params"]["runtime"] == "dsh", "wire handshake remains DSH-compatible"
+            page = await client.request("getSessionSnapshot")
+            decoded = models.timeline_item(page["items"][0])
+            assert decoded.source["runtime"] == "yunwork"
+            assert decoded.content["arguments"] == business
+            assert decoded.content_hash == item["contentHash"]
+            assert item["source"]["runtime"] == "dsh"
+        finally:
+            await client.close()
+    asyncio.run(scenario())

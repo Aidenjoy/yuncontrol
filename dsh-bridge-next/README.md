@@ -64,6 +64,8 @@ DSH 的 AI 通过 `plugin_manager` 工具管理插件，这个工具在 Creator 
 
 ### 升级与卸载
 
+- 插件 2.2.1 包含本机 Connector 启动时 `existsSync is not defined` 的修复。源码安装需重新构建并更新宿主实际加载的插件；仅拉取源码不会更新已安装副本。更新后重启 yunWork / DSH。独立 npm 安装需等待对应版本发布，内置插件需通过宿主发布渠道更新。
+
 - 通过「插件」页面安装的插件暂时不会自动更新。升级时在「插件」页面卸载 Agents Anywhere for DSH，再按上面的步骤重新安装；也可以把上面的提示词再发给 AI，它会先卸载旧版本。
 - 升级 Agents Anywhere Desktop 或 Connector 的 MINOR 版本（例如从 2.0.x 升到 2.1.0）时，插件要一起升级，否则本机连接会一直停在等待状态。
 - 卸载插件不会删除账号、设备连接和设置，它们保存在用户目录的 `~/.agents-anywhere/dsh-bridge-next/`，重新安装后可以继续使用。想同时清除这些数据，先在插件的「设置 → 维护」中执行「恢复出厂设置」，再卸载。

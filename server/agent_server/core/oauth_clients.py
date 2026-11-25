@@ -42,9 +42,20 @@ DSH_PLUGIN_OAUTH_CLIENT = FirstPartyOAuthClient(
     redirect_uri="http://127.0.0.1:{port}/oauth/callback",
 )
 
+YUNDASHI_ANDROID_OAUTH_CLIENT = FirstPartyOAuthClient(
+    client_id="yundashi-agent-mobile",
+    name="云大师 Android",
+    redirect_uri="yundashi-agent://oauth/callback",
+)
+
 FIRST_PARTY_OAUTH_CLIENTS = {
     client.client_id: client
-    for client in (MOBILE_OAUTH_CLIENT, DESKTOP_OAUTH_CLIENT, DSH_PLUGIN_OAUTH_CLIENT)
+    for client in (
+        MOBILE_OAUTH_CLIENT,
+        DESKTOP_OAUTH_CLIENT,
+        DSH_PLUGIN_OAUTH_CLIENT,
+        YUNDASHI_ANDROID_OAUTH_CLIENT,
+    )
 }
 
 

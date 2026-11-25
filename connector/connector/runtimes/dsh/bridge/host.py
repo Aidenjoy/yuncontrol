@@ -282,6 +282,11 @@ async def bridge_host(runtime_type: str = "dsh") -> BridgeHost:
         return host
     if runtime_type != "yunwork":
         raise ValueError("unsupported DSH-compatible runtime")
+    return await start_yunwork_bridge(parent)
+
+
+async def start_yunwork_bridge(parent: LocalHub) -> BridgeHost:
+    """Publish the independent YunWork bridge before discovery/configuration needs it."""
     # 独立 Router 复用 DSH 协议，但不共享认证密钥、发现文件或同步订阅。
     host = _yunwork_hosts.get(id(parent))
     if host is None:

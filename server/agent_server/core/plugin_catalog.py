@@ -28,9 +28,7 @@ def valid_timestamp(value: Any) -> bool:
         value,
     ):
         return False
-    return (
-        datetime.fromisoformat(value.upper()).tzinfo is not None
-    )
+    return datetime.fromisoformat(value.upper()).tzinfo is not None
 
 
 _validator = Draft202012Validator(_schema, format_checker=_formats)
@@ -108,6 +106,7 @@ class PluginView(PluginWrite):
 
     id: str
     status: Literal["draft", "published"]
+    origins: dict[str, dict[str, Any]] = Field(default_factory=dict)
 
 
 class PluginList(BaseModel):
@@ -116,3 +115,54 @@ class PluginList(BaseModel):
     items: list[PluginView]
     total: int
     revision: str = "0"
+
+
+class PluginOrigin(BaseModel):
+    """Original catalog metadata retained for inspection, never an executable install plan."""
+
+    source: Literal["1024store", "dshfind"]
+    url: str
+    itemId: str
+    metadata: dict[str, Any]
+
+
+class PluginSyncEntry(PluginWrite):
+    """Validated public item plus its original provider metadata."""
+
+    origin: PluginOrigin
+
+
+class PluginSyncRequest(BaseModel):
+    """Choose existing YunWork providers; arbitrary remote URLs are not accepted."""
+
+    sources: list[Literal["1024store", "dshfind"]] = Field(
+        default_factory=lambda: ["1024store", "dshfind"], min_length=1, max_length=2
+    )
+
+    @field_validator("sources")
+    @classmethod
+    def unique_sources(cls, value):
+        """Reject duplicate provider requests within one job."""
+        if len(value) != len(set(value)):
+            raise ValueError("duplicate catalog sources")
+        return value
+
+
+class PluginSyncState(BaseModel):
+    """Shared job progress persisted in existing instance settings across server workers."""
+
+    jobId: str | None = None
+    status: Literal["idle", "running", "completed", "failed"] = "idle"
+    sources: list[Literal["1024store", "dshfind"]] = Field(default_factory=list)
+    source: str | None = None
+    total: int = 0
+    processed: int = 0
+    created: int = 0
+    updated: int = 0
+    unchanged: int = 0
+    skipped: int = 0
+    failed: int = 0
+    errors: list[str] = Field(default_factory=list)
+    startedAt: str | None = None
+    updatedAt: str | None = None
+    leaseUntil: float = 0

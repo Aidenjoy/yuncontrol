@@ -139,6 +139,8 @@ export const en = {
   "locale.code": "en",
   "手机连接": "Mobile connection",
   "远程控制": "Remote Control",
+  "{brand}远程控制": "{brand} Remote Control",
+  "登录{brand}远程控制": "Sign in to {brand} Remote Control",
   "下载 Agents Anywhere 桌面端": "Download Agents Anywhere Desktop",
   "加入内测交流群": "Join the beta community",
   "去 GitHub 点 Star": "Star on GitHub",

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { useAuth } from "@/components/auth/auth-context"
+import { PluginSyncCard } from "@/components/admin/plugin-sync-card"
 import { PageHeader } from "@/components/pages/page-header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,8 +13,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Field, FieldLabel } from "@/components/ui/field"
 import { apiClient } from "@/lib/api"
 
-type CatalogItem = { id: string; name: string; displayName: string; summary: string; latestVersion: string; package?: { registry: "npm"; name: string }; categories?: string[]; keywords?: string[] }
-type Entry = { id: string; status: "draft" | "published"; item: CatalogItem }
+type CatalogItem = { id: string; name: string; displayName: string; summary: string; latestVersion?: string; package?: { registry: "npm"; name: string }; categories?: string[]; keywords?: string[] }
+type Entry = { origins?: Record<string, unknown>; id: string; status: "draft" | "published"; item: CatalogItem }
 type CatalogPage = { items: Entry[]; total: number }
 const example: CatalogItem = { id: "my-plugin", name: "dsh-plugin-example", displayName: "我的插件", summary: "插件说明", latestVersion: "1.0.0", package: { registry: "npm", name: "dsh-plugin-example" }, categories: ["tools"] }
 
@@ -73,6 +74,7 @@ export function PluginsPage() {
   return <ScrollArea className="h-full w-full bg-background">
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-8 pb-16 pt-14">
       <PageHeader title="插件管理" description="管理云大师插件目录。新插件默认不上架；仅上架插件会出现在自有市场中。" />
+      {token ? <PluginSyncCard token={token} onComplete={load} /> : null}
       {error ? <p role="alert" className="text-destructive">{error}</p> : null}
       <div className="flex flex-wrap gap-3">
         <Input aria-label="搜索插件" placeholder="搜索名称或说明" value={q} onChange={e => { setQ(e.target.value); setOffset(0) }} />
@@ -82,7 +84,7 @@ export function PluginsPage() {
       </div>
       <div className="divide-y rounded-lg border">
         {page.items.map(entry => <div key={entry.id} className="flex flex-wrap items-center gap-4 p-4">
-          <div className="min-w-0 flex-1"><p className="font-medium">{entry.item.displayName}</p><p className="text-sm text-muted-foreground">{entry.item.package?.name ?? entry.item.name} · {entry.item.latestVersion}</p><p className="text-sm">{entry.item.summary}</p></div>
+          <div className="min-w-0 flex-1"><p className="font-medium">{entry.item.displayName}</p><p className="text-sm text-muted-foreground">{entry.item.package?.name ?? entry.item.name} · {entry.item.latestVersion}</p><p className="text-sm">{entry.item.summary}</p>{entry.origins && Object.keys(entry.origins).length ? <p className="text-xs text-muted-foreground">来源：{Object.keys(entry.origins).join("、")}</p> : null}</div>
           <Field orientation="horizontal"><FieldLabel htmlFor={`plugin-${entry.id}`}>{entry.status === "published" ? "已上架" : "未上架"}</FieldLabel><Switch id={`plugin-${entry.id}`} checked={entry.status === "published"} disabled={busy} onCheckedChange={checked => token && void mutate(() => apiClient.patch(`/admin/plugins/${entry.id}`, { status: checked ? "published" : "draft" }, { token }))} /></Field>
           <Button variant="outline" disabled={busy} onClick={() => { setEditor(entry); setText(JSON.stringify(entry.item, null, 2)) }}>编辑</Button>
           <Button variant="destructive" disabled={busy} onClick={() => setRemove(entry)}>删除</Button>

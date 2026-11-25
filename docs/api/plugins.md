@@ -38,6 +38,8 @@ https://你的云大师域名/api/v2/plugins/config
 | GET | `/plugins/v1/plugins` | 标准公共目录页，`q/category/cursor/limit`（可重复 category，多个分类同时匹配），limit 1–100，默认50 |
 | GET | `/plugins/search` | 上述目录查询别名 |
 | GET | `/admin/plugins` | 管理列表，`q/category/offset/limit` |
+| GET | `/admin/plugins/sync` | 查询最近一次同步进度，不请求上游 |
+| POST | `/admin/plugins/sync` | 手动启动后台元数据同步，返回 202；运行中重复请求返回 409 |
 | POST | `/admin/plugins` | 创建/按目录条目 ID幂等更新：`{"item":标准条目}`，新条目草稿 |
 | PUT | `/admin/plugins/{id}` | 编辑，条目 ID 不可更改，不隐式上架 |
 | PATCH | `/admin/plugins/{id}` | `{"status":"published"}` 上架或 `{"status":"draft"}` 下架 |
@@ -99,3 +101,28 @@ JSON Schema 来自 YunWork，保留原许可证，位于 `server/agent_server/co
 - 开发库：已执行v2_57，未清空原有用户/设备/会话；当前Server/Web已用原启动脚本重启，健康检查200，空公共目录200。
 - 未验证：公网域名与TLS证书、桌面客户端安装包和实际npm插件安装。Desktop renderer同步了管理界面及菜单断言，未单独构建桌面安装包。
 - 未调用模型接口，未安装目录中的插件，未提交或推送代码；本次不修改YunWork项目。
+
+本地调试时，配置接口允许 localhost、回环及内网 IP 的 HTTP origin（可带端口）。公网仍需 HTTPS 443；此例外仅使服务端配置接口可访问，不会放宽云大师市场客户端自身的 HTTPS 校验。
+
+## 管理员手动同步目录
+
+Web 管理员「插件管理」中的「同步插件目录」读取 YunWork `dsh-community-market` 已有来源：
+
+- 1024Store：`https://deepseek1024.com/api/v2/plugins`，每页 200 条，按总页数遍历。
+- dshfind：`https://api.dshfind.com/v1/catalog`，读取完整元数据快照，复用其插件识别与风险过滤条件。
+
+POST 请求体为 `{}`（两个来源），或 `{"sources":["1024store"]}` / `{"sources":["dshfind"]}`。不接受自定义 URL，不在服务启动、打开页面或轮询时自动触发同步。每次请求限定响应大小与超时，对临时网络错误最多请求三次。
+
+复用现有插件资料表、流水表和实例设置，每批最多 200 条；以规范化 GitHub 仓库身份（包含已声明的子目录）去重，多个来源的原始字段保存在管理响应 `origins` 中，包含实际提供的安装命令、版本、下载地址和图标地址。公共目录沿用标准协议返回仓库身份，以及能够按来源规则确认的 npm 包与版本；原始命令不执行，也不作为安装授权。
+
+新增插件保持下架，更新不修改已有上下架状态；同步不恢复管理员删除的记录。来源内容未变时不覆盖管理员补充的资料。图标及插件本体均不下载，不安装、不调用模型。来源任务错误单独显示在 `errors` 中；条目失败计入 `failed`，过滤条目计入 `skipped`。总数随来源读取逐步增加。
+
+进度通过数据库共享，包含 `total/processed/created/updated/unchanged/skipped/failed`；运行任务阻止重复启动，进程中断后租约最长 10 分钟到期，可重新手动同步，已提交批次保留。该任务运行在 Server 进程中，不是独立持久任务队列。
+
+### 同步功能 Mock 验证（2026-11-25）
+
+- 独立测试库临时 schema：10,006 条输入，新增 10,002、更新 1、未变 1、过滤 1、失败 1；重复同步新增/更新均为 0，修改来源数据后更新 10,001 条。验证结束已清理临时 schema。
+- 通过实际仓储和 API 验证：新插件下架、保留已上架状态、公共查询仅返回上架插件及安装身份、删除不恢复、重复启动 409、单来源异常不阻止另一来源处理。上游请求全部使用 MockTransport。
+- 前端 Mock：打开页面不启动同步、快速重复点击只发一次请求、运行时按钮禁用、统计和异常展示、完成后刷新列表均通过；Web 类型检查和同步模块 ruff 检查通过。
+- Apifox 使用仅监听本机的临时 Mock 服务：POST 同步返回 202，GET 进度返回 200、`completed`、总数/处理数/新增数均为 1；未连接真实来源或开发库，临时服务已停止。
+- 未执行真实目录同步、插件本体下载/安装、完整回归或桌面安装包验证。

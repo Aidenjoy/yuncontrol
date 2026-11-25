@@ -57,6 +57,9 @@ def rendezvous(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Path:
     path = tmp_path / "connector.json"
     monkeypatch.setattr(provider_config, "endpoint_path", lambda: path)
     monkeypatch.setattr(bridge_host_module, "_hosts", {})
+    async def no_yunwork_for_recording_hub(_hub):
+        return None
+    monkeypatch.setattr(bridge_host_module, "start_yunwork_bridge", no_yunwork_for_recording_hub)
     return path
 
 
@@ -148,3 +151,67 @@ def test_bridge_host_does_not_mount_twice(rendezvous: Path) -> None:
 
 def assert_absent(path: Path) -> None:
     assert not path.exists()
+
+
+@pytest.mark.parametrize("branded_home", [False, True])
+def test_first_start_publishes_both_isolated_bridges_without_runtime_probe(tmp_path, monkeypatch, branded_home):
+    """Both fresh-install rendezvous files exist before any runtime is configured."""
+    from connector.mesh.hub import LocalHub
+    monkeypatch.setattr(bridge_host_module, "_hosts", {})
+    monkeypatch.setattr(bridge_host_module, "_yunwork_hosts", {})
+    if branded_home:
+        monkeypatch.setenv("DSH_HOME", str(tmp_path / "work-home"))
+    else:
+        monkeypatch.delenv("DSH_HOME", raising=False)
+    monkeypatch.setenv("YUNWORK_ANYWHERE_RUNTIME_TYPE", "yunwork")
+    dsh_path = provider_config.endpoint_path()
+    work_path = provider_config.endpoint_path("yunwork")
+    assert dsh_path != work_path
+
+    async def scenario():
+        hub = LocalHub(directory=tmp_path / "router")
+        try:
+            await hub.start()
+            await mount_host_services(hub)
+            assert dsh_path.exists() and work_path.exists()
+            dsh = bridge_host_module.read_rendezvous(dsh_path)
+            work = bridge_host_module.read_rendezvous(work_path)
+            assert dsh["instanceId"] != work["instanceId"]
+            assert dsh["key"] != work["key"]
+            assert dsh["endpoint"] != work["endpoint"]
+            parent_server = hub._server
+            child = await bridge_host_module.start_yunwork_bridge(hub)
+            assert child.hub is not hub
+            assert hub._server is parent_server, "starting YunWork must not remount DSH/Control"
+            assert (await bridge_host_module.start_yunwork_bridge(hub)) is child
+        finally:
+            await hub.stop()
+        assert not dsh_path.exists() and not work_path.exists()
+
+    asyncio.run(scenario())
+
+
+def test_yunwork_start_failure_does_not_disable_dsh_or_control(rendezvous, monkeypatch):
+    """An optional independent Router failure leaves the original served services intact."""
+    async def fail(_hub):
+        raise RuntimeError("fixture YunWork startup failure")
+    monkeypatch.setenv("YUNWORK_ANYWHERE_RUNTIME_TYPE", "yunwork")
+    monkeypatch.setattr(bridge_host_module, "start_yunwork_bridge", fail)
+    hub = RecordingHub()
+    asyncio.run(mount_host_services(hub, "control", "logs"))
+    assert len(hub.mounts) == 1
+    assert hub.mounts[0][1:] == ("control", "logs")
+    assert rendezvous.exists()
+
+
+def test_plain_dsh_start_does_not_take_over_yunwork_rendezvous(rendezvous, monkeypatch):
+    """Only the selected branded launcher eagerly starts its separate Router."""
+    from unittest.mock import AsyncMock
+    monkeypatch.delenv("YUNWORK_ANYWHERE_RUNTIME_TYPE", raising=False)
+    start = AsyncMock()
+    monkeypatch.setattr(bridge_host_module, "start_yunwork_bridge", start)
+    hub = RecordingHub()
+    asyncio.run(mount_host_services(hub, "control", "logs"))
+    start.assert_not_awaited()
+    assert rendezvous.exists()
+    assert len(hub.mounts) == 1

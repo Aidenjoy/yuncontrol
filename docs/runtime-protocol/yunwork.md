@@ -27,3 +27,10 @@ Bridge 插件新增 `runtimeType: yunwork` 配置；默认仍为 `dsh`。云大�
 - YunWork 发布策略 19 项通过，Next/Beta 渠道一致性检查通过。
 - 未调用模型接口；未重新构建 YunWork、Android 或 iOS 安装包，未进行真实 YunWork 会话端到端验收。
 - Desktop Renderer 类型检查未完成：该子项目现有依赖/lock 安装状态不完整；对应共享 Web 代码已完成类型检查。
+
+
+## 首次启动与字段转换
+
+云大师启动器传入 `YUNWORK_ANYWHERE_RUNTIME_TYPE=yunwork` 后，Connector RPC Host 在发出 ready 前发布 DSH 与云大师各自的 Bridge 发现文件；普通 DSH 启动仍按原路径发布 DSH，不接管其他云大师进程的发现文件。云大师使用独立 Router，不重新挂载原 DSH、Control、Logs 服务。独立 Bridge 启动失败会记录警告，不阻断原有控制通道；后续探测仍可重试。父进程关闭时一起清理。
+
+运行时转换仅处理初始化身份、会话记录、时间线 source、能力条目等已声明的协议字段。工具参数、正文、模型元数据和命令业务返回保持原样，不做递归字符串或同名字段替换；时间线内容及其哈希保持一致。

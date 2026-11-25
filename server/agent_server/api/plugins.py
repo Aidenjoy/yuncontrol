@@ -4,10 +4,11 @@ import base64
 import hashlib
 import json
 import os
+from ipaddress import ip_address
 from typing import Annotated
 from urllib.parse import urlsplit
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Response
 from fastapi import Path as ApiPath
 
 from agent_server.core.models import UserView
@@ -15,12 +16,15 @@ from agent_server.core.plugin_catalog import (
     PluginImport,
     PluginList,
     PluginPublication,
+    PluginSyncRequest,
+    PluginSyncState,
     PluginView,
     PluginWrite,
 )
 from agent_server.deps import get_store, require_admin
 from agent_server.infra.repositories.facade import Store
 from agent_server.infra.repositories.plugin_catalog import PluginCatalogRepository
+from agent_server.services.plugin_catalog_sync import PluginCatalogSync
 
 router = APIRouter(prefix="/plugins", tags=["plugins"])
 admin_router = APIRouter(
@@ -35,18 +39,26 @@ def repository(store: Annotated[Store, Depends(get_store)]) -> PluginCatalogRepo
 
 @router.get("/config")
 async def config(response: Response):
-    """Return the standard source manifest; require an explicitly trusted public HTTPS origin."""
+    """Return a source manifest; allow local HTTP for development, HTTPS for deployment."""
     origin = (
         os.environ.get("AGENT_SERVER_PLUGIN_ORIGIN")
         or os.environ.get("AGENT_SERVER_PUBLIC_ORIGIN", "")
     ).rstrip("/")
     try:
         parsed = urlsplit(origin)
-        valid_port = parsed.port in (None, 443)
+        local_host = parsed.hostname == "localhost"
+        if parsed.hostname and not local_host:
+            try:
+                address = ip_address(parsed.hostname)
+                local_host = address.is_private or address.is_loopback
+            except ValueError:
+                pass
+        local_http = parsed.scheme == "http" and local_host
+        valid_port = parsed.port in (None, 443) or local_http
     except ValueError:
         raise HTTPException(503, "invalid plugin origin") from None
     if (
-        parsed.scheme != "https"
+        (parsed.scheme != "https" and not local_http)
         or not parsed.hostname
         or not valid_port
         or parsed.username
@@ -56,7 +68,8 @@ async def config(response: Response):
         or parsed.fragment
     ):
         raise HTTPException(
-            503, "AGENT_SERVER_PLUGIN_ORIGIN must be a public HTTPS origin on port 443"
+            503,
+            "AGENT_SERVER_PLUGIN_ORIGIN must be HTTPS on port 443 or a local HTTP origin",
         )
     response.headers["Cache-Control"] = "no-store"
     return {
@@ -143,6 +156,31 @@ async def list_plugins(
     """List drafts and published entries for authenticated administrators only."""
     response.headers["Cache-Control"] = "no-store"
     return await repo.list(q, category, limit, offset)
+
+
+@admin_router.get("/sync", response_model=PluginSyncState)
+async def sync_status(
+    response: Response, repo: Annotated[PluginCatalogRepository, Depends(repository)]
+):
+    """Read durable progress without fetching any upstream catalog."""
+    response.headers["Cache-Control"] = "no-store"
+    return await repo.sync_status()
+
+
+@admin_router.post("/sync", response_model=PluginSyncState, status_code=202)
+async def sync_catalog(
+    payload: PluginSyncRequest,
+    tasks: BackgroundTasks,
+    admin: Annotated[UserView, Depends(require_admin)],
+    repo: Annotated[PluginCatalogRepository, Depends(repository)],
+):
+    """Admin-triggered metadata-only synchronization; one job across all HTTP workers."""
+    try:
+        state = await repo.claim_sync(payload.sources)
+    except ValueError as exc:
+        raise HTTPException(409, str(exc)) from exc
+    tasks.add_task(PluginCatalogSync(repo).run, state, admin.userId)
+    return state
 
 
 @admin_router.post("", response_model=PluginView, status_code=201)

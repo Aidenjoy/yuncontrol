@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
-val officialServerUrl = "https://web.agents-anywhere.com"
+val officialServerUrl = "https://agent.yundashi.com"
 val localSettings = Properties().apply {
     rootProject.file("local.properties").takeIf { it.isFile }?.inputStream()?.use { load(it) }
 }
@@ -24,7 +24,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.agentsanywhere.app"
+        applicationId = "com.yundashi.agent"
         minSdk = 26
         targetSdk = 36
         versionCode = 11

@@ -2,6 +2,7 @@ package com.agentsanywhere.app.api
 
 import org.json.JSONObject
 
+/** 封装账号认证请求，网页登录令牌交换与登录入口共用客户端及回调标识。 */
 class AuthApi(
     private val client: ApiClient = ApiClient(),
 ) {
@@ -34,6 +35,7 @@ class AuthApi(
         client.requireHtmlDocument(serverUrl = webOrigin)
     }
 
+    /** 使用授权码及 PKCE 校验值交换令牌，客户端标识必须与授权请求一致。 */
     fun oauthToken(
         serverUrl: String,
         code: String,
@@ -45,8 +47,8 @@ class AuthApi(
             fields = linkedMapOf(
                 "grant_type" to "authorization_code",
                 "code" to code,
-                "client_id" to "agents-anywhere-mobile",
-                "redirect_uri" to "agents-anywhere://oauth/callback",
+                "client_id" to com.agentsanywhere.app.feature.auth.WEB_LOGIN_CLIENT_ID,
+                "redirect_uri" to com.agentsanywhere.app.feature.auth.WEB_LOGIN_CALLBACK_URI,
                 "code_verifier" to codeVerifier,
             ),
         ).toOAuthTokenResponse()

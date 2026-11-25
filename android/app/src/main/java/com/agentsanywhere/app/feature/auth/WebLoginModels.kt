@@ -186,8 +186,8 @@ private fun String?.queryParameters(): Map<String, String> {
     return parameters
 }
 
-const val WEB_LOGIN_CALLBACK_URI = "agents-anywhere://oauth/callback"
-const val WEB_LOGIN_CLIENT_ID = "agents-anywhere-mobile"
-private const val WEB_LOGIN_CALLBACK_SCHEME = "agents-anywhere"
+const val WEB_LOGIN_CALLBACK_URI = "yundashi-agent://oauth/callback"
+const val WEB_LOGIN_CLIENT_ID = "yundashi-agent-mobile"
+private const val WEB_LOGIN_CALLBACK_SCHEME = "yundashi-agent"
 private const val WEB_LOGIN_CALLBACK_HOST = "oauth"
 private const val WEB_LOGIN_CALLBACK_PATH = "/callback"

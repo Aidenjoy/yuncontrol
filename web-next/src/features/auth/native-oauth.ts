@@ -20,8 +20,11 @@ export function isPluginRedirect(uri: string): boolean {
   return Boolean(match && match[0] === uri && Number(match[1]) >= 1024 && Number(match[1]) <= 65535)
 }
 
+/** 校验原生授权请求，独立安卓与原版客户端各自严格匹配专属回调。 */
 export function readNativeOAuthParams(params: { get(name: string): string | null }, kind: NativeOAuthKind): NativeOAuthParams | null {
-  const client = clients[kind]
+  const client = kind === 'mobile' && params.get('client_id') === 'yundashi-agent-mobile'
+    ? { id: 'yundashi-agent-mobile', redirect: 'yundashi-agent://oauth/callback' }
+    : clients[kind]
   const redirect = params.get('redirect_uri') ?? ''
   const challenge = params.get('code_challenge') ?? ''
   const state = params.get('state') ?? ''

@@ -150,7 +150,7 @@ class BridgeClient:
             if isinstance(mapped, BridgeUnavailableError):
                 self.lost(mapped)
             raise mapped from error
-        return runtime_payload(result.model_dump(), self.runtime_type)
+        return runtime_payload(result.model_dump(), self.runtime_type, method=method)
 
     async def stream(self, method: str, params: Mapping[str, Any] | None = None) -> AsyncIterator[dict[str, Any]]:
         """Items of a server stream; the stream has no deadline of its own."""
@@ -159,7 +159,7 @@ class BridgeClient:
                 DSH_BRIDGE_SERVICE, method, Payload(**dict(params or {})), Payload, metadata=self.metadata,
             ) as items:
                 async for item in items:
-                    yield runtime_payload(item.model_dump(), self.runtime_type)
+                    yield runtime_payload(item.model_dump(), self.runtime_type, method=method)
         except MeshCallError as error:
             mapped = bridge_error(error)
             if isinstance(mapped, BridgeUnavailableError):
@@ -178,13 +178,47 @@ class BridgeClient:
         self._closing = True
 
 
-def runtime_payload(value: Any, runtime_type: str) -> Any:
-    """仅转换协议中的 runtime 字段；不改正文、模型 ID 或 DSH 原生业务标识。"""
-    if runtime_type == "dsh":
+def runtime_payload(value: Any, runtime_type: str, *, method: str | None = None) -> Any:
+    """Translate only declared protocol records; never traverse business data or metadata."""
+    if runtime_type == "dsh" or not isinstance(value, dict):
         return value
-    if isinstance(value, dict):
-        return {key: runtime_type if key == "runtime" and item == "dsh" else runtime_payload(item, runtime_type)
-                for key, item in value.items()}
-    if isinstance(value, list):
-        return [runtime_payload(item, runtime_type) for item in value]
-    return value
+    result = {**value}
+    if result.get("runtime") == "dsh":
+        result["runtime"] = runtime_type
+
+    # Each response names its protocol children explicitly. Unknown fields and
+    # command result/arguments remain opaque, even if they contain runtime=dsh.
+    children = {
+        "initialize": ("identity",),
+        "listSessions": ("sessions",),
+        "getSessionSnapshot": ("items",),
+        "getSessionNotices": ("notices",),
+        "getRuntimeCapabilities": ("capabilities",),
+        "getSessionCapabilities": ("capabilities",),
+        "runtime.capability.updated": ("capabilities",),
+        "session.capability.updated": ("capabilities",),
+        "timeline.itemUpsert": ("item",),
+        "timelineItem": ("source",),
+    }.get(method, ())
+    for key in children:
+        child = result.get(key)
+        child_method = "timelineItem" if (method, key) in {
+            ("getSessionSnapshot", "items"), ("timeline.itemUpsert", "item")
+        } else None
+        if isinstance(child, list):
+            result[key] = [runtime_payload(item, runtime_type, method=child_method) for item in child]
+        elif isinstance(child, dict):
+            result[key] = runtime_payload(child, runtime_type, method=child_method)
+    if method == "updateSelections" and isinstance(result.get("result"), dict):
+        operation = result["result"]
+        if isinstance(operation.get("state"), dict):
+            result["result"] = {**operation, "state": runtime_payload(operation["state"], runtime_type)}
+    return result
+
+
+def runtime_notification(value: dict[str, Any], runtime_type: str) -> dict[str, Any]:
+    """Adapt one notification envelope without walking its arbitrary user payloads."""
+    params = value.get("params")
+    if runtime_type == "dsh" or not isinstance(params, dict):
+        return value
+    return {**value, "params": runtime_payload(params, runtime_type, method=value.get("method"))}

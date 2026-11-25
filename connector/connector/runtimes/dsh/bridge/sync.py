@@ -20,7 +20,11 @@ from connector.runtime_protocol.models import (
     SessionSourceObservation,
     SessionSourceState,
 )
-from connector.runtimes.dsh.bridge.client import BridgeClient, runtime_payload
+from connector.runtimes.dsh.bridge.client import (
+    BridgeClient,
+    runtime_notification,
+    runtime_payload,
+)
 from connector.runtimes.dsh.bridge.host import (
     SUBSCRIPTION_UNKNOWN,
     SnapshotPage,
@@ -260,12 +264,11 @@ class SyncRelay:
         self.item_bytes = 0
 
     async def operation(self, op: dict[str, Any]) -> None:
-        op = runtime_payload(op, self.runtime_type)
         kind = op.get("kind")
         if kind == "notifications":
             pending: list[dict[str, Any]] = []
             for raw in op["notifications"]:
-                notice = self.unquarantined(raw)
+                notice = self.unquarantined(runtime_notification(raw, self.runtime_type))
                 if notice is None:
                     continue
                 if self.durable_checkpoints and notice.get("method") in _DURABLE_NOTIFICATIONS:
@@ -669,7 +672,7 @@ class SyncRelay:
                          "withheld": record is not None and asyncio.get_running_loop().time() < record.retry_at}
 
     async def add_snapshot_page(self, page: SnapshotPage) -> None:
-        page = page.model_copy(update={"items": runtime_payload(page.items, self.runtime_type)})
+        page = page.model_copy(update={"items": [runtime_payload(item, self.runtime_type, method="timelineItem") for item in page.items]})
         snapshot = self.snapshot
         if snapshot is None:
             raise ValueError("Snapshot page outside a capture")
