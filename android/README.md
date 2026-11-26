@@ -90,14 +90,13 @@ APK 构建和 JVM 单测也必须在容器或虚机内执行。
 ## Application updates
 
 After entering the signed-in app, Android reads the saved server's
-`/api/v2/health` and compares its `version` with `BuildConfig.VERSION_NAME`
-numerically. This also runs on launch with an existing login and when the saved
-server changes. Login screens and sessions without a saved server never check
-for updates; no default server is substituted. Signing out cancels pending
-checks and downloads and clears the visible update state.
-`AppConfig.UPDATE_DOWNLOAD_URL` is the fixed APK address,
-`https://www.agents-anywhere.com/api/download/android/latest`, which the official
-site redirects to the latest release APK.
+`/api/v2/releases/latest?type=android` and compares its `version` with
+`BuildConfig.VERSION_NAME` numerically. This also runs on launch with an existing
+login and when the saved server changes. Login screens and sessions without a
+saved server never check for updates; no default server is substituted. Signing
+out cancels pending checks and downloads and clears the visible update state.
+The APK address comes from the same response's `downloadUrl` field, so each
+deployment can point at its own release.
 
 **Ignore this version** saves the target version per server in the private
 `app-updates` SharedPreferences file. The same version stays quiet on later
