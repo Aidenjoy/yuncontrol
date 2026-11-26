@@ -15,7 +15,7 @@
     <string name="file_preview_large_title">Large file (%1$s)</string>
     <string name="file_preview_large_body">Previewing downloads the whole file to this phone first.</string>
     <string name="file_preview_large_action">Download and preview</string>
-    <string name="file_preview_saved">Saved to Downloads/Agents Anywhere/%1$s</string>
+    <string name="file_preview_saved">Saved to Downloads/%1$s/%2$s</string>
     <string name="file_preview_save_failed">Couldn\'t save the file.</string>
     <string name="file_preview_save_permission_required">Storage permission is required to save files.</string>
     <string name="file_preview_no_app">No installed app can open this file.</string>

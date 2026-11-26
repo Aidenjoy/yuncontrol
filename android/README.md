@@ -1,6 +1,6 @@
-# Agents Anywhere Android
+# 云大师Agent Android
 
-Native Android client for Agents Anywhere.
+Native Android client for yundashi agent.
 
 ## Stack
 
@@ -160,7 +160,7 @@ Excel 预览保留文件中存储的数值精度。PowerPoint 最多预览前 30
 预览页底部始终提供「下载」「分享」「其他应用打开」。文件经 Server 的 `fs/read` 传输下载并校验
 sha256，缓存在 `cacheDir/file-previews/` 下（以原文件名保存，3 天或超出 40 个 / 768 MB 后清理），
 分享和用其他应用打开通过 FileProvider 交给系统，接收方看到的仍是原文件名。「下载」保存到
-`Download/Agents Anywhere/`：Android 10 及以上使用 MediaStore，Android 8–9 需要存储权限；重名时由
+`Download/yundashi agent/`：Android 10 及以上使用 MediaStore，Android 8–9 需要存储权限；重名时由
 系统追加 ` (1)`。超过 32 MB 的文件需要点击后才下载预览，单个文件上限 512 MB。
 
 源码和配置文件（`.kt`、`.ts`、`.py`、`.json`、`.yaml` 等）仍在会话的「文件」页用代码浏览器打开，
@@ -169,7 +169,7 @@ sha256，缓存在 `cacheDir/file-previews/` 下（以原文件名保存，3 天
 
 ## 云大师Agent独立安装标识
 
-安卓安装标识为 `com.yundashi.agent`，可与原版 Agents Anywhere 并存；源码 namespace 保持不变。
+安卓安装标识为 `com.yundashi.agent`，可与官方版 Agents Anywhere 并存；源码 namespace 保持不变。
 桌面图标使用 `uwork/brand/assets/yundashi` 的云朵品牌图，已复制到本项目资源目录，无需依赖外部项目打包。
 网页登录使用 OAuth 客户端 `yundashi-agent-mobile` 和回调 `yundashi-agent://oauth/callback`，需先部署包含该客户端注册的服务端和支持该标识的 Web；只更新安卓会导致网页提示「手机登录请求无效」。
 旧版及 iOS 的 OAuth 客户端保留；新安装应用不继承原应用本地数据，需重新登录。后续发布须持续使用同一签名证书。

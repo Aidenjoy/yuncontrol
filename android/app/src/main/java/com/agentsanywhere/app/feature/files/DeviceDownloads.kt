@@ -14,8 +14,8 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.OutputStream
 
-/** Folder inside the public Downloads directory that receives saved files. */
-const val DOWNLOADS_SUBFOLDER = "Agents Anywhere"
+/** Folder under Downloads and Pictures that receives saved files and gallery images. */
+const val STORAGE_FOLDER_NAME = "yundashi agent"
 
 /** Where a file ended up after saving: the name may gain a ` (1)` suffix when it already existed. */
 data class SavedDownload(
@@ -27,7 +27,7 @@ data class SavedDownload(
 fun savingDownloadsNeedsPermission(): Boolean = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
 
 /**
- * Copies [source] into `Download/Agents Anywhere/` under [displayName], keeping
+ * Copies [source] into `Download/$STORAGE_FOLDER_NAME/` under [displayName], keeping
  * the original name and extension. Uses MediaStore on Android 10+ and the
  * public directory (with WRITE_EXTERNAL_STORAGE) on older versions.
  */
@@ -77,7 +77,7 @@ private fun saveWithMediaStore(
     val values = ContentValues().apply {
         put(MediaStore.Downloads.DISPLAY_NAME, name)
         put(MediaStore.Downloads.MIME_TYPE, mimeType)
-        put(MediaStore.Downloads.RELATIVE_PATH, "${Environment.DIRECTORY_DOWNLOADS}/$DOWNLOADS_SUBFOLDER")
+        put(MediaStore.Downloads.RELATIVE_PATH, "${Environment.DIRECTORY_DOWNLOADS}/$STORAGE_FOLDER_NAME")
         put(MediaStore.Downloads.IS_PENDING, 1)
     }
     val collection = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
@@ -107,7 +107,7 @@ private fun saveToPublicDirectory(
     write: (OutputStream) -> Unit,
 ): SavedDownload {
     val downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-    val directory = File(downloads, DOWNLOADS_SUBFOLDER)
+    val directory = File(downloads, STORAGE_FOLDER_NAME)
     directory.mkdirs()
     check(directory.isDirectory) { "Unable to create the download folder." }
     var target: File

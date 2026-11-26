@@ -82,7 +82,7 @@
     <string name="model_config_account_load_failed">Couldn\'t read the Tokens Anywhere account right now.</string>
     <string name="model_config_account_tab_models">Models</string>
     <string name="model_config_account_tab_usage">Usage</string>
-    <string name="model_config_account_models_hint">Turning models off or renaming them only affects Agents Anywhere, and applies to every runtime using Tokens Anywhere.</string>
+    <string name="model_config_account_models_hint">Turning models off or renaming them only affects yundashi agent, and applies to every runtime using Tokens Anywhere.</string>
     <string name="model_config_account_restore_defaults">Restore defaults</string>
     <string name="model_config_account_refresh">Refresh</string>
     <string name="model_config_account_other_vendor">Other</string>

@@ -22,6 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.agentsanywhere.app.R
+import com.agentsanywhere.app.feature.files.STORAGE_FOLDER_NAME
 import com.agentsanywhere.app.feature.files.fileMimeType
 import com.agentsanywhere.app.feature.files.saveFileToDownloads
 import com.agentsanywhere.app.feature.files.savingDownloadsNeedsPermission
@@ -44,7 +45,7 @@ internal data class ActionFile(
 )
 
 /**
- * Performs [FileAction]s: saving to `Download/Agents Anywhere`, the system
+ * Performs [FileAction]s: saving to `Download/$STORAGE_FOLDER_NAME`, the system
  * share sheet, and "open with" another app. Results are reported through
  * [toastHostState].
  */
@@ -70,7 +71,7 @@ internal fun rememberFileActionPerformer(toastHostState: SnackbarHostState): (Fi
     fun save(target: ActionFile) {
         scope.launch {
             saveFileToDownloads(context, target.file, target.name)
-                .onSuccess { saved -> toast(context.getString(R.string.file_preview_saved, saved.displayName)) }
+                .onSuccess { saved -> toast(context.getString(R.string.file_preview_saved, STORAGE_FOLDER_NAME, saved.displayName)) }
                 .onFailure { toast(context.getString(R.string.file_preview_save_failed), isError = true) }
         }
     }

@@ -80,7 +80,7 @@
     <string name="model_config_account_load_failed">暂时读不到 Tokens Anywhere 账户。</string>
     <string name="model_config_account_tab_models">模型</string>
     <string name="model_config_account_tab_usage">用量</string>
-    <string name="model_config_account_models_hint">关闭或改名只影响 Agents Anywhere，会应用到所有使用 Tokens Anywhere 的 Runtime。</string>
+    <string name="model_config_account_models_hint">关闭或改名只影响云大师Agent，会应用到所有使用 Tokens Anywhere 的 Runtime。</string>
     <string name="model_config_account_restore_defaults">恢复默认</string>
     <string name="model_config_account_refresh">刷新</string>
     <string name="model_config_account_other_vendor">其他</string>

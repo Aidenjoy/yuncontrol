@@ -7,7 +7,7 @@
     <string name="device_pairing_cli_title">使用命令行连接</string>
     <string name="device_pairing_cli_description">使用一行命令连接您的设备，建议用于 Linux。</string>
     <string name="device_pairing_desktop_install_title">使用桌面程序连接</string>
-    <string name="device_pairing_desktop_install_description">前往官网下载页下载 Agents Anywhere 桌面程序，然后按照下方步骤完成连接。</string>
+    <string name="device_pairing_desktop_install_description">前往官网下载页下载云大师Agent桌面程序，然后按照下方步骤完成连接。</string>
     <string name="device_pairing_desktop_download_title">下载并安装</string>
     <string name="device_pairing_desktop_install_step_download">在官网下载页选择适合您设备的 Windows 或 macOS 安装包，下载后完成安装。</string>
     <string name="device_pairing_desktop_login_title">打开程序并登录</string>

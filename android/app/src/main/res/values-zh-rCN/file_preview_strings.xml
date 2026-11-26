@@ -15,7 +15,7 @@
     <string name="file_preview_large_title">文件较大（%1$s）</string>
     <string name="file_preview_large_body">预览需要先把整个文件下载到手机。</string>
     <string name="file_preview_large_action">下载并预览</string>
-    <string name="file_preview_saved">已保存到「下载/Agents Anywhere/%1$s」</string>
+    <string name="file_preview_saved">已保存到「下载/%1$s/%2$s」</string>
     <string name="file_preview_save_failed">保存文件失败。</string>
     <string name="file_preview_save_permission_required">需要存储权限才能保存文件。</string>
     <string name="file_preview_no_app">没有可以打开此文件的应用。</string>

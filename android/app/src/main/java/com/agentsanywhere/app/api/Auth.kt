@@ -27,7 +27,7 @@ class AuthApi(
     fun requireHealthyServer(serverUrl: String) {
         val health = client.getJson(serverUrl = serverUrl, path = "/health")
         if (health.optString("status") != "ok") {
-            throw ApiException("The address did not return a healthy Agents Anywhere server.")
+            throw ApiException("The address did not return a healthy yundashi agent server.")
         }
     }
 

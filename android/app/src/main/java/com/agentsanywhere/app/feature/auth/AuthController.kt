@@ -198,7 +198,7 @@ class AuthController(
         deviceName: String,
     ): Result<MobileLoginQrPayload> {
         val payload = parseMobileLoginQrPayload(qrValue)
-            ?: return Result.failure(IllegalArgumentException("Scan a valid Agents Anywhere QR code."))
+            ?: return Result.failure(IllegalArgumentException("Scan a valid yundashi agent QR code."))
 
         return withContext(Dispatchers.IO) {
             runCatching {

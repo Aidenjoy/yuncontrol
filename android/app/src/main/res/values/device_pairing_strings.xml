@@ -7,7 +7,7 @@
     <string name="device_pairing_cli_title">Connect using the command line</string>
     <string name="device_pairing_cli_description">Connect your device with a single command. Suggested for Linux.</string>
     <string name="device_pairing_desktop_install_title">Connect using the desktop app</string>
-    <string name="device_pairing_desktop_install_description">Download the Agents Anywhere desktop app from the official download page, then follow the steps below to connect.</string>
+    <string name="device_pairing_desktop_install_description">Download the yundashi agent desktop app from the official download page, then follow the steps below to connect.</string>
     <string name="device_pairing_desktop_download_title">Download and install</string>
     <string name="device_pairing_desktop_install_step_download">Choose the Windows or macOS installer for your device on the official download page, then download and install it.</string>
     <string name="device_pairing_desktop_login_title">Open the app and sign in</string>

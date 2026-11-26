@@ -91,6 +91,7 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.agentsanywhere.app.R
+import com.agentsanywhere.app.feature.files.STORAGE_FOLDER_NAME
 import com.agentsanywhere.app.feature.files.inlineCodeFilePath
 import com.agentsanywhere.app.feature.files.normalizeSpacedLinkDestinations
 import com.agentsanywhere.app.feature.files.saveCsvToDownloads
@@ -437,7 +438,7 @@ private fun MarkdownTable(
                 .onSuccess { saved ->
                     Toast.makeText(
                         context,
-                        context.getString(R.string.file_preview_saved, saved.displayName),
+                        context.getString(R.string.file_preview_saved, STORAGE_FOLDER_NAME, saved.displayName),
                         Toast.LENGTH_SHORT,
                     ).show()
                 }

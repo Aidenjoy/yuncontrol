@@ -86,6 +86,7 @@ import com.agentsanywhere.app.api.UploadFilePart
 import com.agentsanywhere.app.feature.files.FilePreviewTarget
 import com.agentsanywhere.app.feature.files.FilesController
 import com.agentsanywhere.app.feature.files.MAX_INLINE_WORKSPACE_IMAGE_BYTES
+import com.agentsanywhere.app.feature.files.STORAGE_FOLDER_NAME
 import com.agentsanywhere.app.feature.files.opensInFilePreview
 import com.agentsanywhere.app.feature.files.remoteFileRequest
 import com.agentsanywhere.app.feature.files.resolvePathInWorkspace
@@ -2823,7 +2824,7 @@ private suspend fun saveImageToGallery(
                 put(MediaStore.Images.Media.MIME_TYPE, downloaded.mediaType.ifBlank { "image/jpeg" })
                 put(
                     MediaStore.Images.Media.RELATIVE_PATH,
-                    "${Environment.DIRECTORY_PICTURES}/Agents Anywhere",
+                    "${Environment.DIRECTORY_PICTURES}/$STORAGE_FOLDER_NAME",
                 )
                 put(MediaStore.Images.Media.IS_PENDING, 1)
             }
@@ -2847,7 +2848,7 @@ private suspend fun saveImageToGallery(
         } else {
             @Suppress("DEPRECATION")
             val pictures = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-            val directory = File(pictures, "Agents Anywhere")
+            val directory = File(pictures, STORAGE_FOLDER_NAME)
             check(directory.exists() || directory.mkdirs()) { "Unable to create gallery directory" }
             val imageFile = uniqueGalleryFile(directory, displayName)
             imageFile.outputStream().use { output -> output.write(downloaded.bytes) }
