@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import os
 import hmac
+import os
 import re
 import secrets
 import time
@@ -24,7 +24,6 @@ from agent_server.core.models import (
     AuthPasswordSaltRequest,
     AuthPasswordSaltResponse,
     AuthRequest,
-    RevokeLoginRequest,
     AuthResponse,
     BindEmailRequest,
     ChangePasswordRequest,
@@ -41,11 +40,18 @@ from agent_server.core.models import (
     OAuthFinalizeRequest,
     OAuthFinalizeResponse,
     OAuthStartResponse,
+    RevokeLoginRequest,
     UpdateAvatarRequest,
     UpdateProfileRequest,
     UserView,
 )
 from agent_server.core.utc import utc_now
+from agent_server.core.utoken_registration import (
+    UtokenRegistrationCodeRequest,
+    UtokenRegistrationConfig,
+    UtokenRegistrationRequest,
+    UtokenRegistrationResult,
+)
 from agent_server.deps import current_user, get_store, user_id_from_authorization
 from agent_server.infra.repositories.email_accounts import (
     EmailRateLimitError,
@@ -69,6 +75,11 @@ from agent_server.services.oauth import (
 )
 from agent_server.services.setup_tokens import SetupTokenService
 from agent_server.services.utoken_login import UtokenLoginError, authenticate_utoken
+from agent_server.services.utoken_registration import (
+    register_utoken_account,
+    registration_config,
+    send_registration_code,
+)
 
 
 def _setup_token(request: Request) -> SetupTokenService:
@@ -785,3 +796,36 @@ async def revoke_login(payload: RevokeLoginRequest, request: Request, db: Store 
     matched = await db.revoke_utoken_login(origin=origin, subject=str(payload.userId), changed_at=payload.changedAt)
     logger.info("login revocation processed external_user_id={} matched={}", payload.userId, matched)
     return {"ok": True, "matched": matched}
+
+
+@router.get("/auth/utoken/config", response_model=UtokenRegistrationConfig)
+async def utoken_registration_config() -> UtokenRegistrationConfig:
+    """Read public registration switches from the configured token service only."""
+    try:
+        return await registration_config()
+    except UtokenLoginError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
+
+
+@router.post("/auth/utoken/code", response_model=UtokenRegistrationResult)
+async def utoken_registration_code(payload: UtokenRegistrationCodeRequest) -> UtokenRegistrationResult:
+    """Relay code delivery to token; no local email or verification state is used."""
+    try:
+        await send_registration_code(payload)
+    except UtokenLoginError as exc:
+        logger.warning("utoken registration code rejected status={}", exc.status_code)
+        raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
+    logger.info("utoken registration code delivered method={}", payload.method)
+    return UtokenRegistrationResult()
+
+
+@router.post("/auth/utoken/register", response_model=UtokenRegistrationResult, status_code=201)
+async def utoken_register(payload: UtokenRegistrationRequest) -> UtokenRegistrationResult:
+    """Register upstream without creating a local account or issuing a login session."""
+    try:
+        await register_utoken_account(payload)
+    except UtokenLoginError as exc:
+        logger.warning("utoken registration rejected status={}", exc.status_code)
+        raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
+    logger.info("utoken registration completed")
+    return UtokenRegistrationResult()

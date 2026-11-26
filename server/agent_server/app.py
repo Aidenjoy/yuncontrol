@@ -36,6 +36,7 @@ from agent_server.api import (
     oauth,
     pairing,
     projects,
+    releases,
     runtime_workflows,
     service,
     session_goals,
@@ -438,6 +439,8 @@ def create_app(
     app.include_router(plugins.admin_router, prefix=API_V2_PREFIX)
     app.include_router(announcements.router, prefix=API_V2_PREFIX)
     app.include_router(announcements.admin_router, prefix=API_V2_PREFIX)
+    app.include_router(releases.router, prefix=API_V2_PREFIX)
+    app.include_router(releases.admin_router, prefix=API_V2_PREFIX)
     app.include_router(admin_usage.router, prefix=API_V2_PREFIX)
     app.include_router(dashboard_stream.router, prefix=API_V2_PREFIX)
     app.include_router(service.router, prefix=API_V2_PREFIX)

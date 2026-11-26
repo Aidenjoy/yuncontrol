@@ -73,7 +73,8 @@ import {
 import { createTurnReviewDisplaySelector, type SessionReviewTarget } from "@/components/session/session-review-model"
 import { SessionReviewCard } from "@/components/session/session-review-card"
 import { SessionReviewTag } from "@/components/session/session-review-tag"
-import { isVisibleTimelineItem, messageText, runtimeLabel, textOf } from "@/components/session/session-utils"
+import { isVisibleTimelineItem, messageText, textOf } from "@/components/session/session-utils"
+import { useRuntimeLabel } from "@/components/session/use-runtime-label"
 import { stripInjectedAttachmentMentions } from "@/features/dashboard/attachments"
 import { sessionRuntimeId, sessionRuntimeType } from "@/features/dashboard/runtime-instances"
 import { useWorkspace } from "@/components/workspace-context"
@@ -254,6 +255,7 @@ function SessionDetailVisit({
   cache,
 }: SessionDetailProps & { cache: SessionStateCache }) {
   const tSession = useTranslations("dashboard.session")
+  const runtimeLabel = useRuntimeLabel()
   const tPlanning = useTranslations("planning")
   const tNew = useTranslations("dashboard.new")
   const tCommon = useTranslations("common")

@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils"
 import { defaultFilter, type FilterValue } from "@/lib/demo-api"
 import { useWorkspace } from "@/components/workspace-context"
 import { useTranslations } from "next-intl"
-import { runtimeLabel } from "@/components/session/session-utils"
+import { useRuntimeLabel } from "@/components/session/use-runtime-label"
 
 export function SessionFilterMenu({
   onMarkAllRead,
@@ -32,6 +32,7 @@ export function SessionFilterMenu({
 }) {
   const { filter, setFilter, connectors, sessions } = useWorkspace()
   const t = useTranslations("dashboard")
+  const runtimeLabel = useRuntimeLabel()
   const [open, setOpen] = React.useState(false)
 
   const active = filter.connectorId !== "all" || filter.runtime !== "all"

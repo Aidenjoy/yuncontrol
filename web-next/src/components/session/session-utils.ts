@@ -23,10 +23,14 @@ export function isVisibleTimelineItem(item: TimelineItem): boolean {
   return !(item.role === "assistant" && text === CLAUDE_NO_RESPONSE_MARKER)
 }
 
-export function runtimeLabel(runtime: string): string {
+/**
+ * `brandName` is the yunwork product name, which follows the UI language; pass
+ * the localized value from `useRuntimeLabel` where a React tree is available.
+ */
+export function runtimeLabel(runtime: string, options?: { brandName?: string }): string {
   if (runtime === "codex") return "Codex"
   if (runtime === "claude") return "Claude Code"
-  if (runtime === "yunwork") return "云大师Agent"
+  if (runtime === "yunwork") return options?.brandName ?? "云大师Agent"
   if (runtime === "dsh") return "DeepSeek Harness"
   if (runtime === "opencode") return "OpenCode"
   return runtime.slice(0, 1).toUpperCase() + runtime.slice(1)

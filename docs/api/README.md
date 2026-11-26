@@ -23,6 +23,7 @@ All Server HTTP, SSE, and WebSocket API documentation should live under this dir
 - [模型配置](model-config.md)：模型配置、预览、应用与恢复，Tokens Anywhere 链接，以及 Runtime 的成熟度和模型连接状态。
 - [Realtime API](./realtime.md): session, dashboard, connector, and terminal realtime channel semantics.
 - [Admin Usage API](./admin-usage.md): event-driven usage statistics for administrators (`/admin/usage/*`), how events are collected and what each metric means.
+- [安装包发布与版本检测](releases.md)：管理员登记各端版本号与下载地址，客户端通过 `/api/v2/releases/*` 检查更新。
 - [Frontend migration checklist](./frontend-migration-checklist.md): frontend API call-site replacements and behavior changes to apply after backend cleanup.
 
 ## Current API groups

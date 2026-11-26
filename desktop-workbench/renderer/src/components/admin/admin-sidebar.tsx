@@ -2,6 +2,7 @@
 
 import {
   Activity,
+  FolderDown,
   Gauge,
   Info,
   KeyRound,
@@ -34,6 +35,7 @@ const ICONS = {
   team: UserCog,
   announcements: Megaphone,
   plugins: Package,
+  releases: FolderDown,
   "service-general": SlidersHorizontal,
   "service-auth": KeyRound,
   "service-email": Mail,
@@ -50,6 +52,7 @@ export function AdminSidebar({ contained = false }: { contained?: boolean }) {
 
   const label = (section: AdminSection): string => {
     if (section === "plugins") return "插件管理"
+    if (section === "releases") return t("releases.title")
     if (section === "team") return tTeam("title")
     if (section === "announcements") return tAnnouncement("title")
     if (isAdminServiceSection(section)) return tService(`sections.${servicePageKey(section)}.title`)

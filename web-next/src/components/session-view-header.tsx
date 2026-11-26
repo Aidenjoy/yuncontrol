@@ -16,7 +16,7 @@ import type { SessionMemorySnapshot } from "@/components/session-detail"
 import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 import type { SessionView as SessionViewModel } from "@/lib/demo-api"
-import { runtimeLabel } from "@/components/session/session-utils"
+import { useRuntimeLabel } from "@/components/session/use-runtime-label"
 import { sessionRuntimeType } from "@/features/dashboard/runtime-instances"
 
 type SessionViewHeaderProps = {
@@ -148,6 +148,7 @@ function SessionMetaBadge({
   exporting?: boolean
 }) {
   const t = useTranslations("dashboard.session")
+  const runtimeLabel = useRuntimeLabel()
   const displayRuntimeType = session.runtimeTypeDisplayName?.trim()
     || runtimeLabel(sessionRuntimeType(session))
   const displayRuntime = session.runtimeName?.trim() || displayRuntimeType

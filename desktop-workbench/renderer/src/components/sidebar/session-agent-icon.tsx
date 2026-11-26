@@ -1,3 +1,7 @@
+"use client"
+
+import { useTranslations } from "next-intl"
+
 import { BrandMark } from "@/components/brand-mark"
 import { Bot } from "lucide-react"
 
@@ -23,8 +27,9 @@ const agentIcons = {
 }
 
 export function SessionAgentIcon({ runtime, runtimeType }: { runtime: string; runtimeType?: string }) {
+  const t = useTranslations("app")
   const type = (runtimeType?.trim() || runtime).toLowerCase().replace(/[\s_-]/g, "")
-  if (type === "yunwork") return <BrandMark label="云大师Agent" className="size-4" />
+  if (type === "yunwork") return <BrandMark label={t("name")} className="size-4" />
 
   const agent = type === "pi" ? "pi"
     : type === "codex" ? "codex"
