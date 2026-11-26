@@ -17,7 +17,7 @@ struct DeviceSettingsSection: View {
                     VStack(alignment: .leading, spacing: 3) {
                         Text(String(localized: "Ask before quitting on shutdown"))
                             .font(.body.weight(.medium))
-                        Text(String(localized: "When on, 云大师 asks before quitting when the computer shuts down or restarts. When off, it quits right away and never blocks shutdown."))
+                        Text(String(localized: "When on, 云大师Agent asks before quitting when the computer shuts down or restarts. When off, it quits right away and never blocks shutdown."))
                             .font(.footnote).foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }

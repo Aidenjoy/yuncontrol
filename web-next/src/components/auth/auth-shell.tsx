@@ -1,5 +1,7 @@
 "use client"
 
+import { BrandMark } from "@/components/brand-mark"
+
 import { LocaleSwitcher } from "@/components/locale-switcher"
 
 export function AuthShell({ children }: { children: React.ReactNode }) {
@@ -7,7 +9,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
     <div className="flex h-dvh flex-col overflow-y-auto bg-background">
       {/* Top nav */}
       <header className="flex shrink-0 items-center justify-between px-8 py-5">
-        <span className="aa-wordmark hidden text-xl md:inline">云大师</span>
+        <span className="aa-wordmark hidden items-center gap-2 text-xl md:inline-flex"><BrandMark className="mr-2" />云大师Agent</span>
         <nav className="flex items-center gap-4 text-sm text-muted-foreground">
           <LocaleSwitcher size="sm" variant="ghost" className="text-foreground" />
         </nav>

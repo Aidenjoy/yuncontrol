@@ -14,7 +14,7 @@
     <string name="home_project_filter_empty">No projects match the selected device or Agent.</string>
     <string name="home_project_filter_loading">Checking projects for this device or Agent...</string>
     <string name="home_project_load_retry">Could not load sessions. Tap to retry.</string>
-    <string name="app_name">云大师</string>
+    <string name="app_name">云大师Agent</string>
     <string name="common_back">Back</string>
     <string name="common_cancel">Cancel</string>
     <string name="common_checking">Checking...</string>
@@ -49,8 +49,8 @@
     <string name="auth_password_login">Account Password Login</string>
     <string name="auth_continue_qr">Scan to Login</string>
     <string name="auth_host_choice_title">Choose a login service</string>
-    <string name="auth_official_service">Sign in to 云大师 Cloud</string>
-    <string name="auth_official_service_description">Use the 云大师 online service</string>
+    <string name="auth_official_service">Sign in to 云大师Agent Cloud</string>
+    <string name="auth_official_service_description">Use the 云大师Agent online service</string>
     <string name="auth_self_host_service">Connect to your own server instance</string>
     <string name="auth_or">OR</string>
     <string name="auth_connect_server">Connect to server</string>
@@ -68,7 +68,7 @@
     <string name="qr_camera_permission_required">Camera permission is required to scan QR codes.</string>
     <string name="qr_start_failed">Could not start QR sign-in.</string>
     <string name="qr_help_title">How do I generate a mobile sign-in QR?</string>
-    <string name="qr_help_body">Open 云大师 on desktop or the web, go to Settings - Phone Connection - Start Connecting, then scan the QR code shown.</string>
+    <string name="qr_help_body">Open 云大师Agent on desktop or the web, go to Settings - Phone Connection - Start Connecting, then scan the QR code shown.</string>
     <string name="qr_scan_first">Scan a QR code first.</string>
     <string name="qr_status_failed">Could not check QR sign-in status.</string>
     <string name="qr_complete_failed">Could not complete QR sign-in.</string>
@@ -198,7 +198,7 @@
     <string name="device_detail_all_sessions">all sessions</string>
     <string name="device_detail_settings_section">DEVICE SETTINGS</string>
     <string name="device_settings_confirm_quit_title">Ask before quitting on shutdown</string>
-    <string name="device_settings_confirm_quit_description">When on, 云大师 asks before quitting when the computer shuts down or restarts. When off, it quits right away and never blocks shutdown.</string>
+    <string name="device_settings_confirm_quit_description">When on, 云大师Agent asks before quitting when the computer shuts down or restarts. When off, it quits right away and never blocks shutdown.</string>
     <string name="device_settings_saved_offline">Saved. It takes effect when the device comes online.</string>
     <string name="device_settings_load_failed">Could not load device settings.</string>
     <string name="device_settings_save_failed">Could not save device settings.</string>
@@ -266,7 +266,7 @@
     <string name="new_session_connect_device_title">Connect a device first</string>
     <string name="new_session_connect_device_description">Sessions run on your computer. Connect a device, then choose an Agent to start chatting.</string>
     <string name="new_session_devices_offline_title">Your device is offline</string>
-    <string name="new_session_devices_offline_description">Make sure 云大师 on your computer is connected and has network access, then check again.</string>
+    <string name="new_session_devices_offline_description">Make sure 云大师Agent on your computer is connected and has network access, then check again.</string>
     <string name="new_session_checking_agents">Checking available Agents</string>
     <string name="new_session_checking_agents_description">Looking for Agents that are configured and running.</string>
     <string name="new_session_agents_unavailable">Unable to load Agents</string>
@@ -416,9 +416,9 @@
     <string name="session_device_offline_body">This session can\'t receive messages until its device reconnects.</string>
     <string name="session_enable_takeover_title">Turn on takeover?</string>
     <string name="session_disable_takeover_title">Turn off takeover?</string>
-    <string name="session_enable_takeover_body">&#8226; Once enabled, you can take over this session from 云大师 on the web.\n&#8226; Messages may not show up in the %1$s client right away. Restarting them usually refreshes the sync.\n&#8226; If you work in both 云大师 and the %1$s client at the same time, the session may behave unexpectedly.</string>
+    <string name="session_enable_takeover_body">&#8226; Once enabled, you can take over this session from 云大师Agent on the web.\n&#8226; Messages may not show up in the %1$s client right away. Restarting them usually refreshes the sync.\n&#8226; If you work in both 云大师Agent and the %1$s client at the same time, the session may behave unexpectedly.</string>
     <string name="session_disable_takeover_body">&#8226; After takeover is turned off, this session goes back to read-only mode and you can no longer send messages.\n&#8226; The history created here may not show up in the %1$s client right away. Restarting them usually refreshes the sync.</string>
-    <string name="session_enable_takeover_dsh_body">DSH now syncs in real time %1$s with 云大师. Turn on takeover to send messages.</string>
+    <string name="session_enable_takeover_dsh_body">DSH now syncs in real time %1$s with 云大师Agent. Turn on takeover to send messages.</string>
     <string name="session_disable_takeover_dsh_body">After takeover is turned off, this session goes back to read-only mode and you can no longer send messages.</string>
     <string name="session_beta_badge" translatable="false">Beta</string>
     <string name="session_send_anyway_title">Send anyway?</string>

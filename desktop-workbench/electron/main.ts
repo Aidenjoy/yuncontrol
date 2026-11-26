@@ -65,7 +65,7 @@ import type {
   DesktopNotificationResult,
 } from "./connector-types";
 
-const APP_NAME = "云大师";
+const APP_NAME = "云大师Agent";
 const APP_ID = "dev.agentsanywhere.workbench";
 const WEB_PROTOCOL = "aa-workbench";
 const WEB_HOST = "web";
@@ -512,7 +512,7 @@ function createWindowsTray(): void {
   tray = new Tray(iconPath);
   tray.setToolTip(APP_NAME);
   tray.setContextMenu(Menu.buildFromTemplate([
-    { label: "打开 云大师", click: () => showMainWindow() },
+    { label: "打开 云大师Agent", click: () => showMainWindow() },
     { type: "separator" },
     { label: "退出", click: () => { void requestQuit({ confirm: true }); } },
   ]));
@@ -992,8 +992,8 @@ async function confirmQuit(): Promise<boolean> {
   quitConfirmationPromise = (async () => {
     const options = {
       type: "warning" as const,
-      title: "退出 云大师？",
-      message: "退出 云大师？",
+      title: "退出 云大师Agent？",
+      message: "退出 云大师Agent？",
       detail: "退出后，本机将离线，其他设备将无法在本机发起 Agent 会话。",
       buttons: ["取消", "退出程序"],
       defaultId: 1,
@@ -1151,7 +1151,7 @@ if (hasSingleInstanceLock) {
     console.error("Failed to initialize Desktop Workbench", error);
     appendMainLog({ level: "ERROR", message: `Desktop failed to start: ${errorMessage(error)}` });
     // No window may exist yet, so this box is the only place the reason shows.
-    dialog.showErrorBox("云大师 无法启动", `${errorMessage(error)}\n\n日志目录：${connectorLogsPath()}`);
+    dialog.showErrorBox("云大师Agent 无法启动", `${errorMessage(error)}\n\n日志目录：${connectorLogsPath()}`);
     void requestQuit();
   });
 

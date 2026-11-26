@@ -53,7 +53,7 @@ export function ConnectionEntry({ wide, host, t, renderTrigger }: ConnectionEntr
   const state = useOnboardingState(host, open)
   const snapshot = state.snapshot
   const branded = Boolean(snapshot?.brand)
-  const brandName = snapshot?.brand?.shortName || snapshot?.brand?.productName || '云大师'
+  const brandName = snapshot?.brand?.shortName || snapshot?.brand?.productName || '云大师Agent'
   const standalone = snapshot?.desktop.status === 'absent'
   const ownershipError = standalone && snapshot?.ownership && snapshot.ownership.status !== 'owned' ? snapshot.ownership.message || t('暂时无法检查本机 Connector 状态，请稍后重试。') : null
   const showLogin = standalone && !snapshot.account && tab === 'connection'

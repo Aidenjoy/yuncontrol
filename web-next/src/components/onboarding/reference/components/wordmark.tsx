@@ -1,3 +1,5 @@
+import { BrandMark } from "@/components/brand-mark"
+
 export function Wordmark() {
-  return <span className="aa-wordmark hidden text-xl md:inline">云大师</span>
+  return <span className="aa-wordmark hidden items-center gap-2 text-xl md:inline-flex"><BrandMark />云大师Agent</span>
 }

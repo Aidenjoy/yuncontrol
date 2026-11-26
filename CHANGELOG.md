@@ -40,7 +40,7 @@
 
 - 桌面端打开后直接显示与 Web 一致的账号密码登录页，保留本地管理员登录，有效登录状态自动恢复。
 
-- Web、Desktop、Android 和 iOS 的品牌展示名称统一改为「云大师」。
+- Web、Desktop、Android 和 iOS 统一使用「云大师Agent」名称与云朵 Logo，登录页、导航、浏览器及安装图标同步更新。
 
 - Desktop 安装包自带 Pi 运行环境，第一次启动只需在本地复制，不再下载 Node 和 npm 依赖；准备失败时也不再停在启动页、点「重试」也进不去，Pi 会在第一次使用时再次准备并在会话里提示错误。（[#657](https://github.com/anywhere-labs/Agents-Anywhere/pull/657)）
 

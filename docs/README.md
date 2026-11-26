@@ -28,4 +28,11 @@
 
 `docs/migrations/main-to-v2/` 保留早期迁移设计与历史基线。其旧版本号、移动端完成度和 Redis 策略不能替代当前升级指南。带 proposal、plan、target、gap 的文档描述设计或特定时间点的差距，使用前应与源码和契约核对。
 
-- [云大师插件目录管理与 YunWork 接入](api/plugins.md)
+- [云大师Agent插件目录管理与 YunWork 接入](api/plugins.md)
+
+
+## 品牌图标维护
+
+云大师Agent 的云朵 Logo 来自 `uwork/brand/assets/yundashi`，已复制进仓库，构建和运行不依赖外部项目。统一图形原件为 `logo/cloud-mark.svg`、`logo/cloud-mark.png`；Web、Desktop renderer、Android 和 iOS 使用各自平台资源。
+
+在 macOS 上执行 `node scripts/generate-brand-icons.mjs` 可重新生成 Desktop 的 ICNS 与多尺寸 ICO；执行 `swift scripts/render-brand-app-icons.swift "$PWD"` 可从 Desktop 原图重新生成 iOS 的不透明 1024px 应用图标。图标资源变更后需重新打包安装；Web favicon 已增加资源版本以更新浏览器缓存。

@@ -1,6 +1,6 @@
 {
   "name": "agents-anywhere-desktop-workbench",
-  "productName": "云大师",
+  "productName": "云大师Agent",
   "private": true,
   "version": "2.2.0",
   "description": "Electron shell for the Agents Anywhere web workbench",
@@ -42,7 +42,7 @@
   "build": {
     "appId": "dev.agentsanywhere.workbench",
     "afterPack": "scripts/after-pack.cjs",
-    "productName": "云大师",
+    "productName": "云大师Agent",
     "files": [
       "dist/electron/**",
       "dist/shared/**",

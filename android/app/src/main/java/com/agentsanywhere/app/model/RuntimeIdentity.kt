@@ -9,7 +9,7 @@ fun String.runtimeTypeLabel(): String {
     return when (this) {
         "codex" -> "Codex"
         "claude" -> "Claude Code"
-        "yunwork" -> "云大师"
+        "yunwork" -> "云大师Agent"
         "dsh" -> "DeepSeek Harness"
         else -> replaceFirstChar { char ->
             if (char.isLowerCase()) char.titlecase() else char.toString()

@@ -1,6 +1,6 @@
 {
-  "name": "云大师",
-  "short_name": "云大师",
+  "name": "云大师Agent",
+  "short_name": "云大师Agent",
   "icons": [
     {
       "src": "/icon-192.png",

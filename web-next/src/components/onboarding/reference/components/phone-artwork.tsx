@@ -1,7 +1,7 @@
 export function PhoneArtwork() {
   return (
     <div className="phone-figure">
-      <img src="/images/onboarding/phone.webp" alt="" className="phone-screenshot" width={800} height={1649} />
+      <img src="/images/onboarding/yundashi.png" alt="" className="phone-screenshot" width={873} height={1801} />
     </div>
   )
 }

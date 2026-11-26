@@ -44,7 +44,7 @@ DSH_PLUGIN_OAUTH_CLIENT = FirstPartyOAuthClient(
 
 YUNDASHI_ANDROID_OAUTH_CLIENT = FirstPartyOAuthClient(
     client_id="yundashi-agent-mobile",
-    name="云大师 Android",
+    name="云大师Agent Android",
     redirect_uri="yundashi-agent://oauth/callback",
 )
 

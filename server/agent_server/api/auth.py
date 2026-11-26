@@ -755,7 +755,7 @@ def _oauth_frontend_redirect(
 
 
 async def _login_with_utoken(origin: str, username: str, password: str, db: Store) -> AuthResponse:
-    """验证 utoken 密码并原子关联普通账号，返回既有云大师凭证，不持久化上游密码。"""
+    """验证 utoken 密码并原子关联普通账号，返回既有云大师Agent凭证，不持久化上游密码。"""
     try:
         identity = await authenticate_utoken(origin, username, password)
     except UtokenLoginError as exc:
@@ -765,7 +765,7 @@ async def _login_with_utoken(origin: str, username: str, password: str, db: Stor
         user = await db.resolve_utoken_user(origin=identity.origin, subject=identity.subject, display_name=identity.display_name)
     except ValueError as exc:
         logger.warning("utoken local account unavailable")
-        raise HTTPException(status_code=403, detail="云大师账号已停用或身份绑定冲突") from exc
+        raise HTTPException(status_code=403, detail="云大师Agent账号已停用或身份绑定冲突") from exc
     logger.info("utoken login succeeded user_id={}", user.userId)
     return _auth_response(user)
 

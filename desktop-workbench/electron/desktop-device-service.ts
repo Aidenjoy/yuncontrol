@@ -360,10 +360,10 @@ export class DesktopDeviceService {
     try {
       url = new URL(raw);
     } catch {
-      throw new Error("The 云大师 server URL is invalid.");
+      throw new Error("The 云大师Agent server URL is invalid.");
     }
     if (!/^https?:$/.test(url.protocol) || url.username || url.password) {
-      throw new Error("The 云大师 server URL must be an http(s) origin.");
+      throw new Error("The 云大师Agent server URL must be an http(s) origin.");
     }
     const namespace = normalizeNamespace(this.options.apiNamespace());
     if (namespace && url.pathname.replace(/\/+$/, "") === namespace) url.pathname = "/";

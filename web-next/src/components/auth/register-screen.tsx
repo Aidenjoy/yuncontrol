@@ -1,5 +1,7 @@
 "use client"
 
+import { BrandMark } from "@/components/brand-mark"
+
 import { useState } from "react"
 import { User, Lock, Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -34,7 +36,7 @@ export function RegisterScreen() {
         <h1 className="text-2xl font-bold tracking-tight">{t("register.title")}</h1>
         <p className="text-sm text-muted-foreground leading-relaxed">
           {t("register.descriptionPrefix")}<br />
-          <span className="aa-wordmark">云大师</span>
+          <span className="aa-wordmark"><BrandMark className="mr-2" />云大师Agent</span>
           {" "}{t("register.descriptionSuffix")}
         </p>
       </div>

@@ -79,7 +79,7 @@ export async function checkDesktopServer(
     if (!response.ok) throw new DesktopServerError("serverUnavailable", `Server health check failed (${response.status}).`);
     const payload = await response.json().catch(() => null) as { status?: unknown } | null;
     if (payload?.status !== "ok") {
-      throw new DesktopServerError("invalidHealth", "The address did not return a healthy 云大师 server.");
+      throw new DesktopServerError("invalidHealth", "The address did not return a healthy 云大师Agent server.");
     }
   } catch (error) {
     if (controller.signal.aborted) throw new DesktopServerError("serverTimeout", "The server health check timed out.");

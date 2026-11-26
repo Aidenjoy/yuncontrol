@@ -15,10 +15,10 @@ struct SessionTakeoverConfirmation: ViewModifier {
                 Button(String(localized: "取消"), role: .cancel) {}
             } message: { enabled in
                 if isDsh {
-                    Text(enabled ? String(localized: "DSH 现可实时同步（Beta）云大师。启用接管即可发送消息。") : String(localized: "关闭后会话回到只读模式。"))
+                    Text(enabled ? String(localized: "DSH 现可实时同步（Beta）云大师Agent。启用接管即可发送消息。") : String(localized: "关闭后会话回到只读模式。"))
                 } else {
                     Text(enabled
-                        ? String(localized: "开启后可在 云大师 中操作。记录可能需要重启 Agent 客户端才能同步；请避免同时在两个客户端操作此会话。")
+                        ? String(localized: "开启后可在 云大师Agent 中操作。记录可能需要重启 Agent 客户端才能同步；请避免同时在两个客户端操作此会话。")
                         : String(localized: "关闭后会话回到只读模式。这里产生的记录可能需要重启 Agent 客户端才能同步。"))
                 }
             }

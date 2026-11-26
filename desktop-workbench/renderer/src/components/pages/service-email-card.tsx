@@ -105,7 +105,7 @@ export function ServiceEmailCard({
             <Input
               id="email-from"
               value={fromAddress}
-              placeholder="云大师 <accounts@example.com>"
+              placeholder="云大师Agent <accounts@example.com>"
               disabled={!isAdmin || saving}
               onChange={(event) => setFromAddress(event.currentTarget.value)}
             />

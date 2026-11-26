@@ -54,7 +54,7 @@
     "environmentFailedDescription": "The environment is incomplete. Use the error below to resolve the problem and retry, or view the logs."
   },
   "app": {
-    "name": "云大师"
+    "name": "云大师Agent"
   },
   "home": {
     "title": "web-next refactor baseline",
@@ -346,7 +346,7 @@
     },
     "empty": {
       "noDevices": "No devices paired",
-      "noDevicesDescription": "云大师 needs an online connector before it can create or resume sessions.",
+      "noDevicesDescription": "云大师Agent needs an online connector before it can create or resume sessions.",
       "noDevicesTitle": "Pair a device to start",
       "noOnlineDevice": "No online device with an agent is available.",
       "noPinned": "No pinned sessions",
@@ -553,7 +553,7 @@
     "device": {
       "deviceSettings": "Device settings",
       "confirmQuitOnShutdown": "Ask before quitting on shutdown",
-      "confirmQuitOnShutdownDescription": "When on, 云大师 asks before quitting when the computer shuts down or restarts. When off, it quits right away and never blocks shutdown.",
+      "confirmQuitOnShutdownDescription": "When on, 云大师Agent asks before quitting when the computer shuts down or restarts. When off, it quits right away and never blocks shutdown.",
       "deviceSettingsPending": "Saved. It takes effect when the device comes online.",
       "deviceSettingsSaveFailed": "Device settings were not saved",
       "deviceSettingsLoadFailed": "Couldn't load device settings.",
@@ -749,7 +749,7 @@
       "revoking": "Revoking...",
       "disconnectTitle": "Disconnect this device?",
       "localDisconnectDescription": "This device will go offline. You can reconnect it later from settings on this computer.",
-      "remoteDisconnectDescription": "The connection token for {name} will become invalid. To use this device again, open the 云大师 desktop app on that device and reconnect it there; it cannot be restored from here.",
+      "remoteDisconnectDescription": "The connection token for {name} will become invalid. To use this device again, open the 云大师Agent desktop app on that device and reconnect it there; it cannot be restored from here.",
       "deleteTitle": "Delete device?",
       "deleteDescription": "This will permanently remove {name} and all its associated data. This action cannot be undone.",
       "delete": "Delete",
@@ -911,7 +911,7 @@
       "connect": "Connect phone",
       "androidDownloadOption": "Android",
       "confirmDevice": "Scanned device",
-      "downloadPrompt": "Download the 云大师 mobile app from our website. Once it is installed, come back here and we will connect your phone to this computer with a QR code.",
+      "downloadPrompt": "Download the 云大师Agent mobile app from our website. Once it is installed, come back here and we will connect your phone to this computer with a QR code.",
       "downloadUrlHint": "Or open {url} manually",
       "openDownloadPage": "Open download page",
       "pendingConfirmationDevice": "{device} wants to sign in to your account",
@@ -996,9 +996,9 @@
       "takeoverEnableDescription": [
         "After enabling Takeover, you can take over this session on the web.",
         "Messages may not sync to the {agent} client immediately. Restarting it usually refreshes the sync.",
-        "If you operate this session in both 云大师 and the {agent} client at the same time, unexpected results may occur."
+        "If you operate this session in both 云大师Agent and the {agent} client at the same time, unexpected results may occur."
       ],
-      "takeoverEnableDshDescription": "DSH now syncs in real time <beta>Beta</beta> with 云大师. Enable Takeover to send messages.",
+      "takeoverEnableDshDescription": "DSH now syncs in real time <beta>Beta</beta> with 云大师Agent. Enable Takeover to send messages.",
       "takeoverDisableTitle": "Disable Takeover?",
       "takeoverDisableDescription": [
         "After disabling Takeover, the session returns to read-only mode and you cannot send more messages.",
@@ -1113,8 +1113,8 @@
       "shareEntireSession": "Entire session",
       "shareEntireSessionDescription": "Share a snapshot of the complete session as it is now.",
       "createShareLink": "Create share link",
-      "shareReplyText": "A reply from 云大师",
-      "shareSessionText": "A session from 云大师",
+      "shareReplyText": "A reply from 云大师Agent",
+      "shareSessionText": "A session from 云大师Agent",
       "shareLinkCopied": "Share link copied",
       "shareFailed": "Failed to create share link",
       "gitOperationCommitted": "Committed",
@@ -1335,7 +1335,7 @@
       "desktopLocalDescription": "Open the desktop connector on the same computer where this browser is running.",
       "desktopLocalStepTitle": "Start local desktop connector",
       "desktopLocalStepDescription": "This option can only start the connector on this browser's computer.",
-      "desktopInstallHint": "If the desktop connector is not installed on this computer yet, install 云大师 Desktop first. To connect another machine, use command startup, credential text, or pair code.",
+      "desktopInstallHint": "If the desktop connector is not installed on this computer yet, install 云大师Agent Desktop first. To connect another machine, use command startup, credential text, or pair code.",
       "desktopStarted": "I have started the desktop connector",
       "commandTitle": "Start with command",
       "commandDescription": "Copy a command into the target device terminal. Requires uv/uvx command-line usage.",
@@ -1388,7 +1388,7 @@
       "connectionDescription": "Connect your device using the desktop app or CLI.",
       "cliTitle": "Connect using the command line",
       "cliDescription": "Connect your device with a single command. Suggested for Linux.",
-      "desktopInstallDescription": "Install 云大师 Desktop, then follow the steps below to connect.",
+      "desktopInstallDescription": "Install 云大师Agent Desktop, then follow the steps below to connect.",
       "desktopDownloadTitle": "Download and install",
       "desktopLoginTitle": "Open the app and sign in",
       "desktopOnlineTitle": "Wait for your device to connect",
@@ -1411,7 +1411,7 @@
     },
     "firstDevice": {
       "title": "Add your first device?",
-      "description": "云大师 needs a paired online device before you can choose a project or start sessions.",
+      "description": "云大师Agent needs a paired online device before you can choose a project or start sessions.",
       "later": "Maybe later",
       "addDevice": "Add device"
     },
@@ -1466,7 +1466,7 @@
     "settingsFailed": "Failed to save Desktop settings.",
     "openDataFolderFailed": "Failed to open the data folder.",
     "remoteReconnectTitle": "Use the target device to reconnect",
-    "remoteReconnectDescription": "Open 云大师 Desktop on “{name}”, then select Reconnect in the prompt or Settings.",
+    "remoteReconnectDescription": "Open 云大师Agent Desktop on “{name}”, then select Reconnect in the prompt or Settings.",
     "gotIt": "Got it",
     "localNameFailed": "The server name was updated, but the local Desktop name could not be synchronized."
   },
@@ -1489,7 +1489,7 @@
       "registerFailed": "Registration failed.",
       "invalidServer": "Enter a valid HTTP or HTTPS server address without credentials or a page path.",
       "serverUnavailable": "Could not reach the server. Check the address and your connection, then try again.",
-      "invalidHealth": "This address did not return a healthy 云大师 server. Check the backend address.",
+      "invalidHealth": "This address did not return a healthy 云大师Agent server. Check the backend address.",
       "serverTimeout": "The connection timed out. Check the address and your connection, then try again."
     },
     "bootstrap": {
@@ -1520,7 +1520,7 @@
       "forgot": "Forgot your password? Ask your instance admin to reset it.",
       "newHere": "New here?",
       "oauth": "Sign in with {provider}",
-      "oauthDescription": "Securely sign in to your 云大师 account through the browser.",
+      "oauthDescription": "Securely sign in to your 云大师Agent account through the browser.",
       "passwordPlaceholder": "••••••••",
       "passwordDivider": "or use your account password",
       "submit": "Sign in",
@@ -1529,8 +1529,8 @@
       "signingIn": "Signing in...",
       "submitWithEnter": "Sign in ↵",
       "syncDescription": "Access your agents, sessions, and workspaces across all your devices.",
-      "cloud": "Sign in to 云大师 Cloud",
-      "selfHosted": "Connect to your own 云大师 server",
+      "cloud": "Sign in to 云大师Agent Cloud",
+      "selfHosted": "Connect to your own 云大师Agent server",
       "serverPlaceholder": "Server address, e.g. https://your-server.com",
       "connectServer": "Connect to server",
       "connecting": "Connecting…",
@@ -1551,10 +1551,10 @@
       "cancel": "Cancel",
       "continue": "Continue",
       "currentAccount": "Current account",
-      "description": "云大师 for iOS wants to sign in with this server account.",
+      "description": "云大师Agent for iOS wants to sign in with this server account.",
       "eyebrow": "Mobile sign-in",
       "invalid": "Invalid mobile login request.",
-      "opening": "Opening 云大师...",
+      "opening": "Opening 云大师Agent...",
       "switchAccount": "Use another account",
       "title": "Continue to the app?",
       "unknownAccount": "Signed-in account"
@@ -1690,7 +1690,7 @@
       "desktopSilentLaunch": "Launch silently at login",
       "desktopSilentLaunchDescription": "When opened at login, run in the background without showing a window. Open the app again to show it.",
       "desktopConfirmQuitOnShutdown": "Ask before quitting on shutdown",
-      "desktopConfirmQuitOnShutdownDescription": "When on, 云大师 asks before quitting when the computer shuts down or restarts. When off, it quits right away and never blocks shutdown. You can also change this from the device page on your phone or other devices; this computer must be connected to the server first.",
+      "desktopConfirmQuitOnShutdownDescription": "When on, 云大师Agent asks before quitting when the computer shuts down or restarts. When off, it quits right away and never blocks shutdown. You can also change this from the device page on your phone or other devices; this computer must be connected to the server first.",
       "desktopMaintenance": "Maintenance",
       "desktopMaintenanceDescription": "Open local data or restart Connector if it encounters a problem.",
       "desktopOpenDataFolder": "Open data folder",
@@ -2006,7 +2006,7 @@
           "loadFailed": "Couldn't read the Tokens Anywhere account right now.",
           "tabModels": "Models",
           "tabUsage": "Usage",
-          "modelsHint": "Turning models off or renaming them only affects 云大师, and applies to every runtime using Tokens Anywhere.",
+          "modelsHint": "Turning models off or renaming them only affects 云大师Agent, and applies to every runtime using Tokens Anywhere.",
           "restoreDefaults": "Restore defaults",
           "refresh": "Refresh",
           "otherVendor": "Other",
@@ -2434,7 +2434,7 @@
       "webCallback": "Web redirect URL",
       "nativeCallback": "Native callback",
       "about": "About",
-      "aboutDescription": "云大师 is an open-source remote control surface for AI coding agents.",
+      "aboutDescription": "云大师Agent is an open-source remote control surface for AI coding agents.",
       "unavailable": "Service settings unavailable.",
       "loadFailed": "Failed to load service settings.",
       "updateFailed": "Failed to update settings.",
@@ -2791,7 +2791,7 @@
     "checkFailed": "Could not check your Agents. Please try again.",
     "retry": "Retry",
     "phoneTitle": "Connect your phone",
-    "phoneDescription": "Open 云大师 on your phone and scan the QR code.",
+    "phoneDescription": "Open 云大师Agent on your phone and scan the QR code.",
     "deviceConnected": "{name}\nis connected.",
     "deviceDescription": "Add Agents available on this computer.\nYou can also configure them later on the device page.",
     "configureAgent": "Configure Agents",

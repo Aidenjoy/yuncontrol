@@ -54,7 +54,7 @@
     "environmentFailedDescription": "环境尚未准备完成。请根据下面的具体错误修复后重试，或查看日志。"
   },
   "app": {
-    "name": "云大师"
+    "name": "云大师Agent"
   },
   "home": {
     "title": "web-next 重构基线",
@@ -346,7 +346,7 @@
     },
     "empty": {
       "noDevices": "还没有配对设备",
-      "noDevicesDescription": "云大师 需要一个在线连接器，才能创建或恢复会话。",
+      "noDevicesDescription": "云大师Agent 需要一个在线连接器，才能创建或恢复会话。",
       "noDevicesTitle": "先配对一个设备",
       "noOnlineDevice": "没有可用的在线设备或 Agent。",
       "noPinned": "没有置顶会话",
@@ -911,7 +911,7 @@
       "connect": "连接手机",
       "androidDownloadOption": "Android",
       "confirmDevice": "扫码设备",
-      "downloadPrompt": "请前往网站下载 云大师 手机端。装好后回到这里继续，我们会用二维码把手机和这台电脑连接起来。",
+      "downloadPrompt": "请前往网站下载 云大师Agent 手机端。装好后回到这里继续，我们会用二维码把手机和这台电脑连接起来。",
       "downloadUrlHint": "也可以手动打开 {url}",
       "openDownloadPage": "前往下载页",
       "pendingConfirmationDevice": "{device} 想要登录你的账号",
@@ -996,9 +996,9 @@
       "takeoverEnableDescription": [
         "开启后可在网页上接管这个会话。",
         "消息可能不会立即同步到 {agent} 客户端，通常重启它们后即可刷新同步。",
-        "如果你同时在 云大师 和 {agent} 客户端中操作此会话，可能导致意料外的结果。"
+        "如果你同时在 云大师Agent 和 {agent} 客户端中操作此会话，可能导致意料外的结果。"
       ],
-      "takeoverEnableDshDescription": "DSH 现可实时同步 <beta>Beta</beta> 云大师。启用接管即可发送消息。",
+      "takeoverEnableDshDescription": "DSH 现可实时同步 <beta>Beta</beta> 云大师Agent。启用接管即可发送消息。",
       "takeoverDisableTitle": "关闭接管？",
       "takeoverDisableDescription": [
         "关闭后会话将回到只读模式，无法继续发送消息。",
@@ -1113,8 +1113,8 @@
       "shareEntireSession": "整个会话",
       "shareEntireSessionDescription": "分享创建链接时的完整会话快照。",
       "createShareLink": "生成分享链接",
-      "shareReplyText": "来自 云大师 的回复",
-      "shareSessionText": "来自 云大师 的会话",
+      "shareReplyText": "来自 云大师Agent 的回复",
+      "shareSessionText": "来自 云大师Agent 的会话",
       "shareLinkCopied": "分享链接已复制",
       "shareFailed": "生成分享链接失败",
       "gitOperationCommitted": "已提交",
@@ -1335,7 +1335,7 @@
       "desktopLocalDescription": "打开当前浏览器所在这台机器上的桌面连接器。",
       "desktopLocalStepTitle": "启动本机桌面连接器",
       "desktopLocalStepDescription": "这个方式只能启动当前浏览器所在这台机器上的连接器。",
-      "desktopInstallHint": "如果这台机器还没有安装桌面连接器，请先安装云大师桌面程序。要连接另一台机器，请使用命令启动、凭据文本或配对码。",
+      "desktopInstallHint": "如果这台机器还没有安装桌面连接器，请先安装云大师Agent桌面程序。要连接另一台机器，请使用命令启动、凭据文本或配对码。",
       "desktopStarted": "我已启动桌面连接器",
       "commandTitle": "使用命令启动",
       "commandDescription": "复制命令到目标设备的终端运行，需要会使用 uv/uvx。",
@@ -1388,7 +1388,7 @@
       "connectionDescription": "您可以通过桌面程序或 CLI 连接您的设备。",
       "cliTitle": "使用命令行连接",
       "cliDescription": "使用一行命令连接您的设备，建议用于 Linux。",
-      "desktopInstallDescription": "安装云大师桌面程序，然后按照下方步骤完成连接。",
+      "desktopInstallDescription": "安装云大师Agent桌面程序，然后按照下方步骤完成连接。",
       "desktopDownloadTitle": "下载并安装",
       "desktopLoginTitle": "打开程序并登录",
       "desktopOnlineTitle": "等待设备上线",
@@ -1411,7 +1411,7 @@
     },
     "firstDevice": {
       "title": "要添加你的第一台设备吗？",
-      "description": "云大师 需要一台已配对且在线的设备，才能选择项目或开始会话。",
+      "description": "云大师Agent 需要一台已配对且在线的设备，才能选择项目或开始会话。",
       "later": "稍后再说",
       "addDevice": "添加设备"
     },
@@ -1466,7 +1466,7 @@
     "settingsFailed": "无法保存 Desktop 设置。",
     "openDataFolderFailed": "无法打开数据目录。",
     "remoteReconnectTitle": "需要在目标设备上操作",
-    "remoteReconnectDescription": "请在“{name}”上打开 云大师 桌面端，然后在弹窗或设置页面中点击“重新连接”。",
+    "remoteReconnectDescription": "请在“{name}”上打开 云大师Agent 桌面端，然后在弹窗或设置页面中点击“重新连接”。",
     "gotIt": "知道了",
     "localNameFailed": "服务器名称已更新，但无法同步本机 Desktop 名称。"
   },
@@ -1489,7 +1489,7 @@
       "registerFailed": "注册失败。",
       "invalidServer": "请输入有效的 HTTP 或 HTTPS 服务器地址，不要包含账号、密码或页面路径。",
       "serverUnavailable": "无法连接服务器，请检查地址和网络后重试。",
-      "invalidHealth": "该地址未返回正常的 云大师 服务，请检查后端地址。",
+      "invalidHealth": "该地址未返回正常的 云大师Agent 服务，请检查后端地址。",
       "serverTimeout": "连接服务器超时，请检查地址和网络后重试。"
     },
     "bootstrap": {
@@ -1520,7 +1520,7 @@
       "forgot": "忘记密码？请联系实例管理员重置。",
       "newHere": "第一次使用？",
       "oauth": "使用 {provider} 登录",
-      "oauthDescription": "通过浏览器安全登录你的 云大师 账号。",
+      "oauthDescription": "通过浏览器安全登录你的 云大师Agent 账号。",
       "passwordPlaceholder": "••••••••",
       "passwordDivider": "或使用账号密码",
       "submit": "登录",
@@ -1529,8 +1529,8 @@
       "signingIn": "正在登录...",
       "submitWithEnter": "登录 ↵",
       "syncDescription": "在所有设备间访问你的 Agent、会话和工作空间。",
-      "cloud": "登录 云大师 Cloud",
-      "selfHosted": "连接到你自己的 云大师 服务实例",
+      "cloud": "登录 云大师Agent Cloud",
+      "selfHosted": "连接到你自己的 云大师Agent 服务实例",
       "serverPlaceholder": "输入服务器地址，例如 https://your-server.com",
       "connectServer": "连接服务器",
       "connecting": "正在连接…",
@@ -1551,10 +1551,10 @@
       "cancel": "取消",
       "continue": "继续",
       "currentAccount": "当前账号",
-      "description": "云大师 iOS 将使用这个服务器账号登录。",
+      "description": "云大师Agent iOS 将使用这个服务器账号登录。",
       "eyebrow": "手机登录",
       "invalid": "手机登录请求无效。",
-      "opening": "正在打开 云大师...",
+      "opening": "正在打开 云大师Agent...",
       "switchAccount": "使用其他账号",
       "title": "继续打开 App？",
       "unknownAccount": "已登录账号"
@@ -2006,7 +2006,7 @@
           "loadFailed": "暂时读不到 Tokens Anywhere 账户。",
           "tabModels": "模型",
           "tabUsage": "用量",
-          "modelsHint": "关闭或改名只影响 云大师，会应用到所有使用 Tokens Anywhere 的 Runtime。",
+          "modelsHint": "关闭或改名只影响 云大师Agent，会应用到所有使用 Tokens Anywhere 的 Runtime。",
           "restoreDefaults": "恢复默认",
           "refresh": "刷新",
           "otherVendor": "其他",
@@ -2434,7 +2434,7 @@
       "webCallback": "Web 重定向地址",
       "nativeCallback": "原生回调地址",
       "about": "关于",
-      "aboutDescription": "云大师 是面向 AI 编程代理的开源远程控制界面。",
+      "aboutDescription": "云大师Agent 是面向 AI 编程代理的开源远程控制界面。",
       "unavailable": "服务设置不可用。",
       "loadFailed": "无法加载服务设置。",
       "updateFailed": "无法更新设置。",
@@ -2791,7 +2791,7 @@
     "checkFailed": "无法检查已添加的 Agent，请重试。",
     "retry": "重新检测",
     "phoneTitle": "连接手机",
-    "phoneDescription": "打开手机端 云大师，扫描二维码。",
+    "phoneDescription": "打开手机端 云大师Agent，扫描二维码。",
     "deviceConnected": "{name}\n已连接。",
     "deviceDescription": "添加这台电脑上可用的 Agent，\n也可以稍后在设备页面配置。",
     "configureAgent": "配置 Agent",
