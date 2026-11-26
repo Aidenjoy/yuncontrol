@@ -1,4 +1,5 @@
-import { Bot, Cloud } from "lucide-react"
+import { BrandMark } from "@/components/brand-mark"
+import { Bot } from "lucide-react"
 
 // Paths from the supplied agent SVGs; currentColor follows the sidebar theme.
 const agentIcons = {
@@ -23,7 +24,7 @@ const agentIcons = {
 
 export function SessionAgentIcon({ runtime, runtimeType }: { runtime: string; runtimeType?: string }) {
   const type = (runtimeType?.trim() || runtime).toLowerCase().replace(/[\s_-]/g, "")
-  if (type === "yunwork") return <Cloud aria-label="云大师" role="img" data-icon="inline-start" />
+  if (type === "yunwork") return <BrandMark label="云大师Agent" className="size-4" />
 
   const agent = type === "pi" ? "pi"
     : type === "codex" ? "codex"

@@ -78,8 +78,8 @@ async def config(response: Response):
     return {
         "manifestVersion": "1.0.0",
         "providerId": "com.yundashi.plugins",
-        "name": "云大师",
-        "attribution": {"name": "云大师", "url": origin + "/"},
+        "name": "云大师Agent",
+        "attribution": {"name": "云大师Agent", "url": origin + "/"},
         "transport": {
             "kind": "https-json",
             "endpoint": origin + "/api/v2/plugins/v1/plugins",

@@ -101,7 +101,7 @@ test("Windows close hides the window without confirming quit, and reopening rest
     process: { platform: "win32", env: {} },
     app: { isPackaged: true },
     BrowserWindow: Window,
-    APP_NAME: "云大师",
+    APP_NAME: "云大师Agent",
     path,
     __dirname,
     mainWindow: null,
@@ -162,7 +162,7 @@ test("Windows tray opens the app, cancels exit, and shuts down only after confir
     class TestTray extends EventEmitter {
       menu: TrayItem[] = [];
       constructor(readonly icon: string) { super(); }
-      setToolTip = (name: string) => assert.equal(name, "云大师");
+      setToolTip = (name: string) => assert.equal(name, "云大师Agent");
       setContextMenu = (menu: TrayItem[]) => { this.menu = menu; };
       destroy = () => fixture.calls.push("destroy-tray");
     }
@@ -171,7 +171,7 @@ test("Windows tray opens the app, cancels exit, and shuts down only after confir
       process: { platform: "win32", resourcesPath },
       app: { ...fixture.globals.app, isPackaged: packaged, getAppPath: () => appPath },
       path,
-      APP_NAME: "云大师",
+      APP_NAME: "云大师Agent",
       Tray: TestTray,
       Menu: { buildFromTemplate: (items: TrayItem[]) => items },
       showMainWindow: () => fixture.calls.push("show"),
@@ -185,7 +185,7 @@ test("Windows tray opens the app, cancels exit, and shuts down only after confir
     createWindowsTray();
     assert.equal(globals.tray, tray, "initialization must retain a single tray instance");
     tray.emit("click");
-    tray.menu.find((item) => item.label === "打开 云大师")!.click!();
+    tray.menu.find((item) => item.label === "打开 云大师Agent")!.click!();
     assert.deepEqual(fixture.calls, ["show", "show"]);
     fixture.calls.length = 0;
     const exit = tray.menu.find((item) => item.label === "退出")!.click!;

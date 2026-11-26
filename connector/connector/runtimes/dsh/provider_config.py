@@ -24,7 +24,7 @@ def runtime_display_name(selected_runtime_type: str | None = None) -> str:
         return (
             os.environ.get("YUNWORK_SHORT_NAME", "").strip()
             or os.environ.get("YUNWORK_PRODUCT_NAME", "").strip()
-            or "云大师"
+            or "云大师Agent"
         )
     return "DeepSeek Harness"
 

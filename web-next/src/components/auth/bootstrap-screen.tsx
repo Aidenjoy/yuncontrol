@@ -1,5 +1,7 @@
 "use client"
 
+import { BrandMark } from "@/components/brand-mark"
+
 import { useState } from "react"
 import { Key, User, Lock, Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -33,7 +35,7 @@ export function BootstrapScreen() {
       <div className="flex flex-col items-center gap-2 text-center mb-8">
         <h1 className="text-2xl font-bold tracking-tight">
           {t("bootstrap.titlePrefix")}{" "}
-          <span className="aa-wordmark">云大师</span>
+          <span className="aa-wordmark"><BrandMark className="mr-2" />云大师Agent</span>
         </h1>
         <p className="text-sm text-muted-foreground leading-relaxed">
           {t("bootstrap.description")}

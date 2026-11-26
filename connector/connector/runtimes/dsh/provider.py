@@ -75,7 +75,7 @@ class DshProvider(RuntimeProvider):
             return (
                 os.environ.get("YUNWORK_SHORT_NAME", "").strip()
                 or os.environ.get("YUNWORK_PRODUCT_NAME", "").strip()
-                or "云大师"
+                or "云大师Agent"
             )
         return "DeepSeek Harness"
 

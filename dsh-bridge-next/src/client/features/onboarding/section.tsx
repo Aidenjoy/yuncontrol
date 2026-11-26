@@ -10,7 +10,7 @@ import css from './section.module.css'
 export function OnboardingSection({ t, host, state: panel }: { t: Translate; host: OnboardingHostApi; state: OnboardingState }) {
   const { snapshot, busy, run, refresh, clearError } = panel
   const branded = Boolean(snapshot?.brand)
-  const brandName = snapshot?.brand?.shortName || snapshot?.brand?.productName || '云大师'
+  const brandName = snapshot?.brand?.shortName || snapshot?.brand?.productName || '云大师Agent'
   const error = panel.error ?? panel.readError
   const [link, setLink] = useState<string | null>(null)
   const [serverUrl, setServerUrl] = useState('')

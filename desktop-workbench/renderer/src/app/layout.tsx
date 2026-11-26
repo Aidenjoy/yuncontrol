@@ -29,30 +29,30 @@ const serif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "云大师",
+  title: "云大师Agent",
   description: "Remote control plane for coding agents",
-  applicationName: "云大师",
+  applicationName: "云大师Agent",
   manifest: "/site.webmanifest",
   icons: {
     icon: [
       {
-        url: "/favicon-dark-mode.png",
+        url: "/favicon-dark-mode.png?v=cloud-20261126",
         type: "image/png",
         media: "(prefers-color-scheme: dark)"
       },
       {
-        url: "/favicon-light-mode.png",
+        url: "/favicon-light-mode.png?v=cloud-20261126",
         type: "image/png",
         media: "(prefers-color-scheme: light)"
       },
       {
-        url: "/favicon-dark-mode.png",
+        url: "/favicon-dark-mode.png?v=cloud-20261126",
         type: "image/png"
       }
     ],
     apple: [
       {
-        url: "/apple-touch-icon.png",
+        url: "/apple-touch-icon.png?v=cloud-20261126",
         sizes: "180x180",
         type: "image/png"
       }
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    title: "云大师",
+    title: "云大师Agent",
     statusBarStyle: "black-translucent"
   }
 };

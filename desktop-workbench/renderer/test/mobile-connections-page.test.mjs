@@ -57,7 +57,7 @@ function button(container, label) {
 test("the mobile connection page renders the onboarding phone slide without a wordmark", async (t) => {
   const container = await render(t)
   await until(() => container.querySelector('[data-slide="phone"]'))
-  assert.ok(container.querySelector('img[src="/images/onboarding/phone.webp"]'))
+  assert.ok(container.querySelector('img[src="/images/onboarding/yundashi.png"]'))
   assert.equal(container.querySelector(".aa-wordmark"), null)
   assert.match(container.textContent, /Agent 在工作。/)
   assert.ok(button(container, "连接手机"))

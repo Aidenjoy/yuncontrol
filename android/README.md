@@ -167,9 +167,9 @@ sha256，缓存在 `cacheDir/file-previews/` 下（以原文件名保存，3 天
 该页标题栏的下载按钮同样进入预览页。HTML 预览允许运行页面脚本和加载网络资源，但不能读取手机或
 工作设备上的其他文件；其余预览都关闭脚本。
 
-## 云大师独立安装标识
+## 云大师Agent独立安装标识
 
 安卓安装标识为 `com.yundashi.agent`，可与原版 Agents Anywhere 并存；源码 namespace 保持不变。
-桌面图标使用 `utoken_2/web/default/public/logo.png` 的蓝色品牌图，已复制到本项目资源目录，无需依赖外部项目打包。
+桌面图标使用 `uwork/brand/assets/yundashi` 的云朵品牌图，已复制到本项目资源目录，无需依赖外部项目打包。
 网页登录使用 OAuth 客户端 `yundashi-agent-mobile` 和回调 `yundashi-agent://oauth/callback`，需先部署包含该客户端注册的服务端和支持该标识的 Web；只更新安卓会导致网页提示「手机登录请求无效」。
 旧版及 iOS 的 OAuth 客户端保留；新安装应用不继承原应用本地数据，需重新登录。后续发布须持续使用同一签名证书。

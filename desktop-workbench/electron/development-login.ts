@@ -1,7 +1,7 @@
 import { BrowserWindow } from "electron";
 import { DESKTOP_OAUTH_PROTOCOL } from "./desktop-oauth";
 
-const APP_NAME = "云大师";
+const APP_NAME = "云大师Agent";
 
 let developmentLoginWindow: BrowserWindow | null = null;
 

@@ -18,7 +18,7 @@
 
 ## 错误与有效期
 
-密码或账号状态不满足返回 401；要求二次验证返回 409（本入口暂不支持二次验证）；上游不可用/无效响应返回 502；配置非法返回 503；本地停用/身份冲突返回 403。每次新登录验证 utoken，云大师签发自己的既有凭证；utoken 禁用或改密不会即时撤销已经签发的云大师凭证，仍遵循既有会话有效期与本地禁用机制。
+密码或账号状态不满足返回 401；要求二次验证返回 409（本入口暂不支持二次验证）；上游不可用/无效响应返回 502；配置非法返回 503；本地停用/身份冲突返回 403。每次新登录验证 utoken，云大师Agent签发自己的既有凭证；utoken 禁用或改密不会即时撤销已经签发的云大师Agent凭证，仍遵循既有会话有效期与本地禁用机制。
 
 ## 验证记录与手动验收
 
@@ -36,9 +36,9 @@
 
 ## 修改密码通知（最小撤销方案）
 
-云大师新增 `POST /api/v2/auth/revoke`。utoken 密码提交成功后发送 `{"userId":123,"changedAt":1795500000000}`，`changedAt` 为该事件固定的 Unix 毫秒时间，重试必须复用。请求头 `X-Auth-Secret` 使用双方共享、至少 32 字符的随机密钥。仅使用配置的认证实例映射，不接受客户端提供实例地址；未知身份返回 `matched:false`，不创建用户。
+云大师Agent新增 `POST /api/v2/auth/revoke`。utoken 密码提交成功后发送 `{"userId":123,"changedAt":1795500000000}`，`changedAt` 为该事件固定的 Unix 毫秒时间，重试必须复用。请求头 `X-Auth-Secret` 使用双方共享、至少 32 字符的随机密钥。仅使用配置的认证实例映射，不接受客户端提供实例地址；未知身份返回 `matched:false`，不创建用户。
 
-云大师配置 `AGENT_SERVER_AUTH_REVOKE_SECRET`；utoken 配置 `YUNCONTROL_REVOKE_URL=http://127.0.0.1:8000/api/v2/auth/revoke` 和 `YUNCONTROL_REVOKE_SECRET`（与前者一致）。公网必须 HTTPS，两端应同步时钟；超过云大师当前时间 60 秒的事件拒绝。不要在日志中打印密钥。
+云大师Agent配置 `AGENT_SERVER_AUTH_REVOKE_SECRET`；utoken 配置 `YUNCONTROL_REVOKE_URL=http://127.0.0.1:8000/api/v2/auth/revoke` 和 `YUNCONTROL_REVOKE_SECRET`（与前者一致）。公网必须 HTTPS，两端应同步时钟；超过云大师Agent当前时间 60 秒的事件拒绝。不要在日志中打印密钥。
 
 撤销时间存入现有 instance_settings 表，使用原子最大值处理重复、乱序和并发，无数据库迁移。新增用户令牌携带毫秒签发时间，旧版没有签发时间的令牌在收到第一次通知后失效。旧二维码、旧授权码及旧移动刷新凭证也失效。账号、设备、业务会话不删除。配置认证服务后，HTTP 鉴权与带用户 token 的新 WebSocket 握手检查该时间。已建立的 WebSocket、已发放的短期 WS/预览票据不会主动断开或即时撤销，继续使用既有生命周期；这不是即时全连接踢出方案。
 

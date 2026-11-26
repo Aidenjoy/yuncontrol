@@ -77,7 +77,7 @@ export function PublicSessionShare({ shareId: initialShareId }: { shareId?: stri
       <header className="sticky top-0 z-20 border-b border-border/70 bg-background/85 backdrop-blur-xl">
         <div className="mx-auto flex w-full max-w-[calc(48rem+2rem)] items-center justify-between gap-4 px-4 py-4">
           <div className="min-w-0">
-            <p className="text-xs font-medium text-muted-foreground">云大师</p>
+            <p className="text-xs font-medium text-muted-foreground">云大师Agent</p>
             <h1 className="truncate text-base font-semibold">{share.session.title || t("untitled")}</h1>
           </div>
           <Badge variant="secondary" className="shrink-0 font-normal">

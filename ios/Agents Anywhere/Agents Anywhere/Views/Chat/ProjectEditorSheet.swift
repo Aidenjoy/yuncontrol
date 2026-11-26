@@ -66,7 +66,7 @@ struct ProjectEditorSheet: View {
                     Text(draft.original == nil ? String(localized: "项目关联这个目录，不会在设备上新建文件夹。") : String(localized: "编辑项目时，设备和工作目录保持不变。"))
                 }
                 Section {
-                    TextField(String(localized: "例如 云大师"), text: Binding(get: { draft.name }, set: draft.editName))
+                    TextField(String(localized: "例如 云大师Agent"), text: Binding(get: { draft.name }, set: draft.editName))
                         .textInputAutocapitalization(.never).autocorrectionDisabled()
                 } header: { Text(String(localized: "项目名称")) } footer: {
                     if draft.original == nil { Text(String(localized: "按目录自动填写名称，重名时添加数字后缀。也可以自行修改。")) }

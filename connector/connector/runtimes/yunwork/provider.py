@@ -1,4 +1,4 @@
-"""云大师的独立发现、资源声明与优先排序，不替换 DSH Provider。"""
+"""云大师Agent的独立发现、资源声明与优先排序，不替换 DSH Provider。"""
 from dataclasses import replace
 
 from connector.core import runtime_owner
@@ -9,12 +9,12 @@ from connector.runtimes.dsh.provider import DshProvider
 
 
 async def discover(values):
-    """发现云大师类型，连接探测由独立 Bridge 执行。"""
+    """发现云大师Agent类型，连接探测由独立 Bridge 执行。"""
     return await discovery.discover(values, runtime_type="yunwork")
 
 
 async def probe(values):
-    """只连接云大师 Bridge，不回退到原版 DSH。"""
+    """只连接云大师Agent Bridge，不回退到原版 DSH。"""
     return await discovery.probe(values, runtime_type="yunwork")
 
 
@@ -40,7 +40,7 @@ class YunworkProvider(DshProvider):
 
     @property
     def description(self):
-        return "云大师 AI Agent"
+        return "云大师Agent AI Agent"
 
     @property
     def recommended(self):
@@ -57,8 +57,8 @@ class YunworkProvider(DshProvider):
     def _config_schema(self):
         schema = super()._config_schema()
         properties = schema.schema["properties"]
-        properties["dshHome"] = {**properties["dshHome"], "title": "云大师数据目录",
-            "description": "可选的云大师独立数据目录；连接固定使用 ~/.agents-anywhere/yunwork-bridge。"}
+        properties["dshHome"] = {**properties["dshHome"], "title": "云大师Agent数据目录",
+            "description": "可选的云大师Agent独立数据目录；连接固定使用 ~/.agents-anywhere/yunwork-bridge。"}
         return replace(schema, defaults={**schema.defaults, "dshHome": self._last_values.get("dshHome", str(runtime_owner.system_home() / ".yunwork"))})
 
     async def validate_config(self, values):
@@ -70,8 +70,8 @@ class YunworkProvider(DshProvider):
         endpoint = str(provider_config.endpoint_path("yunwork"))
         home = str(provider_config.dsh_home(dict(config.values)))
         return (
-            RuntimeResourceClaim(kind="dsh_home", key=filesystem_resource_key(home), label="云大师数据目录"),
-            RuntimeResourceClaim(kind="yunwork_bridge_endpoint", key=filesystem_resource_key(endpoint), label="云大师 Bridge"),
+            RuntimeResourceClaim(kind="dsh_home", key=filesystem_resource_key(home), label="云大师Agent数据目录"),
+            RuntimeResourceClaim(kind="yunwork_bridge_endpoint", key=filesystem_resource_key(endpoint), label="云大师Agent Bridge"),
         )
 
     def session_source_key(self, config):

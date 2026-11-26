@@ -1,4 +1,4 @@
-# 云大师插件目录
+# 云大师Agent插件目录
 
 目录兼容 YunWork `dsh-community-market` 的 `market.standard-http-v1` 协议（1.0.0）。它只管理插件元数据，不代理 npm、不执行插件代码、不调用模型。安装、升级、启停和卸载继续由 YunWork 原有插件管理器处理。
 
@@ -7,7 +7,7 @@
 在 **YunControl 服务端进程/容器**环境变量中添加：
 
 ```ini
-AGENT_SERVER_PLUGIN_ORIGIN=https://你的云大师域名
+AGENT_SERVER_PLUGIN_ORIGIN=https://你的云大师Agent域名
 ```
 
 未单独配置时复用 `AGENT_SERVER_PUBLIC_ORIGIN`。只填写公网 HTTPS origin，不带路径、尾部斜线、账号或非标准端口。反向代理要将 `/api/v2/plugins/` 转发到 YunControl 后端。配置缺失或无效时配置接口返回 503；目录查询和现有登录、远控不受影响。Docker Compose 修改环境变量后应重建容器（`docker compose up -d --build --force-recreate`，使用实际部署 compose 文件）；单纯 restart 不更新容器环境变量。
@@ -19,10 +19,10 @@ AGENT_SERVER_PLUGIN_ORIGIN=https://你的云大师域名
 YunWork 的工作区设置中启用 **community-market**，不要同时选择互斥的 dshMarket。进入社区市场的源管理，添加标准 HTTP 源：
 
 ```text
-https://你的云大师域名/api/v2/plugins/config
+https://你的云大师Agent域名/api/v2/plugins/config
 ```
 
-再选择「云大师」作为当前源。桌面端只需使用现有源管理功能，无需修改或下载 YunWork 源码。源注册和选择保存到 YunWork 原有本地 storage domain；不会修改其他源的目录，也不会卸载已安装插件。该协议仅接受 HTTPS 443、无凭据、同源清单和查询接口，不要用 `http://127.0.0.1:8000` 作为正式源，也不要关闭 TLS 校验。
+再选择「云大师Agent」作为当前源。桌面端只需使用现有源管理功能，无需修改或下载 YunWork 源码。源注册和选择保存到 YunWork 原有本地 storage domain；不会修改其他源的目录，也不会卸载已安装插件。该协议仅接受 HTTPS 443、无凭据、同源清单和查询接口，不要用 `http://127.0.0.1:8000` 作为正式源，也不要关闭 TLS 校验。
 
 点击市场「刷新」时，YunWork 现有 `force` 逻辑使用 `cacheMode: reload`，替换已缓存/进行中的 HTTP 请求并重建索引；无需改写安装器或缓存机制。服务端每页强制筛选 `published` 且未删除的记录，返回 `Cache-Control: no-store`；所有页面 revision 来自同一个目录写入时钟。旧分页游标也重新执行当前上架条件。
 
@@ -104,7 +104,7 @@ JSON Schema 来自 YunWork，保留原许可证，位于 `server/agent_server/co
 - 未验证：公网域名与TLS证书、桌面客户端安装包和实际npm插件安装。Desktop renderer同步了管理界面及菜单断言，未单独构建桌面安装包。
 - 未调用模型接口，未安装目录中的插件，未提交或推送代码；本次不修改YunWork项目。
 
-本地调试时，配置接口允许 localhost、回环及内网 IP 的 HTTP origin（可带端口）。公网仍需 HTTPS 443；此例外仅使服务端配置接口可访问，不会放宽云大师市场客户端自身的 HTTPS 校验。
+本地调试时，配置接口允许 localhost、回环及内网 IP 的 HTTP origin（可带端口）。公网仍需 HTTPS 443；此例外仅使服务端配置接口可访问，不会放宽云大师Agent市场客户端自身的 HTTPS 校验。
 
 ## 管理员手动同步目录
 

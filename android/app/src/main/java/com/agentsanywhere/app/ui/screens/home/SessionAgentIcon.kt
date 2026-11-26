@@ -4,16 +4,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.agentsanywhere.app.R
 import com.agentsanywhere.app.ui.designsystem.LocalAAColors
-import com.composables.icons.lucide.Cloud
 import com.composables.icons.lucide.Bot
 import com.composables.icons.lucide.Lucide
 
 /**
- * 按 Runtime 类型显示会话标识，云大师使用独立云图标。
+ * 按 Runtime 类型显示会话标识，云大师Agent使用独立云图标。
  */
 @Composable
 internal fun SessionAgentIcon(
@@ -25,6 +25,7 @@ internal fun SessionAgentIcon(
     val type = runtimeType?.trim().orEmpty().ifBlank { runtime }
         .lowercase().filterNot { it.isWhitespace() || it == '_' || it == '-' }
     val drawable = when (type) {
+        "yunwork" -> R.drawable.yundashi_logo
         "pi" -> R.drawable.ic_session_agent_pi
         "codex" -> R.drawable.ic_session_agent_codex
         "claude", "claudecode" -> R.drawable.ic_session_agent_claude
@@ -36,18 +37,18 @@ internal fun SessionAgentIcon(
         R.drawable.ic_session_agent_codex -> "Codex"
         R.drawable.ic_session_agent_claude -> "Claude Code"
         R.drawable.ic_session_agent_deepseek -> "DeepSeek Harness"
-        else -> if (type == "yunwork") "云大师" else runtime
+        else -> if (type == "yunwork") "云大师Agent" else runtime
     }
     if (drawable != null) {
         Icon(
             painter = painterResource(drawable),
             contentDescription = label,
-            tint = LocalAAColors.current.faint,
+            tint = if (type == "yunwork") Color.Unspecified else LocalAAColors.current.faint,
             modifier = modifier.size(16.dp),
         )
     } else {
         Icon(
-            imageVector = if (type == "yunwork") Lucide.Cloud else Lucide.Bot,
+            imageVector = Lucide.Bot,
             contentDescription = label,
             tint = LocalAAColors.current.faint,
             modifier = modifier.size(16.dp),

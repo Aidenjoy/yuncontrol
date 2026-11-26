@@ -24,19 +24,19 @@ class _DummyHost:
 
 def test_dsh_yunwork_identity_matches_instance_binding(monkeypatch: Any) -> None:
     monkeypatch.setenv("YUNWORK_ANYWHERE_RUNTIME_TYPE", "yunwork")
-    monkeypatch.setenv("YUNWORK_SHORT_NAME", "云大师")
+    monkeypatch.setenv("YUNWORK_SHORT_NAME", "云大师Agent")
 
     assert DshProvider().runtime_type == "dsh"
     provider = YunworkProvider()
     identifiers = [item.runtime_type for item in default_runtime_providers()]
     assert len(identifiers) == len(set(identifiers))
     assert provider.runtime_type == "yunwork"
-    assert provider.display_name == "云大师"
+    assert provider.display_name == "云大师Agent"
 
     config = RuntimeConfig(runtime=provider.runtime_type, revision=1, values={})
     runtime = asyncio.run(provider.create_runtime(config, _DummyHost()))
     assert runtime.identity.runtime == "yunwork"
-    assert runtime.identity.display_name == "云大师"
+    assert runtime.identity.display_name == "云大师Agent"
 
 
 def test_dsh_default_identity_falls_back_to_dsh(monkeypatch: Any) -> None:

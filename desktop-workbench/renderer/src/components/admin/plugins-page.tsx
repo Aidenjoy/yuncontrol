@@ -72,7 +72,7 @@ export function PluginsPage() {
 
   return <ScrollArea className="h-full w-full bg-background">
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-8 pb-16 pt-14">
-      <PageHeader title="插件管理" description="管理云大师插件目录。新插件默认不上架；仅上架插件会出现在自有市场中。" />
+      <PageHeader title="插件管理" description="管理云大师Agent插件目录。新插件默认不上架；仅上架插件会出现在自有市场中。" />
       {error ? <p role="alert" className="text-destructive">{error}</p> : null}
       <div className="flex flex-wrap gap-3">
         <Input aria-label="搜索插件" placeholder="搜索名称或说明" value={q} onChange={e => { setQ(e.target.value); setOffset(0) }} />
