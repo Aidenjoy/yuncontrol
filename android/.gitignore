@@ -3,6 +3,11 @@
 build/
 local.properties
 
+# 正式签名密钥与密码
+*.jks
+*.keystore
+keystore.properties
+
 **/build/
 **/.cxx/
 **/.externalNativeBuild/

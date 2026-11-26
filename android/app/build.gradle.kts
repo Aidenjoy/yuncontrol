@@ -37,12 +37,24 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("../yunhaoyao.jks")
+            storePassword = "yundashi"
+            keyAlias = "yunhaoyao"
+            keyPassword = "yunhaoyao"
+            enableV1Signing = true
+            enableV2Signing = true
+        }
+    }
+
     buildTypes {
         debug {
             buildConfigField("String", "OFFICIAL_SERVER_URL", debugServerUrl.asBuildConfigString())
         }
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
