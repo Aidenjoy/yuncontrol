@@ -4,12 +4,17 @@ import { Suspense } from "react"
 import { AuthProvider, useAuth } from "./auth-context"
 import { BootstrapScreen } from "./bootstrap-screen"
 import { LoginScreen } from "./login-screen"
-import { RegisterScreen } from "./register-screen"
+import { UtokenRegisterScreen } from "./utoken-register-screen"
 import { ForgotPasswordScreen } from "./forgot-password-screen"
 import { OAuthNewUserScreen } from "./oauth-new-user-screen"
 import { OAuthLinkExistingScreen } from "./oauth-link-existing-screen"
 import { SignedOutScreen } from "./signed-out-screen"
-import { TokensAnywhereOAuthFlow, DesktopOAuthFlow, MobileOAuthFlow, PluginOAuthFlow } from "./mobile-oauth-page"
+import {
+  TokensAnywhereOAuthFlow,
+  DesktopOAuthFlow,
+  MobileOAuthFlow,
+  PluginOAuthFlow,
+} from "./mobile-oauth-page"
 import { PluginOnboardingPage } from "@/components/onboarding/plugin-onboarding-page"
 import { Demo } from "@/components/demo"
 import { FilePreviewPage } from "@/components/file-preview-page"
@@ -17,17 +22,16 @@ import { LoadingState } from "@/components/loading-state"
 import { AnnouncementGate } from "@/components/announcements/announcement-gate"
 
 function AuthRouterInner() {
-  const { screen, loading, isAuthenticated } = useAuth()
+  const { screen, loading, isAuthenticated, navigate } = useAuth()
 
   if (loading) {
-    return (
-      <LoadingState className="min-h-screen bg-background" />
-    )
+    return <LoadingState className="min-h-screen bg-background" />
   }
   if (screen === "bootstrap") return <BootstrapScreen />
   if (screen === "app") return isAuthenticated ? <Demo /> : <LoginScreen />
   if (screen === "signed-out") return <SignedOutScreen />
-  if (screen === "register") return <RegisterScreen />
+  if (screen === "register")
+    return <UtokenRegisterScreen onBack={() => navigate("login")} />
   if (screen === "forgot-password") return <ForgotPasswordScreen />
   if (screen === "oauth-new-user") return <OAuthNewUserScreen />
   if (screen === "oauth-link-existing") return <OAuthLinkExistingScreen />
@@ -56,5 +60,10 @@ export function AuthRouter() {
 
 function AuthRouterContent() {
   const { screen, loading } = useAuth()
-  return <><AuthRouterInner /><AnnouncementGate page={loading ? null : screen} /></>
+  return (
+    <>
+      <AuthRouterInner />
+      <AnnouncementGate page={loading ? null : screen} />
+    </>
+  )
 }

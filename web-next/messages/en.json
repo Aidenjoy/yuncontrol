@@ -1,6 +1,7 @@
 {
   "app": {
-    "name": "云大师Agent"
+    "name": "YunDaShi Agent",
+    "shortName": "YunDaShi"
   },
   "home": {
     "title": "web-next refactor baseline",
@@ -283,14 +284,15 @@
       "unpin": "Unpin",
       "unpinChat": "Unpin chat",
       "viewNow": "View now",
-      "tokensAnywhere": "Tokens Anywhere"
+      "tokensAnywhere": "Tokens Anywhere",
+      "onboardingGuide": "Getting started"
     },
     "account": {
       "menu": "Account menu"
     },
     "empty": {
       "noDevices": "No devices paired",
-      "noDevicesDescription": "云大师Agent needs an online connector before it can create or resume sessions.",
+      "noDevicesDescription": "YunDaShi Agent needs an online connector before it can create or resume sessions.",
       "noDevicesTitle": "Pair a device to start",
       "noOnlineDevice": "No online device with an agent is available.",
       "noPinned": "No pinned sessions",
@@ -552,7 +554,7 @@
       "confirmDevice": "Scanned device",
       "confirming": "Confirming connection...",
       "connect": "Connect phone",
-      "downloadPrompt": "Download the 云大师Agent mobile app from our website. Once it is installed, come back here and we will connect your phone to this computer with a QR code.",
+      "downloadPrompt": "Download the YunDaShi Agent mobile app from our website. Once it is installed, come back here and we will connect your phone to this computer with a QR code.",
       "openDownloadPage": "Open download page",
       "downloadUrlHint": "Or open {url} manually",
       "errorTitle": "Unable to continue",
@@ -594,7 +596,7 @@
     "device": {
       "deviceSettings": "Device settings",
       "confirmQuitOnShutdown": "Ask before quitting on shutdown",
-      "confirmQuitOnShutdownDescription": "When on, 云大师Agent asks before quitting when the computer shuts down or restarts. When off, it quits right away and never blocks shutdown.",
+      "confirmQuitOnShutdownDescription": "When on, YunDaShi Agent asks before quitting when the computer shuts down or restarts. When off, it quits right away and never blocks shutdown.",
       "deviceSettingsPending": "Saved. It takes effect when the device comes online.",
       "deviceSettingsSaveFailed": "Device settings were not saved",
       "deviceSettingsLoadFailed": "Couldn't load device settings.",
@@ -921,9 +923,9 @@
       "takeoverEnableDescription": [
         "After enabling Takeover, you can take over this session on the web.",
         "Messages may not sync to the {agent} client immediately. Restarting it usually refreshes the sync.",
-        "If you operate this session in both 云大师Agent and the {agent} client at the same time, unexpected results may occur."
+        "If you operate this session in both YunDaShi Agent and the {agent} client at the same time, unexpected results may occur."
       ],
-      "takeoverEnableDshDescription": "DSH now syncs in real time <beta>Beta</beta> with 云大师Agent. Enable Takeover to send messages.",
+      "takeoverEnableDshDescription": "DSH now syncs in real time <beta>Beta</beta> with YunDaShi Agent. Enable Takeover to send messages.",
       "takeoverDisableTitle": "Disable Takeover?",
       "takeoverDisableDescription": [
         "After disabling Takeover, the session returns to read-only mode and you cannot send more messages.",
@@ -998,8 +1000,8 @@
       "shareEntireSession": "Entire session",
       "shareEntireSessionDescription": "Share a snapshot of the complete session as it is now.",
       "createShareLink": "Create share link",
-      "shareReplyText": "A reply from 云大师Agent",
-      "shareSessionText": "A session from 云大师Agent",
+      "shareReplyText": "A reply from YunDaShi Agent",
+      "shareSessionText": "A session from YunDaShi Agent",
       "shareLinkCopied": "Share link copied",
       "shareFailed": "Failed to create share link",
       "publicShareLoading": "Loading shared content",
@@ -1236,7 +1238,7 @@
       "cliTitle": "Connect using the command line",
       "cliDescription": "Connect your device with a single command. Suggested for Linux.",
       "desktopInstallTitle": "Connect using the desktop app",
-      "desktopInstallDescription": "Install 云大师Agent Desktop, then follow the steps below to connect.",
+      "desktopInstallDescription": "Install YunDaShi Agent Desktop, then follow the steps below to connect.",
       "desktopDownloadTitle": "Download and install",
       "desktopInstallStepDownload": "Choose an installer under Assets: the .exe for Windows, or the Apple Silicon or Intel .dmg for your Mac. Download it and complete the installation.",
       "desktopLoginTitle": "Open the app and sign in",
@@ -1273,7 +1275,7 @@
       "desktopLocalDescription": "Open the desktop connector on the same computer where this browser is running.",
       "desktopLocalStepTitle": "Start local desktop connector",
       "desktopLocalStepDescription": "This option can only start the connector on this browser's computer.",
-      "desktopInstallHint": "If the desktop connector is not installed on this computer yet, install 云大师Agent Desktop first. To connect another machine, use command startup, credential text, or pair code.",
+      "desktopInstallHint": "If the desktop connector is not installed on this computer yet, install YunDaShi Agent Desktop first. To connect another machine, use command startup, credential text, or pair code.",
       "desktopStarted": "I have started the desktop connector",
       "commandTitle": "Start with command",
       "commandDescription": "Copy a command into the target device terminal. Requires uv/uvx command-line usage.",
@@ -1326,7 +1328,7 @@
     },
     "firstDevice": {
       "title": "Add your first device?",
-      "description": "云大师Agent needs a paired online device before you can choose a project or start sessions.",
+      "description": "YunDaShi Agent needs a paired online device before you can choose a project or start sessions.",
       "later": "Maybe later",
       "addDevice": "Add device"
     },
@@ -1355,7 +1357,7 @@
     "title": "Privacy policy",
     "updated": "Last updated: September 9, 2026",
     "back": "Back",
-    "introduction": "This policy explains how the 云大师Agent web and desktop clients handle information. The server you connect to, connected devices and model services may be operated by different parties and have their own privacy policies.",
+    "introduction": "This policy explains how the YunDaShi Agent web and desktop clients handle information. The server you connect to, connected devices and model services may be operated by different parties and have their own privacy policies.",
     "sections": {
       "local": {
         "title": "Information on this device",
@@ -1388,6 +1390,7 @@
     }
   },
   "auth": {
+    "brandName": "YunDaShi Agent",
     "actions": {
       "hidePassword": "Hide password",
       "showPassword": "Show password"
@@ -1427,6 +1430,7 @@
       "useUtoken": "Sign in with your account",
       "useLocal": "Local administrator sign-in",
       "createAccount": "Create an account",
+      "signUp": "Sign up",
       "description": "Sign in with your email address and password.",
       "privacyNotice": "By signing in, you agree to the",
       "forgot": "Forgot your password? Ask your instance admin to reset it.",
@@ -1434,7 +1438,7 @@
       "oauth": "Sign in with {provider}",
       "passwordPlaceholder": "••••••••",
       "submit": "Sign in",
-      "titlePrefix": "Sign in to",
+      "titlePrefix": "Sign in",
       "invalidEmail": "Enter an email address.",
       "userPlaceholder": "name@example.com",
       "signingIn": "Signing in...",
@@ -1450,10 +1454,10 @@
       "cancel": "Cancel",
       "continue": "Continue",
       "currentAccount": "Current account",
-      "description": "云大师Agent for iOS wants to sign in with this server account.",
+      "description": "YunDaShi Agent for iOS wants to sign in with this server account.",
       "eyebrow": "Mobile sign-in",
       "invalid": "Invalid mobile login request.",
-      "opening": "Opening 云大师Agent...",
+      "opening": "Opening YunDaShi Agent...",
       "switchAccount": "Use another account",
       "title": "Continue to the app?",
       "unknownAccount": "Signed-in account"
@@ -1462,10 +1466,10 @@
       "cancel": "Cancel",
       "continue": "Continue",
       "currentAccount": "Current account",
-      "description": "云大师Agent Desktop wants to sign in with this server account.",
+      "description": "YunDaShi Agent Desktop wants to sign in with this server account.",
       "eyebrow": "Desktop sign-in",
       "invalid": "Invalid desktop login request.",
-      "opening": "Opening 云大师Agent Desktop...",
+      "opening": "Opening YunDaShi Agent Desktop...",
       "switchAccount": "Use another account",
       "title": "Continue to Desktop?",
       "unknownAccount": "Signed-in account"
@@ -1546,7 +1550,7 @@
       "failed": "Could not reset the password."
     },
     "tokensAnywhereOAuth": {
-      "eyebrow": "云大师Agent",
+      "eyebrow": "YunDaShi Agent",
       "title": "Sign in to Tokens Anywhere",
       "description": "Share your name, email address and avatar with Tokens Anywhere.",
       "currentAccount": "Current account",
@@ -1556,6 +1560,36 @@
       "cancel": "Cancel",
       "opening": "Continuing to Tokens Anywhere…",
       "invalid": "This sign-in link is invalid. Return to Tokens Anywhere and try again."
+    },
+    "tokenRegister": {
+      "title": "Create account",
+      "description": "Your account, verification codes and delivery are managed by the token service.",
+      "username": "Username",
+      "email": "Email",
+      "phone": "Phone number",
+      "code": "Verification code",
+      "sendCode": "Send code",
+      "countdown": "Retry in {seconds}s",
+      "password": "Password",
+      "confirm": "Confirm password",
+      "passwordHint": "Use 8–20 characters.",
+      "invite": "Invitation code (optional)",
+      "captcha": "Verification",
+      "captchaHint": "Complete the token service verification. You may need to verify again after sending a code.",
+      "captchaRequired": "Complete verification first.",
+      "invalidRecipient": "Enter a valid email address or phone number.",
+      "invalidForm": "Check your username, password, confirmation, verification code and consent.",
+      "agreed": "I have read and agree to the following terms",
+      "agreement": "User agreement",
+      "privacy": "Privacy policy",
+      "submit": "Create account",
+      "working": "Working…",
+      "back": "Back to sign in",
+      "retry": "Retry",
+      "loading": "Loading registration settings…",
+      "disabled": "Registration is currently disabled by the token service.",
+      "unavailable": "Registration is temporarily unavailable. Please retry later.",
+      "success": "Account created. Sign in with your new credentials."
     }
   },
   "pages": {
@@ -1826,7 +1860,7 @@
           "loadFailed": "Couldn't read the Tokens Anywhere account right now.",
           "tabModels": "Models",
           "tabUsage": "Usage",
-          "modelsHint": "Turning models off or renaming them only affects 云大师Agent, and applies to every runtime using Tokens Anywhere.",
+          "modelsHint": "Turning models off or renaming them only affects YunDaShi Agent, and applies to every runtime using Tokens Anywhere.",
           "restoreDefaults": "Restore defaults",
           "refresh": "Refresh",
           "otherVendor": "Other",
@@ -2252,7 +2286,7 @@
       "webCallback": "Web redirect URL",
       "nativeCallback": "Native callback",
       "about": "About",
-      "aboutDescription": "云大师Agent is an open-source remote control surface for AI coding agents.",
+      "aboutDescription": "YunDaShi Agent is an open-source remote control surface for AI coding agents.",
       "unavailable": "Service settings unavailable.",
       "loadFailed": "Failed to load service settings.",
       "updateFailed": "Failed to update settings.",
@@ -2382,6 +2416,48 @@
     },
     "announcements": {
       "description": "Publish or update the announcement shown to every user."
+    },
+    "releases": {
+      "title": "File releases",
+      "description": "Register one installer per platform with its version and download URL; clients use it to check for updates.",
+      "new": "Add release",
+      "createTitle": "Add release",
+      "editTitle": "Edit release",
+      "platform": "Platform",
+      "version": "Version",
+      "file": "File",
+      "status": "Status",
+      "updated": "Updated",
+      "actions": "Actions",
+      "allPlatforms": "All platforms",
+      "published": "Published",
+      "draft": "Draft",
+      "empty": "No releases registered yet.",
+      "loadFailed": "Could not load releases: {message}",
+      "downloadUrl": "Download URL",
+      "fileName": "File name",
+      "notes": "Release notes",
+      "publishedHint": "Only published releases appear in the client update check.",
+      "save": "Save",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "deleteTitle": "Delete this release?",
+      "deleteConfirm": "After deleting, {platform} {version} disappears from the update check and download link.",
+      "deleting": "Deleting…",
+      "invalid": "Enter a version, download URL, and file name.",
+      "versionHint": "For example 2.2.0 or 2.2.0-beta.1",
+      "duplicate": "This platform already has a release; edit that record instead.",
+      "duplicateVersion": "This platform already has {version}; edit that record instead.",
+      "platformMacArm64": "macOS (Apple Silicon)",
+      "platformMacX64": "macOS (Intel)",
+      "platformWindows": "Windows",
+      "platformLinux": "Linux",
+      "platformAndroid": "Android",
+      "platformIos": "iOS",
+      "platformLocked": "The platform cannot change after creation. Delete and re-add to move it.",
+      "platformOnceHint": "One release per platform; edit this row to ship a new version.",
+      "allPlatformsTaken": "All six platforms are registered. Edit an existing record instead.",
+      "publicEndpoint": "Public update check: GET /api/v2/releases/check?platform={platform}&currentVersion={version}"
     }
   },
   "planning": {
@@ -2588,7 +2664,7 @@
     "checkFailed": "Could not check your Agents. Please try again.",
     "retry": "Retry",
     "phoneTitle": "Connect your phone",
-    "phoneDescription": "Open 云大师Agent on your phone and scan the QR code.",
+    "phoneDescription": "Open YunDaShi Agent on your phone and scan the QR code.",
     "deviceConnected": "{name}\nis connected.",
     "deviceDescription": "Add Agents available on this computer.\nYou can also configure them later on the device page.",
     "configureAgent": "Configure Agents",
@@ -2601,7 +2677,12 @@
     "offline": "Connect a device to add an Agent.",
     "openDevice": "Open device",
     "chooseDevice": "Choose a device",
-    "done": "Done"
+    "done": "Done",
+    "guideTitle": "Getting started",
+    "guideClose": "Close the guide",
+    "guideDemoDevice": "Example device",
+    "guideDemoAgentsLabel": "Example Agents",
+    "guideDemoAgents": "This is a walkthrough with example state, showing what the Agent list looks like once an Agent is added. In real use, add an Agent on this computer to start a session."
   },
   "goal": {
     "title": "Goal",

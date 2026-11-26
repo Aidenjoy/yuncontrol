@@ -54,7 +54,8 @@
     "environmentFailedDescription": "环境尚未准备完成。请根据下面的具体错误修复后重试，或查看日志。"
   },
   "app": {
-    "name": "云大师Agent"
+    "name": "云大师Agent",
+    "shortName": "云大师"
   },
   "home": {
     "title": "web-next 重构基线",
@@ -1477,6 +1478,7 @@
     "untitledSession": "未命名会话"
   },
   "auth": {
+    "brandName": "云大师Agent",
     "actions": {
       "hidePassword": "隐藏密码",
       "showPassword": "显示密码"
@@ -1515,6 +1517,7 @@
     },
     "login": {
       "createAccount": "创建账号",
+      "signUp": "注册账号",
       "description": "使用邮箱和密码登录。",
       "desktopOAuth": "使用浏览器登录",
       "forgot": "忘记密码？请联系实例管理员重置。",
@@ -1620,6 +1623,36 @@
       "retry": "{seconds} 秒后重发",
       "sent": "验证码已发送，请查看邮箱。",
       "failed": "验证码发送失败。"
+    },
+    "tokenRegister": {
+      "title": "注册账号",
+      "description": "账号、验证码和邮件由 token 服务管理。",
+      "username": "用户名",
+      "email": "邮箱",
+      "phone": "手机号",
+      "code": "验证码",
+      "sendCode": "发送验证码",
+      "countdown": "{seconds} 秒后重试",
+      "password": "密码",
+      "confirm": "确认密码",
+      "passwordHint": "密码长度为 8–20 位。",
+      "invite": "邀请码（可选）",
+      "captcha": "人机校验",
+      "captchaHint": "按 token 服务要求完成人机校验；发码后可能需要再次验证。",
+      "captchaRequired": "请先完成人机校验。",
+      "invalidRecipient": "请输入有效的邮箱或手机号。",
+      "invalidForm": "请检查用户名、密码、确认密码、验证码及协议勾选。",
+      "agreed": "我已阅读并同意以下协议",
+      "agreement": "用户协议",
+      "privacy": "隐私政策",
+      "submit": "注册",
+      "working": "处理中…",
+      "back": "返回登录",
+      "retry": "重试",
+      "loading": "正在读取注册配置…",
+      "disabled": "token 服务暂未开放注册。",
+      "unavailable": "注册服务暂时不可用，请稍后重试。",
+      "success": "注册成功，请使用刚注册的账号登录。"
     }
   },
   "pages": {
@@ -2585,6 +2618,48 @@
     },
     "announcements": {
       "description": "发布或更新向所有用户展示的公告。"
+    },
+    "releases": {
+      "title": "文件管理",
+      "description": "登记各端安装包的版本号与下载地址，每个平台只保留一个版本，供客户端检查更新。",
+      "new": "新增文件",
+      "createTitle": "新增文件",
+      "editTitle": "编辑文件",
+      "platform": "平台",
+      "version": "版本号",
+      "file": "文件",
+      "status": "状态",
+      "updated": "更新时间",
+      "actions": "操作",
+      "allPlatforms": "全部平台",
+      "published": "已发布",
+      "draft": "未发布",
+      "empty": "还没有登记任何文件。",
+      "loadFailed": "加载失败：{message}",
+      "downloadUrl": "文件地址",
+      "fileName": "文件名",
+      "notes": "更新说明",
+      "publishedHint": "发布后，客户端才能在版本检测里拿到这个版本。",
+      "save": "保存",
+      "saving": "保存中…",
+      "cancel": "取消",
+      "deleteTitle": "删除这条记录？",
+      "deleteConfirm": "删除后 {platform} {version} 不再出现在版本检测和下载链接里。",
+      "deleting": "删除中…",
+      "invalid": "请填写版本号、文件地址和文件名。",
+      "versionHint": "例如 2.2.0 或 2.2.0-beta.1",
+      "duplicate": "该平台已有版本，请直接编辑现有记录。",
+      "duplicateVersion": "该平台已有版本 {version}，请直接编辑这条记录。",
+      "platformMacArm64": "macOS（M 系列）",
+      "platformMacX64": "macOS（Intel）",
+      "platformWindows": "Windows",
+      "platformLinux": "Linux",
+      "platformAndroid": "Android",
+      "platformIos": "iOS",
+      "platformLocked": "平台创建后不能修改，如需更换请删除后重新登记。",
+      "platformOnceHint": "每个平台只保留一个版本，升级时直接编辑这条记录。",
+      "allPlatformsTaken": "六个平台都已登记，请直接编辑现有记录。",
+      "publicEndpoint": "对外版本检测：GET /api/v2/releases/check?platform={platform}&currentVersion={version}"
     }
   },
   "planning": {

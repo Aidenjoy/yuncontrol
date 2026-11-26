@@ -28,7 +28,7 @@ const connector = {
   lastSeenAt: null, createdAt: "2026-09-09T00:00:00.000Z", updatedAt: "2026-09-09T00:00:00.000Z",
 }
 
-async function render(t, { source = "desktop", flowId = "", authFailed = false } = {}) {
+async function render(t, { source = "desktop", flowId = "", authFailed = false, locale = "zh-CN" } = {}) {
   const completed = []
   const reconnects = []
   const local = { authFailed }
@@ -61,8 +61,8 @@ async function render(t, { source = "desktop", flowId = "", authFailed = false }
   const root = createRoot(container)
   await act(async () => root.render(
     h(NextIntlClientProvider, {
-      locale: "zh-CN",
-      messages: JSON.parse(readFileSync(new URL("../messages/zh-CN.json", import.meta.url), "utf8")),
+      locale,
+      messages: JSON.parse(readFileSync(new URL(`../messages/${locale}.json`, import.meta.url), "utf8")),
       timeZone: "Asia/Shanghai",
     }, h(AuthProvider, null, h(DesktopOnboardingPage))),
   ))
@@ -86,12 +86,21 @@ test("a desktop launch starts on the copied web welcome slide", async (t) => {
   const { container } = await render(t)
   await until(() => container.querySelector('[data-slide="welcome"]'))
   assert.match(container.textContent, /你的 Agent，/)
-  assert.ok(container.querySelector('img[src="/images/onboarding/desktop.webp"]'))
+  assert.ok(container.querySelector('img[src="/images/onboarding/yundashidesktop.png"]'))
   assert.ok(button(container, "下一页"))
   assert.ok(button(container, "跳过引导"))
   // Frameless window: this screen carries its own drag band and no wordmark.
   assert.ok(container.querySelector(".aa-window-drag"))
   assert.equal(container.querySelector(".aa-wordmark"), null)
+})
+
+test("the welcome agent list leads with the localized product name", async (t) => {
+  const zh = await render(t)
+  await until(() => zh.container.querySelector(".agent-list"))
+  assert.deepEqual([...zh.container.querySelectorAll(".agent-list li")].map((item) => item.textContent), ["云大师", "Codex", "Claude Code", "DSH"])
+  const en = await render(t, { locale: "en" })
+  await until(() => en.container.querySelector(".agent-list"))
+  assert.deepEqual([...en.container.querySelectorAll(".agent-list li")].map((item) => item.textContent), ["YunDaShi", "Codex", "Claude Code", "DSH"])
 })
 
 test("skipping records completion for a user launch and opens the app", async (t) => {
@@ -108,7 +117,7 @@ test("skipping records completion for a user launch and opens the app", async (t
   await until(() => container.querySelector('[data-slide="complete"]'))
   // The desktop app never offers to download itself.
   assert.equal([...container.querySelectorAll("a")].some((item) => item.textContent.includes("下载桌面程序")), false)
-  assert.equal([...container.querySelectorAll("a")].find((item) => item.textContent.includes("了解更多")).getAttribute("href"), "https://agents-anywhere.com")
+  assert.equal([...container.querySelectorAll("a")].some((item) => item.textContent.includes("了解更多")), false)
   await act(async () => { button(container, "立刻体验").click(); await delay(10) })
   await until(() => completed.length === 1)
   assert.deepEqual(completed, ["desktop"])

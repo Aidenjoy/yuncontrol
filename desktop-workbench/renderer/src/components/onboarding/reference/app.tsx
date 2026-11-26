@@ -20,11 +20,11 @@ type Props = {
   onComplete?: () => void | Promise<void>
   /** Desktop hides it: the window's own chrome owns that corner. */
   wordmark?: boolean
-  /** Desktop hides it: the user is already running the desktop app. */
+  /** Hidden by default: the desktop download page is not published yet. */
   showDownload?: boolean
 }
 
-export function App({ connector, token, userId, initialPage, onPageChange, onComplete, wordmark = true, showDownload = true }: Props) {
+export function App({ connector, token, userId, initialPage, onPageChange, onComplete, wordmark = true, showDownload = false }: Props) {
   const [page, setPage] = useState(initialPage)
   const [transitioning, setTransitioning] = useState(false)
   const [direction, setDirection] = useState(1)

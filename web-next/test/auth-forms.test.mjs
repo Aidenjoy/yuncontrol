@@ -78,8 +78,6 @@ test('utoken login identifies the saved credential pair and submits once via the
   await act(async () => form.querySelector('button[aria-label]').click())
   assert.equal(password.type, 'text')
   assert.equal(calls.length, 2)
-  await act(async () => form.querySelector('button[type="button"][data-slot="button"]:not([aria-label])').click())
-  assert.equal(calls.length, 2)
   globalThis.authFormFixture.loading = true
   await update()
   await act(async () => form.requestSubmit())
@@ -88,7 +86,9 @@ test('utoken login identifies the saved credential pair and submits once via the
 
 test('local administrator login still rejects invalid email and empty password', async t => {
   const { container, calls } = await render(t, LoginScreen)
-  await act(async () => [...container.querySelectorAll('button')].find(button => button.textContent === messages.auth.login.useLocal).click())
+  // Local administrator sign-in moved to its own address (#/admin-login).
+  await act(async () => { window.location.hash = '#/admin-login' })
+  await act(async () => {})
   await fill(container, '#login-email', 'not-an-email')
   await fill(container, '#login-password', 'synthetic password')
   await act(async () => container.querySelector('form').requestSubmit())
@@ -97,6 +97,7 @@ test('local administrator login still rejects invalid email and empty password',
   await fill(container, '#login-password', '')
   await act(async () => container.querySelector('form').requestSubmit())
   assert.equal(calls.length, 0)
+  await act(async () => { window.location.hash = '' })
 })
 
 for (const [Screen, autocomplete] of [[RegisterScreen, 'email'], [BootstrapScreen, 'email'], [ForgotPasswordScreen, 'username'], [OAuthNewUserScreen, 'email']]) {

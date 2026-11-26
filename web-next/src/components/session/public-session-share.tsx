@@ -14,10 +14,13 @@ import { Badge } from "@/components/ui/badge"
 import { dashboardApi } from "@/features/dashboard/api"
 import type { PublicSessionShareResponse, SessionView } from "@/features/dashboard/types"
 import { apiPath } from "@/lib/api"
-import { isVisibleTimelineItem, runtimeLabel } from "@/components/session/session-utils"
+import { isVisibleTimelineItem } from "@/components/session/session-utils"
+import { useRuntimeLabel } from "@/components/session/use-runtime-label"
 
 export function PublicSessionShare({ shareId: initialShareId }: { shareId?: string } = {}) {
   const t = useTranslations("dashboard.session")
+  const tApp = useTranslations("app")
+  const runtimeLabelFor = useRuntimeLabel()
   const pathname = usePathname()
   const [shareId, setShareId] = React.useState(initialShareId ?? "")
   const [share, setShare] = React.useState<PublicSessionShareResponse | null>(null)
@@ -77,7 +80,7 @@ export function PublicSessionShare({ shareId: initialShareId }: { shareId?: stri
       <header className="sticky top-0 z-20 border-b border-border/70 bg-background/85 backdrop-blur-xl">
         <div className="mx-auto flex w-full max-w-[calc(48rem+2rem)] items-center justify-between gap-4 px-4 py-4">
           <div className="min-w-0">
-            <p className="text-xs font-medium text-muted-foreground">云大师Agent</p>
+            <p className="text-xs font-medium text-muted-foreground">{tApp("name")}</p>
             <h1 className="truncate text-base font-semibold">{share.session.title || t("untitled")}</h1>
           </div>
           <Badge variant="secondary" className="shrink-0 font-normal">
@@ -87,7 +90,7 @@ export function PublicSessionShare({ shareId: initialShareId }: { shareId?: stri
       </header>
       <div className="mx-auto flex w-full max-w-[calc(48rem+2rem)] flex-col gap-3 overflow-hidden px-4 py-8">
         <p className="text-xs text-muted-foreground">
-          {share.session.runtimeName?.trim() || runtimeLabel(share.session.runtime)}
+          {share.session.runtimeName?.trim() || runtimeLabelFor(share.session.runtime)}
         </p>
         {groups.map((group) => {
           const groupKey = timelineGroupKey(group)

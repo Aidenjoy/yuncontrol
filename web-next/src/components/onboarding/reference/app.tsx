@@ -20,11 +20,16 @@ type Props = {
   onComplete?: () => void | Promise<void>
   /** Desktop hides it: the window's own chrome owns that corner. */
   wordmark?: boolean
-  /** Desktop hides it: the user is already running the desktop app. */
+  /** Hidden by default: the desktop download page is not published yet. */
   showDownload?: boolean
+  /**
+   * Replay from inside the app. Device and Agent state are illustrative, so the
+   * flow never calls the API and can be walked through any number of times.
+   */
+  demo?: boolean
 }
 
-export function App({ connector, token, userId, initialPage, onPageChange, onComplete, wordmark = true, showDownload = true }: Props) {
+export function App({ connector, token, userId, initialPage, onPageChange, onComplete, wordmark = true, showDownload = false, demo = false }: Props) {
   const [page, setPage] = useState(initialPage)
   const [transitioning, setTransitioning] = useState(false)
   const [direction, setDirection] = useState(1)
@@ -85,9 +90,13 @@ export function App({ connector, token, userId, initialPage, onPageChange, onCom
     setDialog({ kind, open: true })
   }
 
-  const next = () => { page === 1 ? setDialog({ kind: "skip", open: true }) : void navigate(page + 1) }
+  const next = () => {
+    if (demo) { void navigate(page === 1 ? 2 : page + 1); return }
+    page === 1 ? setDialog({ kind: "skip", open: true }) : void navigate(page + 1)
+  }
   const experience = async () => {
     await onComplete?.()
+    if (demo) return
     window.location.href = PRODUCT_LINKS.webAppHref
   }
 
@@ -95,15 +104,15 @@ export function App({ connector, token, userId, initialPage, onPageChange, onCom
     <>
       <OnboardingShell artwork={page === 0 ? "desktop" : page === 2 ? "phone" : undefined} wordmark={wordmark}>
         <div key={page} ref={pageRef} className={page === 0 ? "slide-page slide-page-welcome" : "slide-page"} inert={transitioning} style={{ "--entry-x": `${direction * 22}px` } as CSSProperties}>
-          {page === 0 && <WelcomeSlide onNext={next} onSkip={(trigger) => openDialog("skip", trigger)} />}
-          {page === 1 && <DeviceSlide connector={connector} onNext={next} />}
-          {page === 2 && <PhoneSlide onNext={next} onConnect={(trigger) => openDialog("phone", trigger)} />}
+          {page === 0 && <WelcomeSlide onNext={next} onSkip={(trigger) => { if (demo) { void navigate(1); return } openDialog("skip", trigger) }} />}
+          {page === 1 && <DeviceSlide connector={connector} onNext={next} demo={demo} />}
+          {page === 2 && <PhoneSlide onNext={next} onConnect={(trigger) => { if (demo) { void navigate(3); return } openDialog("phone", trigger) }} />}
           {page === 3 && <CompleteSlide onExperience={() => { void experience() }} showDownload={showDownload} />}
         </div>
       </OnboardingShell>
       <OnboardingDialogs
         token={token} userId={userId}
-        kind={dialog.kind} open={dialog.open}
+        kind={dialog.kind} open={dialog.open && !demo}
         onOpenChange={(open) => setDialog((current) => ({ ...current, open }))}
         onRestoreFocus={() => { if (triggerRef.current?.isConnected) triggerRef.current.focus({ preventScroll: true }) }}
         onPhoneConnected={() => { setDialog((current) => ({ ...current, open: false })); void navigate(3) }}

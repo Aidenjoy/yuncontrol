@@ -3,10 +3,11 @@
 import { BrandMark } from "@/components/brand-mark"
 
 import * as React from "react"
-import { Plus, Smartphone } from "lucide-react"
+import { Plus, Smartphone, Sparkles } from "lucide-react"
 import { toast } from "sonner"
 
 import { useAuth } from "@/components/auth/auth-context"
+import { OnboardingGuideOverlay } from "@/components/onboarding/onboarding-guide-overlay"
 import { PairDeviceDialog } from "@/components/pair-device-dialog"
 import { DevicesSection } from "@/components/sidebar/devices-section"
 import { ProjectConfirmationDialogs } from "@/components/sidebar/project-confirmation-dialogs"
@@ -85,7 +86,9 @@ export function AppSidebar({ contained = false }: { contained?: boolean }) {
   const tokensAnywhereUrl = useTokensAnywhereUrl()
   const [mobileConnectionsSidebarVisible] = useMobileConnectionsSidebarVisibility()
   const t = useTranslations("dashboard")
+  const tApp = useTranslations("app")
   const [pairOpen, setPairOpen] = React.useState(false)
+  const [guideOpen, setGuideOpen] = React.useState(false)
   const { preferences: { projectsExpanded, expandedProjectIds }, setProjectExpanded, setProjectsExpanded } =
     useProjectSidebarPreferences(authSession?.userId ?? "signed-out")
   const [projectEditor, setProjectEditor] = React.useState<ProjectEditorState>(null)
@@ -237,7 +240,7 @@ export function AppSidebar({ contained = false }: { contained?: boolean }) {
       <SidebarHeader className="gap-0 px-4 pb-2 pt-4">
         <div className="flex min-h-7 items-center justify-between">
           <button type="button" onClick={goHome} className="aa-wordmark flex min-w-0 items-center gap-2 text-left text-xl">
-            <BrandMark />云大师Agent
+            <BrandMark />{tApp("name")}
           </button>
         </div>
 
@@ -273,6 +276,12 @@ export function AppSidebar({ contained = false }: { contained?: boolean }) {
               </SidebarMenuButton>
             </SidebarMenuItem>
           ) : null}
+          <SidebarMenuItem>
+            <SidebarMenuButton className="h-10 font-medium" onClick={() => setGuideOpen(true)}>
+              <Sparkles />
+              <span>{t("actions.onboardingGuide")}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
 
@@ -346,6 +355,8 @@ export function AppSidebar({ contained = false }: { contained?: boolean }) {
       </SidebarContent>
 
       <SidebarAccountFooter me={me} navigate={navigate} signOut={signOut} />
+
+      <OnboardingGuideOverlay open={guideOpen} onClose={() => setGuideOpen(false)} />
 
       <PairDeviceDialog
         open={pairOpen}

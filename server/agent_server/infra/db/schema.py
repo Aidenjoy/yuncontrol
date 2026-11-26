@@ -857,3 +857,7 @@ session_queued_messages, session_queue_state = define_message_queue_tables(metad
 
 
 plugin_catalog_info, plugin_catalog_flow = catalog_tables(metadata)
+
+from agent_server.infra.db.release_files import release_tables
+
+(release_files,) = release_tables(metadata)

@@ -45,3 +45,22 @@
 通知异步发送，最多三次、单次三秒，失败记录日志，不影响改密。没有持久化队列，进程退出或重试耗尽后不保证送达；失效通知成功前，旧凭证仍有效。个人改密、管理员重置及忘记密码重置均覆盖。
 
 改密通知验证（2026-11-24）：Server 认证及架构回归 95 项通过；补充时间戳与 WebSocket 握手后定向回归 22 项通过。utoken 通知 HTTP 模拟重试测试通过，Model/Controller 编译检查通过。未修改真实用户密码，未执行真实账号端到端改密；已运行的 utoken 需重新构建并重启以加载通知代码。
+
+
+## 当前页面内注册与独立管理员入口
+
+- 普通登录页的「注册」在当前页面显示表单，仅 Web 提供内嵌注册；Desktop 保留原有外部注册入口。表单读取 `AGENT_SERVER_UTOKEN_URL` 的现有 `/api/status`，发码分别调用其 `/api/verification` 或 `/api/phone_verification`，注册调用其 `/api/user/register`。
+- 当前 Server 的 `/api/v2/auth/utoken/config`、`/api/v2/auth/utoken/code`、`/api/v2/auth/utoken/register` 只转发固定上游接口。验证码生成、存储、邮件/短信发送、校验及账号创建完全在 token 服务执行；不用本地邮件设置，不写本地账号，不发登录会话，不共享 Cookie，不自动重试注册/发码。
+- 注册完成返回当前登录表单，提示用户登录；随后登录才按既有 token 认证流程建立本地身份关联。
+- 普通登录界面隐藏「本地管理员登录」切换。Web 访问 `/admin-login` 会转到 `/#/admin-login`，也可直接使用 `http://<当前域名或IP>:<端口>/#/admin-login`；Desktop renderer 同样识别 `#/admin-login`。管理员认证仍由原后端接口校验，地址不是权限校验的替代。
+- 不修改 token 项目的代码、配置、邮件系统或原站注册入口。上游开启人机校验时，当前登录站点域名须在其现有 Turnstile Site Key 的允许范围内；不能绕过或关闭校验。验证码与注册需各自新的校验令牌。
+- 更新 Web/Desktop 和 Server 后生效；本次不调用真实发码或注册接口，不触发邮件、短信或账号创建。
+
+
+### 邮箱发码故障处理
+
+Web 注册表单不再提供邀请码输入；发码请求与注册提交分别管理忙碌状态，发码时不禁用输入框，避免移动端键盘收起造成页面跳动。验证码请求发起后保留 60 秒冷却，失败也不自动重试；错误信息固定区域显示，人机校验通过 reset 更新，不销毁重建整个控件。
+
+若 token 的 `/api/verification` 返回 `success=false,message=EOF`，本项目返回 502 并提示 token 邮件服务连接中断。SMTP 配置、认证和发送故障需在 token 服务排查；当前项目不接管邮件发送，也不更改 token 的直注册流程。
+
+邮箱发码、短信、注册配置、注册提交及登录统一使用 `AGENT_SERVER_UTOKEN_URL`，确保验证码生成和验证由同一个 token 实例处理。

@@ -160,7 +160,7 @@ test('the administration sidebar lists both groups and navigates by section', as
   assert.match(container.textContent, /团队与公告/)
   assert.match(container.textContent, /服务/)
   const items = [...container.querySelectorAll('[data-sidebar="menu-button"]')].map((button) => button.textContent.trim())
-  assert.deepEqual(items, ['返回主页', '概览', '用户', '使用量', '设备与 Runtime', '运行质量', '团队', '公告', '插件管理', '常规', '身份认证', '邮件', '服务信息'])
+  assert.deepEqual(items, ['返回主页', '概览', '用户', '使用量', '设备与 Runtime', '运行质量', '团队', '公告', '插件管理', '文件管理', '常规', '身份认证', '邮件', '服务信息'])
   assert.match(container.textContent, /服务/)
   assert.equal(container.querySelector('[aria-current="page"]').textContent.trim(), '概览')
   await act(async () => buttonNamed(container, '团队').click())

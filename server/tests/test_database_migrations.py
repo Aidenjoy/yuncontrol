@@ -5,6 +5,13 @@ import hashlib
 import json
 
 import pytest
+from alembic import command
+from sqlalchemy import BigInteger, create_engine, inspect, text
+from sqlalchemy.dialects.postgresql import asyncpg as postgresql_asyncpg
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.pool import NullPool
+
 from agent_server.infra.db.engine import build_engine, resolve_db_url
 from agent_server.infra.db.migrations import (
     CURRENT_SCHEMA_REVISION,
@@ -25,12 +32,7 @@ from agent_server.infra.db.schema import (
     sessions,
     timeline_items,
 )
-from alembic import command
 from migrations.versions import v2_24
-from sqlalchemy import BigInteger, create_engine, inspect, text
-from sqlalchemy.dialects.postgresql import asyncpg as postgresql_asyncpg
-from sqlalchemy.ext.asyncio import create_async_engine
-from sqlalchemy.pool import NullPool
 
 
 def _sync_url(url: str) -> str:
@@ -284,6 +286,7 @@ def test_v2_0_database_upgrades_through_current_revision(fresh_database_url) -> 
         ("v2_54", "v2_55"),
         ("v2_55", "v2_56"),
         ("v2_56", "v2_57"),
+        ("v2_57", "v2_58"),
     ],
 )
 def test_every_adjacent_schema_upgrade(tmp_path,
@@ -1024,9 +1027,9 @@ def test_unversioned_runtime_schema_is_classified_by_actual_columns(tmp_path,
     )
 
 
-def test_current_schema_version_is_v2_57() -> None:
-    assert CURRENT_SCHEMA_REVISION == "v2_57"
-    assert CURRENT_SCHEMA_VERSION == "2.57"
+def test_current_schema_version_is_v2_58() -> None:
+    assert CURRENT_SCHEMA_REVISION == "v2_58"
+    assert CURRENT_SCHEMA_VERSION == "2.58"
 
 
 def test_v2_49_tracks_inventory_scans_without_rewriting_sessions(
@@ -2702,6 +2705,69 @@ def test_v2_57_catalog_uses_explicit_bigint_ids_and_safe_downgrade(fresh_databas
         inspector = inspect(engine)
         assert not inspector.has_table("plugin_catalog_info")
         assert not inspector.has_table("plugin_catalog_flow")
+        assert inspector.has_table("users")
+    finally:
+        engine.dispose()
+
+
+def test_v2_58_release_registry_keeps_one_live_platform(fresh_database_url) -> None:
+    """One live row per platform; downgrade removes only the registry."""
+    url = fresh_database_url
+    upgrade_database(db_url=url, revision="v2_58")
+    engine = create_engine(_sync_url(url))
+    insert_sql = text(
+        "INSERT INTO release_files "
+        "(platform, version, download_url, create_time, update_time, create_by, update_by) "
+        "VALUES (:platform, :version, 'https://dl.example.com/app.dmg', "
+        ":now, :now, 'admin', 'admin')"
+    )
+    values = {
+        "platform": "desktop-macos-arm64",
+        "version": "1.0.0",
+        "now": "2026-11-26T00:00:00Z",
+    }
+    try:
+        inspector = inspect(engine)
+        columns = {column["name"] for column in inspector.get_columns("release_files")}
+        assert {
+            "id",
+            "platform",
+            "version",
+            "download_url",
+            "file_name",
+            "notes",
+            "published",
+            "deleted",
+        }.issubset(columns)
+        with engine.begin() as connection:
+            connection.execute(insert_sql, values)
+        # The platform is taken, so a second build cannot coexist even at 2.0.0.
+        with pytest.raises(IntegrityError), engine.begin() as connection:
+            connection.execute(insert_sql, {**values, "version": "2.0.0"})
+        # Unknown platform literals still violate the CHECK constraint.
+        with pytest.raises(IntegrityError), engine.begin() as connection:
+            connection.execute(insert_sql, {**values, "platform": "windows"})
+        # Apple Silicon and Intel are separate platforms with their own row.
+        with engine.begin() as connection:
+            connection.execute(
+                insert_sql, {**values, "platform": "desktop-macos-x64"}
+            )
+        # A deleted row no longer occupies the platform.
+        with engine.begin() as connection:
+            connection.execute(text("UPDATE release_files SET deleted = 1"))
+        with engine.begin() as connection:
+            connection.execute(insert_sql, values)
+        with engine.begin() as connection:
+            connection.execute(text("DROP TABLE alembic_version"))
+    finally:
+        engine.dispose()
+    assert asyncio.run(classify_database(url)) == UnversionedDatabase("v2", "v2_58")
+    command.stamp(_alembic_config(url), "v2_58")
+    command.downgrade(_alembic_config(url), "v2_57")
+    engine = create_engine(_sync_url(url))
+    try:
+        inspector = inspect(engine)
+        assert not inspector.has_table("release_files")
         assert inspector.has_table("users")
     finally:
         engine.dispose()

@@ -151,6 +151,7 @@ export function TaskComposer() {
     updateProject,
   } = useWorkspace()
   const t = useTranslations("dashboard.new")
+  const tApp = useTranslations("app")
   const tPlanning = useTranslations("planning")
   const tGoal = useTranslations("goal")
   const [goalCreation,setGoalCreation]=React.useState(Boolean(creationEditorDraft?.request.goalIntent))
@@ -1038,7 +1039,7 @@ export function TaskComposer() {
             onClick={goHome}
             className="aa-wordmark text-xl leading-none text-foreground transition-colors hover:text-primary"
           >
-            云大师Agent
+            {tApp("name")}
           </button>
         </div>
       ) : null}
