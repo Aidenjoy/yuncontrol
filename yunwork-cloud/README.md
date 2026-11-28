@@ -13,11 +13,11 @@ Web → yuncontrol Server → yunwork-cloud → Docker
 - 用户实例 ID 是控制密钥对用户 ID 计算的 HMAC，形式为 `user-<24位十六进制>`。用户名、中文显示名和特殊字符不会进入容器名或目录名。
 - 每用户目录包含 `instance.json`、权限为 `0600` 的 `container.env` 和挂载到容器 `/user` 的 `data/`。删除实例会删除整个实例目录。
 - 容器不映射端口、不挂载 Docker Socket，并使用独立标签、资源限制、`cap-drop=ALL` 和 `no-new-privileges`。
-- 控制服务挂载宿主机 Docker Socket，权限等同宿主机 Docker 管理员。它只能部署在受信任主机上，不得暴露给浏览器或公网直连。
+- 控制服务直接在宿主机使用 Docker CLI，权限等同宿主机 Docker 管理员。它只能部署在受信任主机上，不得暴露给浏览器或公网直连。
 
 ## 准备云大师 Agent 镜像
 
-`Dockerfile` 和 `compose.yaml` 构建的是**控制服务**，不是用户容器镜像。用户容器镜像需要由云大师 Agent、DSH CLI、yuncontrol bridge/connector 及 `dsh-yunwork-platform` 的部署产物另行构建。
+控制服务直接作为 Python 项目运行在云主机上，本目录不提供控制服务镜像。用户容器镜像需要由云大师 Agent、DSH CLI、yuncontrol bridge/connector 及 `dsh-yunwork-platform` 的部署产物另行构建。
 
 在镜像构建机完成构建后，将镜像导入或推送到云主机，并确保云主机上的镜像名与 `YUNWORK_CLOUD_IMAGE` 一致。默认值为 `yunwork-cloud:local`。例如已有镜像归档时可执行：
 
@@ -30,7 +30,7 @@ docker image inspect yunwork-cloud:local
 
 ## 配置与启动
 
-要求：Linux、Docker Engine、Docker Compose 插件。以下命令在 `yunwork-cloud/` 目录执行。
+要求：Linux、Python 3.12、uv、Docker Engine。以下命令在 `yunwork-cloud/` 目录执行。
 
 ```bash
 cp .env.example .env
@@ -49,15 +49,17 @@ YUNWORK_CLOUD_HOST=127.0.0.1
 YUNWORK_CLOUD_PORT=8090
 ```
 
-`compose.yaml` 将 `/srv/yunwork-cloud` 同时挂载到控制容器和宿主机。若修改 `YUNWORK_CLOUD_DATA_ROOT`，必须同步调整 Compose 的宿主机与容器挂载路径，保证 Docker Socket 收到的路径在宿主机上有效。
+控制服务和云大师容器都运行在同一台宿主机上，`YUNWORK_CLOUD_DATA_ROOT` 必须保持为宿主机绝对路径，并确保运行控制服务的系统用户有权创建和写入该目录。
 
-启动并检查：
+首次启动或更新后，安装依赖并重启服务：
 
 ```bash
-docker compose up -d --build
+./auto.sh
 curl --fail http://127.0.0.1:8090/healthz
-docker compose logs --tail=100 controller
+tail -n 100 ../.local-dev/logs/yunwork-cloud.log
 ```
+
+日常也可分别执行 `./stop.sh` 和 `./start.sh`。PID 文件为 `../.local-dev/yunwork-cloud.pid`，服务以当前登录用户运行。
 
 `/healthz` 不需要鉴权，其他接口均要求 `Authorization: Bearer <控制密钥>`。服务未启用 CORS，也不应添加浏览器跨域访问。
 
@@ -81,7 +83,7 @@ YUNCONTROL_CLOUD_KEY_SECRET=<独立随机值，至少 32 字符>
 
 `AGENT_SERVER_PUBLIC_ORIGIN` 必须是容器可访问的 Server Web/API origin；`AGENT_SERVER_UTOKEN_URL` 同时用于模型网关和认证 origin。三个地址均只接受不带路径、查询参数或用户信息的 HTTP(S) origin，生产环境应使用 HTTPS。
 
-Compose 默认只绑定 `127.0.0.1`。Server 不在同一主机时，应在云主机配置 TLS 反向代理和防火墙，仅允许 Server 访问控制接口；不要直接把 8090 端口暴露到公网。
+服务默认只绑定 `127.0.0.1`。Server 不在同一主机时，应在云主机配置 TLS 反向代理和防火墙，仅允许 Server 访问控制接口；不要直接把 8090 端口暴露到公网。
 
 ## 运维
 

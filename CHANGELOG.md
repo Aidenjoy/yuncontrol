@@ -6,6 +6,8 @@
 
 ### 升级须知
 
+- 云电脑控制服务改为直接在 Linux 云主机运行，通过 `yunwork-cloud/auto.sh` 安装依赖并重启，不再使用 Docker Compose 部署控制服务自身。
+
 - 安装包发布管理需执行 `v2_59` 迁移，修复旧库无法新增 macOS M/Intel 版本的问题；Linux 不再提供为发布选项，已有记录保留。
 
 
