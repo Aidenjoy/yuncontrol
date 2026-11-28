@@ -5,6 +5,7 @@ import { registerSource } from "./helpers/onboarding-source.mjs"
 const hooks = registerSource()
 const {
   filterProjectSessions,
+  groupProjectsByDevice,
   isDeviceAgentFilterActive,
   projectIdentityLabel,
   projectMatchesDeviceAgentFilter,
@@ -73,6 +74,29 @@ test("identity falls back to the connector id and to the runtime name", () => {
   assert.equal(identity.deviceOs, null)
   assert.deepEqual(identity.agents, [agent("opencode", "OpenCode", 1)])
   assert.deepEqual(resolveProjectIdentity(project("p9"), [], []).agents, [])
+})
+
+test("projects are grouped in device order without reordering their rows", () => {
+  const groups = groupProjectsByDevice(
+    [
+      project("p1"),
+      project("p2", { connectorId: "conn-b" }),
+      project("p3"),
+      project("p4", { connectorId: "conn-missing" }),
+    ],
+    [connector("conn-b", "云电脑"), connector("conn-a", "MacBook Pro")],
+  )
+
+  assert.deepEqual(groups.map((group) => ({
+    connectorId: group.connectorId,
+    deviceName: group.deviceName,
+    projectIds: group.projects.map((item) => item.id),
+  })), [
+    { connectorId: "conn-b", deviceName: "云电脑", projectIds: ["p2"] },
+    { connectorId: "conn-a", deviceName: "MacBook Pro", projectIds: ["p1", "p3"] },
+    { connectorId: "conn-missing", deviceName: "conn-missing", projectIds: ["p4"] },
+  ])
+  assert.deepEqual(groupProjectsByDevice([], [connector("conn-a", "MacBook Pro")]), [])
 })
 
 test("the compact label carries the device, the primary Agent and a +N suffix", () => {

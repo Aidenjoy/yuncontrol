@@ -326,6 +326,7 @@ export function AppSidebar({ contained = false }: { contained?: boolean }) {
           <>
             <ProjectsSection
               projects={regularProjects}
+              connectors={connectors}
               isLoading={isLoading}
               expanded={projectsExpanded}
               controller={projectController}

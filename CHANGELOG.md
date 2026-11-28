@@ -81,6 +81,8 @@
 
 - Web 设置新增「云电脑」：每用户创建独立云大师 Agent 容器，跨页面保留创建进度，自动连接设备并激活 Runtime；关闭前明确提示并删除该用户全部云端文件。本次仅 Web 提供开关，Android、iOS 和 Desktop 尚未接入。
 
+- Web 项目列表按所属电脑名称分组，本机与云电脑的项目和任务不再混在同一列表中。
+
 - 公开版本查询支持通过 `type` 选择平台，并返回版本、平台类型、下载地址、文件名、说明和发布时间。
 
 - 管理员侧边栏新增「文件管理」：按平台登记版本号、文件地址和文件名，控制是否发布；对外提供 `GET /api/v2/releases/latest` 和 `GET /api/v2/releases/check` 供客户端检查更新并取得下载链接。每个平台只保留一条记录，macOS 区分为 Apple Silicon（`desktop-macos-arm64`）和 Intel（`desktop-macos-x64`）。

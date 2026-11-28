@@ -31,9 +31,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import type { WorkspaceSessionView } from "@/components/workspace-context"
-import type { IdentityParts, ProjectIdentity } from "@/components/sidebar/project-identity"
+import {
+  groupProjectsByDevice,
+  type IdentityParts,
+  type ProjectIdentity,
+} from "@/components/sidebar/project-identity"
 import type { ProjectSessionStatusFilter } from "@/components/sidebar/sidebar-selectors"
 import type { ProjectView } from "@/features/dashboard/types"
+import type { ConnectorView } from "@/lib/demo-api"
 import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 
@@ -95,6 +100,7 @@ export function ProjectList({
 
 type ProjectsSectionProps = {
   projects: ProjectView[]
+  connectors: ConnectorView[]
   isLoading: boolean
   expanded: boolean
   controller: ProjectListController
@@ -109,6 +115,7 @@ type ProjectsSectionProps = {
 
 export function ProjectsSection({
   projects,
+  connectors,
   isLoading,
   expanded,
   controller,
@@ -121,6 +128,10 @@ export function ProjectsSection({
 }: ProjectsSectionProps) {
   const t = useTranslations("dashboard")
   const [filterOpen, setFilterOpen] = React.useState(false)
+  const projectGroups = React.useMemo(
+    () => groupProjectsByDevice(projects, connectors),
+    [connectors, projects],
+  )
 
   return (
     <SidebarGroup>
@@ -215,11 +226,20 @@ export function ProjectsSection({
                   <p className="px-3 py-2 text-xs text-muted-foreground">{t("projects.empty")}</p>
                 )
               ) : (
-                <ProjectList
-                  projects={projects}
-                  controller={controller}
-                  sessionStatus={sessionStatus}
-                />
+                projectGroups.map((group) => (
+                  <li key={group.connectorId} className="mt-2 first:mt-0">
+                    <SidebarGroupLabel className="h-7 px-3" role="heading" aria-level={3}>
+                      <span className="truncate">{group.deviceName}</span>
+                    </SidebarGroupLabel>
+                    <SidebarMenu>
+                      <ProjectList
+                        projects={group.projects}
+                        controller={controller}
+                        sessionStatus={sessionStatus}
+                      />
+                    </SidebarMenu>
+                  </li>
+                ))
               )}
             </SidebarMenu>
           </SidebarGroupContent>

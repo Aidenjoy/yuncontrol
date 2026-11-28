@@ -78,6 +78,38 @@ export function resolveProjectIdentity(
   }
 }
 
+/** Group regular projects by their owning device without changing project order. */
+export function groupProjectsByDevice(
+  projects: readonly ProjectView[],
+  connectors: readonly IdentityConnector[],
+): { connectorId: string; deviceName: string; projects: ProjectView[] }[] {
+  const projectsByDevice = new Map<string, ProjectView[]>()
+  for (const project of projects) {
+    const items = projectsByDevice.get(project.connectorId) ?? []
+    items.push(project)
+    projectsByDevice.set(project.connectorId, items)
+  }
+
+  const groups: { connectorId: string; deviceName: string; projects: ProjectView[] }[] = []
+  const groupedDeviceIds = new Set<string>()
+  for (const connector of connectors) {
+    const items = projectsByDevice.get(connector.id)
+    if (!items?.length || groupedDeviceIds.has(connector.id)) continue
+    groupedDeviceIds.add(connector.id)
+    groups.push({
+      connectorId: connector.id,
+      deviceName: connector.name.trim() || connector.id,
+      projects: items,
+    })
+  }
+  for (const [connectorId, items] of projectsByDevice) {
+    if (!groupedDeviceIds.has(connectorId)) {
+      groups.push({ connectorId, deviceName: connectorId, projects: items })
+    }
+  }
+  return groups
+}
+
 /**
  * Which halves of the identity belong on the row. A dimension is only shown
  * while that filter is narrowing the list: with "all devices" the device name
