@@ -21,6 +21,7 @@ All Server HTTP, SSE, and WebSocket API documentation should live under this dir
 - [Effective capability API](./capabilities.md): global and session-scoped effective capability semantics, paths, and realtime events.
 - [Capability event deduplication](./capability-event-deduplication.md): why repeated session capability events occurred and how live projection delivery is deduplicated safely.
 - [模型配置](model-config.md)：模型配置、预览、应用与恢复，Tokens Anywhere 链接，以及 Runtime 的成熟度和模型连接状态。
+- [云电脑](cloud-computer.md)：每用户独立容器、云端进度恢复、Runtime 激活与删除数据的 Server API。
 - [Realtime API](./realtime.md): session, dashboard, connector, and terminal realtime channel semantics.
 - [Admin Usage API](./admin-usage.md): event-driven usage statistics for administrators (`/admin/usage/*`), how events are collected and what each metric means.
 - [安装包发布与版本检测](releases.md)：管理员登记各端版本号与下载地址，客户端通过 `/api/v2/releases/*` 检查更新。
@@ -47,6 +48,7 @@ The connector channel endpoints are intentionally stable. Runtime protocol refac
 ### Connector and runtime management
 
 ```text
+/cloud-computer
 /connectors
 /connectors/{connectorId}
 /connectors/{connectorId}/preferences

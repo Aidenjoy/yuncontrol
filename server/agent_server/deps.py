@@ -9,6 +9,7 @@ from starlette.requests import HTTPConnection
 
 from agent_server.core.auth import verify_user_access_token
 from agent_server.core.models import UserView
+from agent_server.infra.cloud_computer import CloudComputerClient, CloudComputerError
 from agent_server.infra.connector_gateway import ConnectorGateway
 from agent_server.infra.connector_rpc import ConnectorRpcManager
 from agent_server.infra.fs_downloads import FsDownloadRelayManager
@@ -45,6 +46,16 @@ from agent_server.services.usage_events import UsageRecorder
 
 def get_store(conn: HTTPConnection) -> Store:
     return conn.app.state.store
+
+
+def get_cloud_computer_client(conn: HTTPConnection) -> CloudComputerClient:
+    override = getattr(conn.app.state, "cloud_computer_client", None)
+    if override is not None:
+        return override
+    try:
+        return CloudComputerClient.from_environment()
+    except CloudComputerError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=str(exc)) from None
 
 
 def get_attachment_service(conn: HTTPConnection) -> AttachmentService:

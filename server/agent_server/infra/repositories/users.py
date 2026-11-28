@@ -570,6 +570,25 @@ class UserRepositoryMixin(EmailAccountRepositoryMixin):
         return user
 
 
+    async def utoken_subject_for_user(self, *, user_id: str, origin: str) -> str | None:
+        """Return only the utoken subject bound to this enabled account."""
+        normalized = self.normalize_user_id(user_id)
+        provider = "utoken:" + hashlib.sha256(origin.rstrip("/").encode()).hexdigest()
+        async with read_connection(self._engine) as conn:
+            row = (
+                await conn.execute(
+                    select(oauth_accounts_t.c.subject)
+                    .select_from(oauth_accounts_t.join(users_t, oauth_accounts_t.c.user_id == users_t.c.id))
+                    .where(
+                        oauth_accounts_t.c.provider == provider,
+                        oauth_accounts_t.c.user_id == normalized,
+                        users_t.c.disabled == 0,
+                    )
+                )
+            ).first()
+        return str(row.subject) if row is not None else None
+
+
     async def revoke_utoken_login(self, *, origin: str, subject: str, changed_at: int) -> bool:
         """找到外部身份并原子推进撤销时间；重复或乱序通知不能覆盖较新时间。"""
         from sqlalchemy import BigInteger, Text, cast

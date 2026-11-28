@@ -1,0 +1,23 @@
+[project]
+name = "yunwork-cloud-controller"
+version = "0.1.0"
+description = "Per-user Yunwork Docker instance controller"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.136.1",
+    "uvicorn[standard]>=0.47.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.0.3",
+    "ruff>=0.15.13",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120

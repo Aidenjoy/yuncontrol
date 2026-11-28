@@ -37,6 +37,7 @@ import { AccountProfileCard } from "@/components/pages/account-profile-card"
 import { accountDisplayName } from "@/features/auth/account-profile"
 import { MobileConnectionDialog } from "@/components/pages/mobile-signin-panel"
 import { ArchivedSessionsTab } from "@/components/settings/archived-sessions-tab"
+import { CloudComputerTab } from "@/components/settings/cloud-computer-tab"
 import { ModelConfigsTab } from "@/components/settings/model-configs-tab"
 import { parseSettingsTab, settingsNavigation } from "@/components/settings/settings-navigation"
 import { PageHeader } from "@/components/pages/page-header"
@@ -630,6 +631,12 @@ export function SettingsPage() {
             )
           )}
           {tab === "appearance" && <AppearanceTab />}
+          {tab === "cloud-computer" && (
+            <CloudComputerTab
+              token={session?.accessToken ?? ""}
+              onWorkspaceRefresh={refreshData}
+            />
+          )}
           {tab === "model-configs" && (
             <ModelConfigsTab token={session?.accessToken ?? ""} connectors={connectors} />
           )}
